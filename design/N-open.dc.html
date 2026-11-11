@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>결재 공문 — 열린 편지</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;900&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#000000}a:hover{color:#000000}
+a:focus-visible,button:focus-visible{outline:3px solid #000000;outline-offset:3px}
+@media (prefers-reduced-motion: reduce){*{transition:none !important}}
+</style>
+</helmet>
+<div style="width:390px;height:844px;box-sizing:border-box;background:#DADDE1;color:#000000;font-family:'Noto Serif KR',serif;padding:22px 18px 22px;display:flex;flex-direction:column;gap:16px">
+  <div style="flex-grow:1;background:#FFFFFF;box-shadow:0 2px 0 #B9BEC5;padding:24px 20px 20px;display:flex;flex-direction:column;gap:16px;position:relative;overflow:hidden">
+    <div aria-hidden="true" style="position:absolute;left:16px;top:18px;border:2.5px solid #D2232A;color:#D2232A;font-size:15px;font-weight:900;padding:2px 8px;letter-spacing:4px;transform:rotate(-6deg)">{{mark}}</div>
+
+    <div style="display:flex;justify-content:flex-end">
+      <div style="display:grid;grid-template-columns:repeat(3,56px);border:1px solid #000000;font-size:12px;text-align:center">
+        <div style="border-right:1px solid #000000;border-bottom:1px solid #000000;padding:3px 0">기안</div>
+        <div style="border-right:1px solid #000000;border-bottom:1px solid #000000;padding:3px 0">검토</div>
+        <div style="border-bottom:1px solid #000000;padding:3px 0">수신</div>
+        <div style="border-right:1px solid #000000;height:54px;display:flex;align-items:center;justify-content:center">
+          <div style="width:40px;height:40px;border-radius:50%;border:2.5px solid #D2232A;color:#D2232A;font-size:14px;font-weight:900;display:flex;align-items:center;justify-content:center;transform:rotate(-10deg)">영진</div>
+        </div>
+        <div style="border-right:1px solid #000000;height:54px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600">전결</div>
+        <div style="height:54px;display:flex;align-items:center;justify-content:center;position:relative">
+          <span style="font-size:11px;color:#555555;line-height:1.3;opacity:{{pendingO}};transition:opacity 0.2s">1. 1.<br>예정</span>
+          <div style="position:absolute;width:42px;height:42px;border-radius:50%;border:3px solid #D2232A;color:#D2232A;font-size:14px;font-weight:900;display:flex;align-items:center;justify-content:center;transform:{{stampT}};opacity:{{stampO}};transition:transform 0.22s cubic-bezier(0.6,0,0.9,0.4),opacity 0.12s">지민</div>
+        </div>
+      </div>
+    </div>
+
+    <h1 style="margin:0;text-align:center;font-size:23px;font-weight:900;letter-spacing:5px">{{title}}</h1>
+
+    <div style="display:grid;grid-template-columns:72px 1fr;border-top:2px solid #000000;border-bottom:1px solid #000000;font-size:14px;line-height:1.9;padding:6px 0">
+      <span style="font-weight:600">수 신</span><span>지민 귀하</span>
+      <span style="font-weight:600">발 신</span><span>영진</span>
+      <span style="font-weight:600">제 목</span><span style="font-weight:900">편지 개봉의 건</span>
+    </div>
+
+    <div style="flex-grow:1;position:relative">
+      <div aria-hidden="{{bodyHidden}}" style="position:absolute;left:0;right:0;top:0;font-size:15px;line-height:1.9;display:flex;flex-direction:column;gap:6px;opacity:{{bodyO}};transition:opacity 0.4s">
+        <p style="margin:0">1. 귀하의 무궁한 발전을 기원합니다.</p>
+        <p style="margin:0">2. 개봉 일시가 도래하였으므로 수신인의 결재를 받아 붙임 문서를 개봉하고자 합니다.</p>
+        <p style="margin:6px 0 0">붙임 편지 1부. 끝.</p>
+      </div>
+      <div aria-hidden="{{letterHidden}}" style="position:absolute;left:0;right:0;top:0;bottom:0;display:flex;flex-direction:column;gap:10px;opacity:{{letterO}};transform:{{letterT}};transition:opacity 0.6s ease,transform 0.6s ease">
+        <span style="font-size:13px;font-weight:600;border-bottom:1px solid #000000;padding-bottom:4px;align-self:flex-start">붙임  편지 1부</span>
+        <p style="margin:0;font-size:16px;line-height:1.9;white-space:pre-line">지민아, 이걸 쓰는 지금은 11월이야.
+너는 이직할지 말지 아직 고민 중이고, 나는 네가 결국 옮길 거라는 데 만 원 걸었어.
+맞았으면 오늘 밥은 네가 사.
+틀렸으면, 그것도 잘한 결정이었을 거야.
+새해 복 많이 받아. 끝.</p>
+        <p style="margin:auto 0 0;text-align:center;font-size:22px;font-weight:900;letter-spacing:10px">영 진</p>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px">
+    <button onClick="{{replay}}" style="height:54px;border:1.5px solid #000000;border-radius:2px;background:#FFFFFF;color:#000000;font-family:'Noto Serif KR',serif;font-size:16px;font-weight:600;cursor:pointer">다시 결재</button>
+    <a href="Main.dc.html" style="height:54px;border-radius:2px;background:#000000;color:#FFFFFF;font-size:16px;font-weight:600;display:flex;align-items:center;justify-content:center;text-decoration:none">회신 기안하기</a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { phase: 'wait' };
+    this.timers = [];
+  }
+  componentDidMount() {
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) { this.setState({ phase: 'open' }); return; }
+    this.play();
+  }
+  componentWillUnmount() { this.timers.forEach(clearTimeout); }
+  play() {
+    this.timers.forEach(clearTimeout);
+    this.setState({ phase: 'wait' });
+    this.timers = [
+      setTimeout(() => this.setState({ phase: 'stamp' }), 1100),
+      setTimeout(() => this.setState({ phase: 'open' }), 1900)
+    ];
+  }
+  renderVals() {
+    var p = this.state.phase;
+    var stamped = p !== 'wait';
+    var open = p === 'open';
+    return {
+      mark: open ? '개봉필' : '대외비',
+      title: open ? '편지 개봉 완료 통지' : '편지 개봉 결재 요청',
+      pendingO: stamped ? '0' : '1',
+      stampT: stamped ? 'scale(1) rotate(-12deg)' : 'scale(2.8) rotate(-30deg)',
+      stampO: stamped ? '1' : '0',
+      bodyO: open ? '0' : '1',
+      bodyHidden: open ? 'true' : 'false',
+      letterO: open ? '1' : '0',
+      letterT: open ? 'none' : 'translateY(24px)',
+      letterHidden: open ? 'false' : 'true',
+      replay: () => this.play()
+    };
+  }
+}
+</script>
+</body>
+</html>

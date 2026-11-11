@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>대기열 — 열린 편지</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#000000}a:hover{color:#000000}
+a:focus-visible,button:focus-visible{outline:3px solid #000000;outline-offset:3px}
+@keyframes jIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@media (prefers-reduced-motion: reduce){*{animation:none !important;transition:none !important}}
+</style>
+</helmet>
+<div style="width:390px;height:844px;box-sizing:border-box;background:#FFE94A;color:#000000;font-family:'Noto Sans KR',sans-serif;padding:36px 24px 26px;display:flex;flex-direction:column;gap:26px">
+  <div style="display:flex;flex-direction:column;gap:8px">
+    <p style="margin:0;font-size:15px;font-weight:500">영진 님이 지민 님에게 보낸 편지</p>
+    <h1 style="margin:0;font-size:38px;font-weight:900;line-height:1.25;letter-spacing:-2px">{{title}}</h1>
+  </div>
+
+  <sc-if value="{{loading}}" hint-placeholder-val="{{false}}">
+    <div style="flex-grow:1;display:flex;flex-direction:column;justify-content:center;gap:22px">
+      <div style="display:flex;flex-direction:column">
+        <span style="font-size:16px;font-weight:700">내 앞에 남은 시간</span>
+        <span style="font-size:84px;font-weight:900;line-height:1.1;letter-spacing:-5px">0일</span>
+        <span style="font-size:34px;font-weight:900;line-height:1.1;letter-spacing:-1.5px">내 차례예요</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div role="img" aria-label="입장 진행 중" style="height:26px;box-sizing:border-box;border:3px solid #000000;border-radius:13px;background:#FFFFFF;padding:3px;display:flex">
+          <div style="width:{{fill}};min-width:14px;background:#000000;border-radius:8px;transition:width 1.8s cubic-bezier(0.3,0,0.2,1)"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:500">
+          <span>2026년 11월 11일</span>
+          <span>2027년 1월 1일 0시</span>
+        </div>
+      </div>
+      <p style="margin:0;font-size:14px;font-weight:500;line-height:1.9">자물쇠를 푸는 중이에요. 창을 닫지 마세요.</p>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{entered}}" hint-placeholder-val="{{true}}">
+    <div style="flex-grow:1;display:flex;flex-direction:column;justify-content:center;animation:jIn 0.45s ease-out both">
+      <div style="background:#FFFFFF;border:3px solid #000000;border-radius:16px;padding:22px 20px;display:flex;flex-direction:column;gap:16px">
+        <p style="margin:0;font-size:17px;font-weight:500;line-height:1.85;white-space:pre-line">지민아, 이걸 쓰는 지금은 11월이야.
+너는 이직할지 말지 아직 고민 중이고, 나는 네가 결국 옮길 거라는 데 만 원 걸었어.
+맞았으면 오늘 밥은 네가 사.
+틀렸으면, 그것도 잘한 결정이었을 거야.
+새해 복 많이 받아.</p>
+        <span style="font-size:15px;font-weight:700;text-align:right">영진, 51일 전에 씀</span>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;animation:jIn 0.45s 0.15s ease-out both">
+      <button onClick="{{replay}}" style="height:56px;border:3px solid #000000;border-radius:14px;background:transparent;color:#000000;font-family:'Noto Sans KR',sans-serif;font-size:16px;font-weight:700;cursor:pointer">다시 입장하기</button>
+      <a href="Main.dc.html" style="height:56px;box-sizing:border-box;border-radius:14px;background:#000000;color:#FFFFFF;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;text-decoration:none">나도 줄 세우기</a>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { phase: 'start' };
+    this.timers = [];
+  }
+  componentDidMount() {
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) { this.setState({ phase: 'in' }); return; }
+    this.play();
+  }
+  componentWillUnmount() { this.timers.forEach(clearTimeout); }
+  play() {
+    this.timers.forEach(clearTimeout);
+    this.setState({ phase: 'start' });
+    this.timers = [
+      setTimeout(() => this.setState({ phase: 'fill' }), 400),
+      setTimeout(() => this.setState({ phase: 'in' }), 2500)
+    ];
+  }
+  renderVals() {
+    var p = this.state.phase;
+    return {
+      loading: p !== 'in',
+      entered: p === 'in',
+      fill: p === 'start' ? '2%' : '100%',
+      title: p === 'in' ? '입장했습니다' : '입장 중입니다',
+      replay: () => this.play()
+    };
+  }
+}
+</script>
+</body>
+</html>

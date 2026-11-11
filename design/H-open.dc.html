@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>입력 중 — 열린 편지</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#000000}a:hover{color:#000000}
+a:focus-visible,button:focus-visible{outline:3px solid #000000;outline-offset:3px}
+@keyframes hPop{from{opacity:0;transform:translateY(8px) scale(0.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes hDot{0%,60%,100%{opacity:0.3;transform:translateY(0)}30%{opacity:1;transform:translateY(-3px)}}
+@media (prefers-reduced-motion: reduce){*{animation:none !important}}
+</style>
+</helmet>
+<div style="width:390px;height:844px;box-sizing:border-box;background:#FFFFFF;color:#000000;font-family:-apple-system,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;display:flex;flex-direction:column">
+  <div style="display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid #EFEFEF">
+    <div aria-hidden="true" style="width:36px;height:36px;border-radius:50%;background:#DBDBDB;overflow:hidden;display:flex"><svg width="36" height="36" viewBox="0 0 36 36"><circle cx="18" cy="14" r="6.5" fill="#FFFFFF"></circle><ellipse cx="18" cy="33" rx="12.5" ry="10" fill="#FFFFFF"></ellipse></svg></div>
+    <div style="display:flex;flex-direction:column;gap:1px">
+      <span style="font-size:16px;font-weight:700;line-height:1.2">영진</span>
+      <span style="font-size:12px;color:#737373;line-height:1.2">{{status}}</span>
+    </div>
+  </div>
+
+  <div style="flex-grow:1;display:flex;flex-direction:column;justify-content:flex-end;padding:16px;gap:3px;overflow:hidden">
+    <span style="align-self:center;font-size:12px;color:#737373;margin-bottom:10px">2026년 11월 11일 오전 11:06</span>
+    <div style="margin-left:36px;align-self:flex-start;background:#EFEFEF;border-radius:20px 20px 20px 5px;padding:9px 14px;font-size:15px;line-height:1.4">지민아</div>
+    <div style="margin-left:36px;align-self:flex-start;background:#EFEFEF;border-radius:5px 20px 20px 20px;padding:9px 14px;font-size:15px;line-height:1.4">편지 하나 써놨어</div>
+
+    <span style="align-self:center;font-size:12px;color:#737373;margin:18px 0 10px">2027년 1월 1일 오전 12:00</span>
+
+    <sc-for list="{{msgs}}" as="m" hint-placeholder-count="3">
+      <div style="display:flex;align-items:flex-end;gap:8px;animation:hPop 0.24s ease-out both">
+        <div aria-hidden="true" style="width:28px;height:28px;flex-shrink:0;border-radius:50%;background:#DBDBDB;overflow:hidden;display:flex;visibility:{{m.avatarVis}}"><svg width="28" height="28" viewBox="0 0 36 36"><circle cx="18" cy="14" r="6.5" fill="#FFFFFF"></circle><ellipse cx="18" cy="33" rx="12.5" ry="10" fill="#FFFFFF"></ellipse></svg></div>
+        <div style="max-width:270px;background:#EFEFEF;border-radius:5px 20px 20px 5px;padding:9px 14px;font-size:15px;line-height:1.45">{{m.text}}</div>
+      </div>
+    </sc-for>
+
+    <sc-if value="{{typing}}" hint-placeholder-val="{{false}}">
+      <div style="display:flex;align-items:flex-end;gap:8px;animation:hPop 0.2s ease-out both">
+        <div aria-hidden="true" style="width:28px;height:28px;flex-shrink:0;border-radius:50%;background:#DBDBDB;overflow:hidden;display:flex"><svg width="28" height="28" viewBox="0 0 36 36"><circle cx="18" cy="14" r="6.5" fill="#FFFFFF"></circle><ellipse cx="18" cy="33" rx="12.5" ry="10" fill="#FFFFFF"></ellipse></svg></div>
+        <div role="img" aria-label="입력 중" style="background:#EFEFEF;border-radius:5px 20px 20px 20px;padding:14px 15px;display:flex;gap:5px;align-items:center">
+          <div style="width:8px;height:8px;border-radius:50%;background:#000000;animation:hDot 1s infinite"></div>
+          <div style="width:8px;height:8px;border-radius:50%;background:#000000;animation:hDot 1s 0.15s infinite"></div>
+          <div style="width:8px;height:8px;border-radius:50%;background:#000000;animation:hDot 1s 0.3s infinite"></div>
+        </div>
+      </div>
+    </sc-if>
+  </div>
+
+  <div style="padding:12px 16px 20px;min-height:62px;box-sizing:content-box;display:flex;flex-direction:column;justify-content:flex-end">
+    <sc-if value="{{playing}}" hint-placeholder-val="{{false}}">
+      <button onClick="{{showAll}}" style="height:50px;border:1px solid #DBDBDB;border-radius:25px;background:#FFFFFF;color:#000000;font-family:inherit;font-size:15px;font-weight:600;cursor:pointer">한 번에 보기</button>
+    </sc-if>
+    <sc-if value="{{done}}" hint-placeholder-val="{{true}}">
+      <div style="display:flex;gap:8px;align-items:center">
+        <a href="Main.dc.html" style="flex-grow:1;height:50px;border-radius:25px;background:linear-gradient(90deg,#E8601C 0%,#DD2A7B 50%,#8134AF 100%);color:#FFFFFF;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;text-decoration:none">답장도 예약해서 보내기</a>
+        <button onClick="{{replay}}" aria-label="다시 보기" style="width:50px;height:50px;border:1px solid #DBDBDB;border-radius:50%;background:#FFFFFF;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0">
+          <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"></path><path d="M3 4v5h5"></path></svg>
+        </button>
+      </div>
+    </sc-if>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+var H_LINES = [
+  '지민아, 이걸 쓰는 지금은 11월이야',
+  '너는 이직할지 말지 아직 고민 중이고',
+  '나는 네가 결국 옮길 거라는 데 만 원 걸었어',
+  '맞았으면 오늘 밥은 네가 사',
+  '틀렸으면, 그것도 잘한 결정이었을 거야',
+  '새해 복 많이 받아'
+];
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { shown: 0, typing: false };
+    this.timer = null;
+  }
+  componentDidMount() {
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) { this.setState({ shown: H_LINES.length, typing: false }); return; }
+    this.play();
+  }
+  componentWillUnmount() { clearTimeout(this.timer); }
+  play() {
+    clearTimeout(this.timer);
+    this.setState({ shown: 0, typing: false });
+    this.timer = setTimeout(() => this.step(0), 600);
+  }
+  step(i) {
+    if (i >= H_LINES.length) { this.setState({ typing: false }); return; }
+    this.setState({ typing: true });
+    var wait = Math.min(1800, 500 + H_LINES[i].length * 45);
+    this.timer = setTimeout(() => {
+      this.setState({ shown: i + 1, typing: false });
+      this.timer = setTimeout(() => this.step(i + 1), 350);
+    }, wait);
+  }
+  renderVals() {
+    var n = this.state.shown;
+    var typing = this.state.typing;
+    var done = n >= H_LINES.length;
+    return {
+      msgs: H_LINES.slice(0, n).map((t, i) => ({ text: t, avatarVis: (i === n - 1 && !typing) ? 'visible' : 'hidden' })),
+      typing: typing,
+      done: done,
+      playing: !done,
+      status: done ? '방금 도착' : '입력 중',
+      showAll: () => { clearTimeout(this.timer); this.setState({ shown: H_LINES.length, typing: false }); },
+      replay: () => this.play()
+    };
+  }
+}
+</script>
+</body>
+</html>

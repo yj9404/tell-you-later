@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>가려진 글 — 열린 편지</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hahmlet:wght@400;500;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#1838D8}a:hover{color:#0F2596}
+a:focus-visible,button:focus-visible{outline:3px solid #1838D8;outline-offset:3px}
+@media (prefers-reduced-motion: reduce){*{transition:none !important}}
+</style>
+</helmet>
+<div style="width:390px;height:844px;box-sizing:border-box;background:#F7F7F7;color:#000000;font-family:'Hahmlet',serif;padding:36px 30px 28px;display:flex;flex-direction:column;gap:28px">
+  <div style="display:flex;flex-direction:column;gap:10px">
+    <p style="margin:0;font-size:15px;color:#4A4A4A">영진이 지민에게</p>
+    <h1 style="margin:0;font-size:27px;font-weight:500;line-height:1.45;letter-spacing:-0.5px">2027년 1월 1일 0시,<br>이제 읽을 수 있습니다.</h1>
+  </div>
+
+  <div style="flex-grow:1;display:flex;flex-wrap:wrap;align-content:center;gap:16px 6px">
+    <sc-for list="{{words}}" as="w" hint-placeholder-count="12">
+      <span style="flex-basis:{{w.basis}};font-size:18px;line-height:1.3;padding:1px 2px;background-color:{{w.bg}};color:{{w.color}};transition:background-color 0.45s ease,color 0.45s ease">{{w.text}}</span>
+    </sc-for>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:18px">
+    <p style="margin:0;font-size:16px;color:#4A4A4A">2026년 11월 11일에 씀</p>
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:16px">
+      <a href="Main.dc.html" style="height:54px;padding:0 22px;background:#000000;color:#FFFFFF;font-size:16px;font-weight:500;display:flex;align-items:center;justify-content:center;text-decoration:none">답장도 잠가서 보내기</a>
+      <sc-if value="{{playing}}" hint-placeholder-val="{{false}}">
+        <button onClick="{{showAll}}" style="height:48px;border:0;background:transparent;color:#000000;font-family:'Hahmlet',serif;font-size:15px;text-decoration:underline;text-underline-offset:4px;cursor:pointer;padding:0">한 번에 보기</button>
+      </sc-if>
+      <sc-if value="{{done}}" hint-placeholder-val="{{true}}">
+        <button onClick="{{replay}}" style="height:48px;border:0;background:transparent;color:#000000;font-family:'Hahmlet',serif;font-size:15px;text-decoration:underline;text-underline-offset:4px;cursor:pointer;padding:0">다시 보기</button>
+      </sc-if>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+var E_LINES = [
+  '지민아, 이걸 쓰는 지금은 11월이야.',
+  '너는 이직할지 말지 아직 고민 중이고, 나는 네가 결국 옮길 거라는 데 만 원 걸었어.',
+  '맞았으면 오늘 밥은 네가 사.',
+  '틀렸으면, 그것도 잘한 결정이었을 거야.',
+  '새해 복 많이 받아.'
+];
+var E_WORDS = [];
+E_LINES.forEach(function (line, li) {
+  line.split(' ').forEach(function (t) { E_WORDS.push({ text: t, br: false }); });
+  if (li < E_LINES.length - 1) E_WORDS.push({ text: '', br: true });
+});
+var E_COUNT = E_WORDS.filter(function (w) { return !w.br; }).length;
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { shown: 0 };
+    this.timer = null;
+  }
+  componentDidMount() {
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) { this.setState({ shown: E_COUNT }); return; }
+    this.play();
+  }
+  componentWillUnmount() { clearTimeout(this.timer); }
+  play() {
+    clearTimeout(this.timer);
+    this.setState({ shown: 0 });
+    this.timer = setTimeout(() => this.step(), 900);
+  }
+  step() {
+    var n = this.state.shown + 1;
+    this.setState({ shown: n });
+    if (n < E_COUNT) this.timer = setTimeout(() => this.step(), 110);
+  }
+  renderVals() {
+    var n = this.state.shown;
+    var k = 0;
+    var words = E_WORDS.map(function (w) {
+      if (w.br) return { text: '', basis: '100%', bg: 'transparent', color: 'transparent' };
+      var open = k < n;
+      k += 1;
+      return { text: w.text, basis: 'auto', bg: open ? 'transparent' : '#000000', color: open ? '#000000' : 'transparent' };
+    });
+    var done = n >= E_COUNT;
+    return {
+      words: words,
+      done: done,
+      playing: !done,
+      showAll: () => { clearTimeout(this.timer); this.setState({ shown: E_COUNT }); },
+      replay: () => this.play()
+    };
+  }
+}
+</script>
+</body>
+</html>

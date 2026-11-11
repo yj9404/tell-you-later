@@ -1,0 +1,30 @@
+html,
+body {
+  margin: 0;
+  background: #ffffff;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+  color: #000000;
+}
+
+button,
+input,
+textarea {
+  font-family: inherit;
+}
+
+/* 디자인 기준 폭은 390px. 넓은 화면에서는 가운데에 폰 폭으로 둔다. */
+#root {
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}

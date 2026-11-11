@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>포춘쿠키 — 아직 잠긴 편지</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&amp;family=Noto+Sans+KR:wght@500;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#FFFFFF}a:hover{color:#FFFFFF}
+a:focus-visible,button:focus-visible{outline:3px solid #FFFFFF;outline-offset:3px}
+</style>
+</helmet>
+<div style="width:390px;height:844px;box-sizing:border-box;background:#C8321F;color:#FFFFFF;font-family:'Noto Sans KR',sans-serif;padding:32px 24px 26px;display:flex;flex-direction:column;gap:20px;overflow:hidden">
+  <div style="display:flex;flex-direction:column;gap:6px">
+    <p style="margin:0;font-size:16px;font-weight:700">지민아, 영진이가 포춘쿠키 하나 구워놨어</p>
+    <h1 style="margin:0;font-family:'Bagel Fat One',sans-serif;font-weight:400;font-size:46px;line-height:1.15;letter-spacing:-1px">1월 1일 0시에<br>깨져</h1>
+  </div>
+
+  <div style="flex-grow:1;display:flex;align-items:center;justify-content:center">
+    <img src="../assets/fortune-cookie.png" alt="" width="296" height="245" style="display:block;filter:drop-shadow(0 12px 0 rgba(0,0,0,0.2))">
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:4px">
+    <span style="font-size:15px;font-weight:700">깨지기까지</span>
+    <span style="font-family:'Bagel Fat One',sans-serif;font-size:42px;line-height:1.1">50일 8시간</span>
+    <p style="margin:4px 0 0;font-size:14px;font-weight:500;line-height:1.6">그 전엔 구운 사람도 못 깨. 진짜로.</p>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px">
+    <button style="height:56px;border:2px solid #FFFFFF;border-radius:16px;background:transparent;color:#FFFFFF;font-family:'Noto Sans KR',sans-serif;font-size:16px;font-weight:700;cursor:pointer">캘린더에 저장</button>
+    <a href="Main.dc.html" style="height:56px;box-sizing:border-box;border-radius:16px;background:#FFFFFF;color:#C8321F;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;text-decoration:none">나도 구워두기</a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

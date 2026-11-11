@@ -1,0 +1,26 @@
+@keyframes lPop {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes lDot {
+  0%,
+  60%,
+  100% {
+    opacity: 0.35;
+  }
+  30% {
+    opacity: 1;
+  }
+}
+
+.msg-screen button:focus-visible {
+  outline: 3px solid #0b6bf2;
+  outline-offset: 3px;
+}

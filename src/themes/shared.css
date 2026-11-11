@@ -1,0 +1,55 @@
+/* 테마들이 함께 쓰는 최소한의 규칙. 모양은 각 테마가 정한다. */
+
+/* 편지 본문: 줄바꿈을 살리고, 한글은 단어 단위로 줄을 바꾼다. */
+.tyl-text {
+  white-space: pre-wrap;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+.tyl-keep {
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+.tyl-screen {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tyl-screen button {
+  -webkit-appearance: none;
+  appearance: none;
+  margin: 0;
+}
+
+/* 초점 표시: 밝은 테마는 검정, 어두운 테마는 흰색 */
+.tyl-focus-dark button:focus-visible {
+  outline: 3px solid #000000;
+  outline-offset: 3px;
+}
+
+.tyl-focus-light button:focus-visible {
+  outline: 3px solid #ffffff;
+  outline-offset: 3px;
+}
+
+.tyl-lock-error {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.tyl-lock-error button {
+  height: 44px;
+  padding: 0 18px;
+  border: 1.5px solid currentColor;
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}

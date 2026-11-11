@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#FFFFFF" />
+    <!-- 편지는 fragment에 들어 있다. 다른 사이트로 나갈 때 주소가 따라가지 않게 한다. -->
+    <meta name="referrer" content="no-referrer" />
+    <title>할 말이 있는데 나중에 할게</title>
+    <meta name="description" content="정한 날짜 전에는 쓴 사람도 못 여는 편지" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="할 말이 있는데 나중에 할게" />
+    <meta property="og:description" content="정한 날짜 전에는 쓴 사람도 못 여는 편지" />
+    <!-- 편지는 fragment에 있어 서버가 볼 수 없으므로, 미리보기는 모든 링크가 같은 한 장을 쓴다. -->
+    <!-- og:image는 절대 주소여야 한다. 주소는 .env의 VITE_SITE_URL에서 온다. -->
+    <meta property="og:url" content="%VITE_SITE_URL%/" />
+    <meta property="og:image" content="%VITE_SITE_URL%/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

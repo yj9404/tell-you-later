@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>항공 봉투 — 열린 편지</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#1F3C88}a:hover{color:#152A61}
+a:focus-visible,button:focus-visible{outline:3px solid #1F3C88;outline-offset:3px}
+@keyframes fRollA{from{transform:translateY(0)}to{transform:translateY(calc(-100% + 548px))}}
+@keyframes fRollB{from{transform:translateY(0)}to{transform:translateY(calc(-100% + 548px))}}
+</style>
+</helmet>
+<div style="width:390px;height:844px;box-sizing:border-box;background:#EEF1F5;color:#1F3C88;font-family:'Gowun Dodum',sans-serif;padding:32px 26px 28px;display:flex;flex-direction:column;gap:20px">
+  <h1 style="margin:0;font-size:24px;font-weight:400;line-height:1.5;letter-spacing:-0.5px">1월 1일 0시, 편지가 열렸어요.</h1>
+
+  <div style="height:570px;box-sizing:border-box;padding:11px;background-image:repeating-linear-gradient(135deg,#D7263D 0,#D7263D 14px,#FFFFFF 14px,#FFFFFF 28px,#1F3C88 28px,#1F3C88 42px,#FFFFFF 42px,#FFFFFF 56px);box-shadow:0 14px 28px rgba(31,60,136,0.16)">
+    <div style="height:100%;background:#FFFFFF;overflow-x:hidden;overflow-y:{{overflowY}}">
+      <div style="padding:26px 24px 40px;animation:{{anim}}">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:26px">
+          <span style="font-size:26px;letter-spacing:-0.5px">지민에게</span>
+          <div style="width:52px;height:60px;box-sizing:border-box;border:2px dotted #D7263D;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#D7263D;line-height:1.1">
+            <span style="font-size:10px">2027</span>
+            <span style="font-size:22px">1.1</span>
+          </div>
+        </div>
+        <p style="margin:0 0 20px;font-size:17px;line-height:2;color:#22305A">이걸 쓰는 지금은 11월이야. 창밖에 은행잎이 다 떨어졌고, 너는 어제도 야근했다고 했지.</p>
+        <p style="margin:0 0 20px;font-size:17px;line-height:2;color:#22305A">요즘 네가 이직할지 말지 고민하는 거 알아. 만날 때마다 괜찮다고 하는데, 괜찮은 사람은 그 얘기를 세 번씩 안 하거든.</p>
+        <p style="margin:0 0 20px;font-size:17px;line-height:2;color:#22305A">나는 네가 결국 옮길 거라는 데 만 원 걸었어. 누구랑 걸었는지는 비밀이야.</p>
+        <p style="margin:0 0 20px;font-size:17px;line-height:2;color:#22305A">맞았으면 오늘 밥은 네가 사. 틀렸으면, 그것도 잘한 결정이었을 거야. 너는 어디에 있든 결국 잘 해내는 사람이니까.</p>
+        <p style="margin:0 0 20px;font-size:17px;line-height:2;color:#22305A">이 편지가 열리는 날에는 둘 다 한 살씩 더 먹었겠다. 올해도 옆에 있어 줘서 고마워.</p>
+        <p style="margin:0 0 28px;font-size:17px;line-height:2;color:#22305A">새해 복 많이 받아.</p>
+        <p style="margin:0;font-size:17px;text-align:right;color:#22305A">2026년 11월 11일, 영진</p>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:auto">
+    <sc-if value="{{rolling}}" hint-placeholder-val="{{false}}">
+      <button onClick="{{stop}}" style="height:54px;border:1.5px solid #1F3C88;border-radius:8px;background:transparent;color:#1F3C88;font-family:'Gowun Dodum',sans-serif;font-size:16px;cursor:pointer">직접 넘겨 읽기</button>
+    </sc-if>
+    <sc-if value="{{manual}}" hint-placeholder-val="{{true}}">
+      <button onClick="{{replay}}" style="height:54px;border:1.5px solid #1F3C88;border-radius:8px;background:transparent;color:#1F3C88;font-family:'Gowun Dodum',sans-serif;font-size:16px;cursor:pointer">처음부터 다시</button>
+    </sc-if>
+    <a href="Main.dc.html" style="height:54px;border-radius:8px;background:#1F3C88;color:#FFFFFF;font-size:16px;display:flex;align-items:center;justify-content:center;text-decoration:none">답장 부치기</a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { manual: false, run: 0 };
+  }
+  componentDidMount() {
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) this.setState({ manual: true });
+  }
+  renderVals() {
+    var manual = this.state.manual;
+    var name = this.state.run % 2 === 0 ? 'fRollA' : 'fRollB';
+    return {
+      manual: manual,
+      rolling: !manual,
+      overflowY: manual ? 'auto' : 'hidden',
+      anim: manual ? 'none' : name + ' 22s linear 1.2s both',
+      stop: () => this.setState({ manual: true }),
+      replay: () => this.setState({ manual: false, run: this.state.run + 1 })
+    };
+  }
+}
+</script>
+</body>
+</html>

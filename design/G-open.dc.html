@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>포춘쿠키 — 열린 편지</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&amp;family=Noto+Sans+KR:wght@500;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#FFFFFF}a:hover{color:#FFFFFF}
+a:focus-visible,button:focus-visible{outline:3px solid #FFFFFF;outline-offset:3px}
+@keyframes gShakeA{0%,100%{transform:rotate(0deg)}20%{transform:rotate(-9deg)}40%{transform:rotate(8deg)}60%{transform:rotate(-6deg)}80%{transform:rotate(4deg)}}
+@keyframes gShakeB{0%,100%{transform:rotate(0deg)}20%{transform:rotate(-9deg)}40%{transform:rotate(8deg)}60%{transform:rotate(-6deg)}80%{transform:rotate(4deg)}}
+@media (prefers-reduced-motion: reduce){*{transition:none !important;animation:none !important}}
+</style>
+</helmet>
+<div style="width:390px;height:844px;box-sizing:border-box;background:#C8321F;color:#FFFFFF;font-family:'Noto Sans KR',sans-serif;padding:32px 24px 26px;display:flex;flex-direction:column;gap:16px;overflow:hidden">
+  <h1 style="margin:0;font-family:'Bagel Fat One',sans-serif;font-weight:400;font-size:36px;line-height:1.2;letter-spacing:-1px">{{title}}</h1>
+
+  <div style="flex-grow:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:14px">
+    <div style="width:300px;box-sizing:border-box;background:#FBF8F0;color:#000000;border:3px solid #2A1A12;padding:20px 18px 14px;display:flex;flex-direction:column;gap:14px;transform-origin:50% 100%;transform:{{paperT}};opacity:{{paperO}};transition:transform 0.7s cubic-bezier(0.2,0.8,0.2,1),opacity 0.3s;position:relative;z-index:1">
+      <p style="margin:0;font-size:16px;font-weight:500;line-height:1.8;white-space:pre-line">지민아, 이걸 쓰는 지금은 11월이야.
+너는 이직할지 말지 아직 고민 중이고, 나는 네가 결국 옮길 거라는 데 만 원 걸었어.
+맞았으면 오늘 밥은 네가 사.
+틀렸으면, 그것도 잘한 결정이었을 거야.
+새해 복 많이 받아.</p>
+      <div style="display:flex;justify-content:space-between;align-items:baseline;border-top:1px dashed #C8321F;padding-top:10px;color:#C8321F;font-size:13px;font-weight:700">
+        <span>영진이 구움</span>
+        <span>행운의 날짜 1 . 1</span>
+      </div>
+    </div>
+
+    <div aria-hidden="true" style="position:relative;width:342px;height:170px;transform:{{stageT}};transition:transform 0.6s cubic-bezier(0.3,1.2,0.5,1)">
+      <img src="../assets/fortune-cookie.png" alt="" width="206" style="position:absolute;left:68px;top:0;opacity:{{wholeO}};animation:{{shake}};transition:opacity 0.12s">
+      <img src="../assets/cookie-slip.png" alt="" width="150" style="position:absolute;left:96px;top:38px;opacity:{{slipO}};transform:{{slipT}};transition:transform 0.45s cubic-bezier(0.2,1.5,0.4,1),opacity 0.3s">
+      <img src="../assets/cookie-left.png" alt="" width="128" style="position:absolute;left:52px;top:22px;opacity:{{halfO}};transform:{{leftT}};transition:transform 0.5s cubic-bezier(0.3,1.4,0.5,1),opacity 0.12s">
+      <img src="../assets/cookie-right.png" alt="" width="134" style="position:absolute;left:162px;top:20px;opacity:{{halfO}};transform:{{rightT}};transition:transform 0.5s cubic-bezier(0.3,1.4,0.5,1),opacity 0.12s">
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px">
+    <button onClick="{{replay}}" style="height:56px;border:2px solid #FFFFFF;border-radius:16px;background:transparent;color:#FFFFFF;font-family:'Noto Sans KR',sans-serif;font-size:16px;font-weight:700;cursor:pointer">다시 깨기</button>
+    <a href="Main.dc.html" style="height:56px;box-sizing:border-box;border-radius:16px;background:#FFFFFF;color:#C8321F;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;text-decoration:none">나도 구워두기</a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { phase: 'closed', run: 0 };
+    this.timers = [];
+  }
+  componentDidMount() {
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) { this.setState({ phase: 'paper' }); return; }
+    this.play();
+  }
+  componentWillUnmount() { this.timers.forEach(clearTimeout); }
+  play() {
+    this.timers.forEach(clearTimeout);
+    this.setState({ phase: 'closed' });
+    this.timers = [
+      setTimeout(() => this.setState({ phase: 'shake', run: this.state.run + 1 }), 800),
+      setTimeout(() => this.setState({ phase: 'crack' }), 1450),
+      setTimeout(() => this.setState({ phase: 'paper' }), 2350)
+    ];
+  }
+  renderVals() {
+    var p = this.state.phase;
+    var name = this.state.run % 2 === 0 ? 'gShakeA' : 'gShakeB';
+    var whole = p === 'closed' || p === 'shake';
+    var paper = p === 'paper';
+    return {
+      title: paper ? '영진이 넣어둔 쪽지' : '1월 1일 0시',
+      stageT: paper ? 'none' : 'translateY(-200px) scale(1.2)',
+      wholeO: whole ? '1' : '0',
+      shake: p === 'shake' ? (name + ' 0.6s ease-in-out both') : 'none',
+      halfO: whole ? '0' : '1',
+      leftT: whole ? 'none' : (paper ? 'translate(-56px,6px) rotate(-10deg)' : 'translate(-72px,0) rotate(-14deg)'),
+      rightT: whole ? 'none' : (paper ? 'translate(60px,6px) rotate(10deg)' : 'translate(76px,0) rotate(14deg)'),
+      slipO: p === 'crack' ? '1' : '0',
+      slipT: p === 'crack' ? 'none' : (paper ? 'translateY(-70px) scale(1.5)' : 'scale(0.2)'),
+      paperT: paper ? 'none' : 'translateY(120px) scale(0.3,0.1)',
+      paperO: paper ? '1' : '0',
+      replay: () => this.play()
+    };
+  }
+}
+</script>
+</body>
+</html>

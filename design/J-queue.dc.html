@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>대기열 — 아직 잠긴 편지</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#000000}a:hover{color:#000000}
+a:focus-visible,button:focus-visible{outline:3px solid #000000;outline-offset:3px}
+</style>
+</helmet>
+<div style="width:390px;height:844px;box-sizing:border-box;background:#FFE94A;color:#000000;font-family:'Noto Sans KR',sans-serif;padding:36px 24px 26px;display:flex;flex-direction:column;gap:26px">
+  <div style="display:flex;flex-direction:column;gap:8px">
+    <p style="margin:0;font-size:15px;font-weight:500">영진 님이 지민 님에게 보낸 편지</p>
+    <h1 style="margin:0;font-size:38px;font-weight:900;line-height:1.25;letter-spacing:-2px">접속 대기 중입니다</h1>
+  </div>
+
+  <div style="flex-grow:1;display:flex;flex-direction:column;justify-content:center;gap:22px">
+    <div style="display:flex;flex-direction:column;gap:0">
+      <span style="font-size:16px;font-weight:700">내 앞에 남은 시간</span>
+      <span style="font-size:84px;font-weight:900;line-height:1.1;letter-spacing:-5px">50일</span>
+      <span style="font-size:34px;font-weight:900;line-height:1.1;letter-spacing:-1.5px">12시간 54분</span>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div role="img" aria-label="진행률 1퍼센트 미만" style="height:26px;box-sizing:border-box;border:3px solid #000000;border-radius:13px;background:#FFFFFF;padding:3px;display:flex">
+        <div style="width:14px;background:#000000;border-radius:8px"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:500">
+        <span>오늘</span>
+        <span>2027년 1월 1일 0시</span>
+      </div>
+    </div>
+
+    <ul style="margin:0;padding:0 0 0 18px;font-size:14px;line-height:1.9;font-weight:500">
+      <li>새로고침해도 순서는 그대로예요.</li>
+      <li>쓴 사람도 먼저 들어갈 수 없어요.</li>
+      <li>1월 1일 0시가 되면 자동으로 열려요.</li>
+    </ul>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px">
+    <button style="height:56px;border:3px solid #000000;border-radius:14px;background:transparent;color:#000000;font-family:'Noto Sans KR',sans-serif;font-size:16px;font-weight:700;cursor:pointer">캘린더에 저장</button>
+    <a href="Main.dc.html" style="height:56px;box-sizing:border-box;border-radius:14px;background:#000000;color:#FFFFFF;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;text-decoration:none">나도 줄 세우기</a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

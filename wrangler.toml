@@ -1,0 +1,4 @@
+# Cloudflare Pages 설정. 정적 파일만 올린다(Functions 없음).
+name = "tell-you-later"
+compatibility_date = "2026-11-01"
+pages_build_output_dir = "dist"

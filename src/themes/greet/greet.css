@@ -1,0 +1,13 @@
+@keyframes mFall {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  100% {
+    transform: translate(-70px, 120vh) rotate(560deg);
+  }
+}
+
+.greet-screen button:focus-visible {
+  outline: 4px solid #000000;
+  outline-offset: 2px;
+}
