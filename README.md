@@ -56,7 +56,7 @@ assets/         포춘쿠키 PNG
 4. **Web Analytics는 아직 켜지 않는다.** 분석 스크립트는 코드에 없고, 대시보드의 자동 삽입도 켜지 않는다.
    편지 암호문은 주소의 `#` 뒤에 있다. 분석 요청에 `#` 뒤가 실려 나가지 않는다는 것이 확인될 때까지 넣지 않는다(아래 체크리스트).
 
-OG 이미지는 `pwsh scripts/make-og-image.ps1`로 다시 만들 수 있다(`public/og.png`).
+OG 이미지(`public/og.png`)는 `design/og.svg`를 그린 것이다. 문구를 바꾸려면 og.svg를 고치고 `pwsh scripts/make-og-image.ps1`로 다시 만든다(Edge 또는 Chrome 필요).
 포춘쿠키 그림은 `assets/`의 PNG 원본을 가로 600px WebP로 줄인 것이다(`src/themes/cookie/*.webp`, 합계 약 180KB). 원본은 번들에 들어가지 않는다.
 다시 만들려면 `npm i --no-save sharp && node scripts/make-cookie-webp.mjs`.
 
