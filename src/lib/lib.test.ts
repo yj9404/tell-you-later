@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { decodeLink, encodeLink, LinkError, linkHash, type Letter } from './codec.ts'
+import { detectPlatform, googleCalendarUrl, icsDataUrl, isInAppBrowser, outlookCalendarUrl } from './calendar.ts'
 import { countdown, longDate, teaserDate } from './date.ts'
 import { splitBubbles } from './bubbles.ts'
 import { QUICKNET, roundForTime, timeForRound } from './drand.ts'
@@ -166,5 +167,49 @@ describe('타임락 암호문', () => {
     expect(decodeLink(link).body).toEqual(body)
     // 반복이 많은 글이라 압축이 잘 된다. 평문 UTF-8(약 5KB)보다 훨씬 짧아야 한다.
     expect(link.length).toBeLessThan(1500)
+  })
+})
+
+describe('캘린더 링크', () => {
+  const ev = { start: new Date('2026-12-24T15:00:00Z'), link: 'https://example.com/#abc&d=1' }
+
+  it('구글 캘린더: 30분 일정, UTC 시각, 링크 전체를 설명에 넣는다', () => {
+    const u = new URL(googleCalendarUrl(ev))
+    expect(u.origin + u.pathname).toBe('https://calendar.google.com/calendar/render')
+    expect(u.searchParams.get('action')).toBe('TEMPLATE')
+    expect(u.searchParams.get('text')).toBe('할 말이 있는 날')
+    expect(u.searchParams.get('dates')).toBe('20261224T150000Z/20261224T153000Z')
+    expect(u.searchParams.get('details')).toBe(ev.link)
+  })
+
+  it('Outlook: ISO 8601 시각, 공백을 +로 바꾸지 않는다', () => {
+    const s = outlookCalendarUrl(ev)
+    expect(s.startsWith('https://outlook.live.com/calendar/0/deeplink/compose?')).toBe(true)
+    expect(s).not.toContain('+')
+    const u = new URL(s)
+    expect(u.searchParams.get('subject')).toBe('할 말이 있는 날')
+    expect(u.searchParams.get('startdt')).toBe('2026-12-24T15:00:00Z')
+    expect(u.searchParams.get('enddt')).toBe('2026-12-24T15:30:00Z')
+    expect(u.searchParams.get('body')).toBe(ev.link)
+  })
+
+  it('data URL은 ics를 그대로 되돌릴 수 있게 인코딩한다', () => {
+    const ics = 'BEGIN:VCALENDAR\r\nSUMMARY:편지, 열림 #&+\r\nEND:VCALENDAR'
+    const u = icsDataUrl(ics)
+    expect(u.startsWith('data:text/calendar;charset=utf-8,')).toBe(true)
+    expect(decodeURIComponent(u.slice(u.indexOf(',') + 1))).toBe(ics)
+  })
+
+  it('UA로 기기와 인앱 브라우저를 가른다', () => {
+    const android = 'Mozilla/5.0 (Linux; Android 14; SM-S918N) AppleWebKit/537.36 Chrome/130.0 Mobile Safari/537.36'
+    const iphone = 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 Version/18.0 Mobile/15E148 Safari/604.1'
+    const mac = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 Version/18.0 Safari/605.1.15'
+    expect(detectPlatform(android)).toBe('android')
+    expect(detectPlatform(iphone)).toBe('ios')
+    expect(detectPlatform(mac, 5)).toBe('ios')
+    expect(detectPlatform(mac, 0)).toBe('desktop')
+    expect(isInAppBrowser(iphone)).toBe(false)
+    expect(isInAppBrowser(iphone + ' KAKAOTALK 10.8.5')).toBe(true)
+    expect(isInAppBrowser(android.replace('Mobile Safari', 'Mobile Safari Instagram 350.0.0'))).toBe(true)
   })
 })

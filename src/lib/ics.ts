@@ -1,4 +1,5 @@
-const stamp = (d: Date) => d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '')
+/** UTC 기준 YYYYMMDDTHHmmssZ. iCalendar와 구글 캘린더 링크가 같은 형식을 쓴다. */
+export const stamp = (d: Date) => d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '')
 const escape = (s: string) => s.replace(/[\\;,]/g, (c) => '\\' + c).replace(/\n/g, '\\n')
 
 /** RFC 5545: 한 줄은 75옥텟까지. 넘으면 다음 줄을 공백으로 시작해 잇는다. */

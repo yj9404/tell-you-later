@@ -2,10 +2,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { decodeLink, linkHash, type Letter } from '../lib/codec.ts'
 import { DrandError, timeForRound } from '../lib/drand.ts'
 import { loadFonts } from '../lib/fonts.ts'
-import { buildIcs, downloadIcs } from '../lib/ics.ts'
 import { openLetter } from '../lib/timelock.ts'
 import { themeByCode } from '../themes/registry.ts'
 import type { LetterInfo, LockStatus } from '../themes/types.ts'
+import { useSaveCalendar } from './SaveCalendar.tsx'
 import type { Prefill } from './Write.tsx'
 import s from './screens.module.css'
 
@@ -125,6 +125,8 @@ function Letter({ letter, fragment, onWrite }: Props & { letter: Letter }) {
     return () => clearInterval(id)
   }, [unlockMs, open, text])
 
+  const calendar = useSaveCalendar({ from: letter.from, unlockAt: info.unlockAt, uid: info.hash })
+
   if (text !== null) {
     return (
       <theme.Open
@@ -138,15 +140,18 @@ function Letter({ letter, fragment, onWrite }: Props & { letter: Letter }) {
   }
 
   return (
-    <theme.Locked
-      letter={info}
-      now={now}
-      status={status}
-      error={error}
-      onRetry={() => void open()}
-      onSaveCalendar={() => downloadIcs(buildIcs({ from: letter.from, unlockAt: info.unlockAt, link: location.href, uid: info.hash }))}
-      onWrite={() => onWrite(null)}
-    />
+    <>
+      <theme.Locked
+        letter={info}
+        now={now}
+        status={status}
+        error={error}
+        onRetry={() => void open()}
+        onSaveCalendar={calendar.onSaveCalendar}
+        onWrite={() => onWrite(null)}
+      />
+      {calendar.overlay}
+    </>
   )
 }
 

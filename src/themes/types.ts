@@ -1,4 +1,4 @@
-import type { ComponentType } from 'react'
+import type { ComponentType, MouseEvent } from 'react'
 
 export interface Tint {
   hex: string
@@ -31,7 +31,8 @@ export interface LockedProps {
   /** status가 error일 때의 원인 */
   error?: string
   onRetry: () => void
-  onSaveCalendar: () => void
+  /** 데스크톱에서는 누른 버튼 옆에 메뉴를 띄우므로 클릭 이벤트를 그대로 넘긴다 */
+  onSaveCalendar: (e: MouseEvent<HTMLElement>) => void
   onWrite: () => void
   /** 쓰기 화면의 미리보기 중. 밖으로 나가는 버튼(나도 쓰기, 캘린더 저장)을 비활성으로 둔다 */
   preview?: boolean
