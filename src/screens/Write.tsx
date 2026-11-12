@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import { encodeLink, NAME_MAX } from '../lib/codec.ts'
-import { fullDate, openClock, teaserDate } from '../lib/date.ts'
+import { clock, fullDate, teaserDate } from '../lib/date.ts'
 import { roundForTime, timeForRound } from '../lib/drand.ts'
 import { loadFonts } from '../lib/fonts.ts'
 import { lockLetter } from '../lib/timelock.ts'
@@ -130,7 +130,7 @@ export function Write({ prefill, onCreated }: { prefill: Prefill | null; onCreat
           >
             <span className={s.rowLabel}>여는 날</span>
             <span className={s.rowValue} data-past={inPast || undefined}>
-              {fullDate(unlock)} {openClock(unlock)}
+              {fullDate(unlock)} {clock(unlock)}
             </span>
             <Chevron />
           </button>

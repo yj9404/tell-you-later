@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { decodeLink, encodeLink, LinkError, linkHash, type Letter } from './codec.ts'
 import { androidIntentUrl, detectPlatform, eventTitle, googleCalendarUrl, icsDataUrl, isInAppBrowser, outlookCalendarUrl } from './calendar.ts'
 import { buildIcs } from './ics.ts'
-import { callName, countdown, longDate, shareText, teaserDate } from './date.ts'
+import { callName, chatStamp, clock, countdown, dateClock, longDate, shareText, teaserDate } from './date.ts'
 import { lyricLines, splitBubbles } from './bubbles.ts'
 import { QUICKNET, roundForTime, timeForRound } from './drand.ts'
 import { lockLetter, openLetter } from './timelock.ts'
@@ -75,6 +75,20 @@ describe('예고 문구의 날짜 표기', () => {
   it('긴 표기', () => {
     expect(longDate(new Date(2027, 0, 1))).toBe('2027년 1월 1일 금요일 0시')
     expect(longDate(new Date(2026, 11, 25, 9, 30))).toBe('2026년 12월 25일 금요일 9시 30분')
+  })
+  it('오전·오후 시각: 자정은 "오전 0:00", 정오는 "오후 12:00"', () => {
+    const at = (h: number, m = 0) => new Date(2027, 0, 1, h, m)
+    expect(clock(at(0))).toBe('오전 0:00')
+    expect(clock(at(0, 5))).toBe('오전 0:05')
+    expect(clock(at(1))).toBe('오전 1:00')
+    expect(clock(at(11, 59))).toBe('오전 11:59')
+    expect(clock(at(12))).toBe('오후 12:00')
+    expect(clock(at(13, 6))).toBe('오후 1:06')
+    expect(clock(at(23, 59))).toBe('오후 11:59')
+    // clock을 쓰는 표기도 같은 규칙
+    expect(dateClock(at(0))).toBe('2027년 1월 1일 오전 0:00')
+    expect(chatStamp(at(0), at(9))).toBe('오늘 오전 0:00')
+    expect(chatStamp(at(12), new Date(2026, 10, 12))).toBe('2027년 1월 1일 오후 12:00')
   })
   it('카운트다운', () => {
     expect(countdown((50 * 24 + 12) * 3600_000)).toBe('50일 12시간')

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { paragraphs } from '../../lib/bubbles.ts'
-import { daysBetween, fullDate, iGa, openClock } from '../../lib/date.ts'
+import { clock, daysBetween, fullDate, iGa } from '../../lib/date.ts'
 import { LockError, st, TeaserLines, usePhases } from '../shared.tsx'
 import type { LetterInfo, LockedProps, OpenProps, Theme } from '../types.ts'
 import './queue.css'
@@ -77,7 +77,7 @@ function QueueCard({ letter, now, status, spinning, num, progress, left, childre
         <div style={st(ROW)}>
           <span style={st('color:#6B7280;flex-shrink:0')}>입장 시각</span>
           <span style={st('font-weight:600;font-variant-numeric:tabular-nums;text-align:right')}>
-            {fullDate(letter.unlockAt)} {openClock(letter.unlockAt)}
+            {fullDate(letter.unlockAt)} {clock(letter.unlockAt)}
           </span>
         </div>
         <div style={st(ROW)}>

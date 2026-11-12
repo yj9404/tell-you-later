@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type PointerEvent } from 'react'
-import { dayDate, daysBetween, nextNewYear, oneYearLater, openClock } from '../lib/date.ts'
+import { clock, dayDate, daysBetween, nextNewYear, oneYearLater } from '../lib/date.ts'
 import { useModal } from './useModal.ts'
 import { resolveWhen, type When } from './when.ts'
 import s from './write.module.css'
@@ -7,7 +7,7 @@ import s from './write.module.css'
 const pad = (n: number) => String(n).padStart(2, '0')
 const isoDate = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
 /** "2027년 1월 1일 금요일 오전 0:00" */
-const dayClock = (d: Date) => `${dayDate(d)} ${openClock(d)}`
+const dayClock = (d: Date) => `${dayDate(d)} ${clock(d)}`
 // 이만큼 아래로 끌면 닫는다.
 const DRAG_CLOSE = 90
 
