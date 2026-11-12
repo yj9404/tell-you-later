@@ -103,7 +103,7 @@ function Locked(p: LockedProps) {
             <h2 style={st(H2)}>□ 개요 및 목적</h2>
             <p style={st(ITEM)}>○ 편지 1통을 지정 일시에 개봉</p>
             <p style={st(ITEM)}>○ 개봉 전 열람 시도 원천 봉쇄</p>
-            <p style={st(STAR)}>* 기안자 본인 포함 열람 불가</p>
+            <p style={st(STAR)}>* 개봉 전 누구도 열람 불가</p>
           </div>
 
           <div style={st('display:flex;flex-direction:column;gap:1px')}>

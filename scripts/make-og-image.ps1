@@ -15,7 +15,7 @@ $sub = New-Object System.Drawing.Font('Malgun Gothic', 38, [System.Drawing.FontS
 
 $g.DrawString('할 말이 있는데', $title, $black, 84, 150)
 $g.DrawString('나중에 할게', $title, $black, 84, 270)
-$g.DrawString('정한 날짜 전에는 쓴 사람도 못 여는 편지', $sub, $gray, 90, 430)
+$g.DrawString('정한 날짜 전에는 누구도 열 수 없는 편지', $sub, $gray, 90, 430)
 
 $out = Join-Path $PSScriptRoot '..\public\og.png'
 $bmp.Save($out, [System.Drawing.Imaging.ImageFormat]::Png)

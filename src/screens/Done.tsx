@@ -55,7 +55,7 @@ export function Done({ created, onPreview, onNew }: { created: Created; onPrevie
           <br />
           이제 링크를 보내세요
         </h1>
-        <p className={s.lead}>{longDate(created.unlockAt)}에 열립니다. 그 전에는 쓴 나도 못 엽니다.</p>
+        <p className={s.lead}>{longDate(created.unlockAt)}에 열립니다. 그 전에는 누구도 열 수 없습니다.</p>
       </div>
 
       <div className={s.field}>
@@ -101,7 +101,7 @@ export function Done({ created, onPreview, onNew }: { created: Created; onPrevie
         <button type="button" className={s.secondary} onClick={(e) => (e.currentTarget.focus(), setWatching(true))}>
           열리는 모습 마지막으로 보기
         </button>
-        <span className={s.noteCenter}>이 화면을 떠나면 나도 그날까지 못 봅니다</span>
+        <span className={s.noteCenter}>이 화면을 떠나면 그날까지 누구도 볼 수 없습니다</span>
       </div>
 
       <div className={s.bottom}>

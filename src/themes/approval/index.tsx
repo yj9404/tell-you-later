@@ -104,7 +104,7 @@ function Locked(p: LockedProps) {
           <p style={st('margin:0;padding-left:14px')}>
             나. 남은 기간: <span style={st('font-weight:900;font-variant-numeric:tabular-nums')}>{p.status === 'error' ? '개봉 지연' : remaining(p)}</span>
           </p>
-          <p style={st('margin:0;padding-left:14px')}>다. 내 용: 대외비 (기안자 본인 포함 열람 불가)</p>
+          <p style={st('margin:0;padding-left:14px')}>다. 내 용: 대외비 (개봉 전 누구도 열람 불가)</p>
           <p style={st('margin:6px 0 0')}>붙임 편지 1부. 끝.</p>
           <LockError {...p} />
         </div>

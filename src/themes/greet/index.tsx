@@ -50,7 +50,7 @@ function Locked(p: LockedProps) {
       </div>
 
       <p style={st('margin:0;text-align:center;font-size:17px;font-weight:700;line-height:1.6;position:relative')}>
-        그 전에는 보낸 사람도 못 엽니다.
+        그 전에는 누구도 열 수 없습니다.
         <br />
         건강이 최고입니다.
       </p>

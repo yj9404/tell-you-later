@@ -78,7 +78,7 @@ function Locked(p: LockedProps) {
           </svg>
           <span>편지 1통, {whenText(letter.unlockAt, today)}에 도착</span>
         </div>
-        <span style={st('font-size:12px;color:#6D6D72;padding-left:6px')}>그 전엔 보낸 사람도 못 봐요.</span>
+        <span style={st('font-size:12px;color:#6D6D72;padding-left:6px')}>그 전에는 누구도 열 수 없어요.</span>
       </div>
 
       <div style={st('padding:12px 16px 20px;display:flex;flex-direction:column;gap:12px;border-top:1px solid #EFEFEF')}>

@@ -106,7 +106,7 @@ export function Write({ prefill, onCreated }: { prefill: Prefill | null; onCreat
             <br />
             열리는 편지를 써요
           </h1>
-          <p className={s.lead}>완성된 링크를 보내면, 그날 전에는 받는 사람도 나도 열 수 없어요.</p>
+          <p className={s.lead}>완성된 링크를 보내면, 그날 전에는 누구도 열 수 없어요.</p>
         </header>
 
         <section aria-label="편지" className={s.card}>

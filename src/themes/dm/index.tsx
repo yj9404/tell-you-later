@@ -64,7 +64,7 @@ function Locked({ letter, now, status, error, onRetry, onSaveCalendar, onWrite, 
           </div>
           <span className={s.arrival}>
             {dateHour(letter.unlockAt)}에 도착해요.
-            <br />그 전엔 보낸 사람도 못 봐요.
+            <br />그 전에는 누구도 열 수 없어요.
           </span>
         </div>
       </div>

@@ -64,7 +64,7 @@ function Locked(p: LockedProps) {
       <div style={st('flex-grow:1;display:flex;flex-direction:column;justify-content:center')}>
         <Notification name={letter.from} line={teaser(letter.unlockAt, today)} />
         <div aria-hidden="true" style={st('height:14px;margin:0 16px;background:#FFFFFF;opacity:0.14;border-radius:0 0 18px 18px')} />
-        <p style={st('margin:16px 6px 0;font-size:14px;line-height:1.6')}>내용은 {whenText(letter.unlockAt, today)}까지 숨겨져 있어요. 보낸 사람도 못 봐요.</p>
+        <p style={st('margin:16px 6px 0;font-size:14px;line-height:1.6')}>내용은 {whenText(letter.unlockAt, today)}까지 숨겨져 있어요. 그 전에는 누구도 열 수 없어요.</p>
       </div>
 
       <div style={st('display:flex;flex-direction:column;gap:12px')}>

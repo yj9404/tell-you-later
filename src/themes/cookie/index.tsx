@@ -41,7 +41,7 @@ function Locked(p: LockedProps) {
             <span style={st(`font-family:${DISPLAY};font-size:42px;line-height:1.1`)}>{remaining(p)}</span>
           </>
         )}
-        <p style={st('margin:4px 0 0;font-size:14px;font-weight:500;line-height:1.6')}>그 전엔 구운 사람도 못 깨. 진짜로.</p>
+        <p style={st('margin:4px 0 0;font-size:14px;font-weight:500;line-height:1.6')}>그 전엔 누구도 못 깨. 진짜로.</p>
       </div>
 
       <div style={st('display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px')}>
