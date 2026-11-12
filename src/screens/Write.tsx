@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import { encodeLink, NAME_MAX } from '../lib/codec.ts'
+import { fullDate, openClock, teaserDate } from '../lib/date.ts'
 import { roundForTime, timeForRound } from '../lib/drand.ts'
 import { loadFonts } from '../lib/fonts.ts'
 import { lockLetter } from '../lib/timelock.ts'
 import { THEMES } from '../themes/registry.ts'
 import { FullPreview, PreviewPair, type Draft, type Side } from './Preview.tsx'
 import { WhenSheet } from './WhenSheet.tsx'
-import { resolveWhen, whenLabel, type When } from './when.ts'
+import { resolveWhen, type When } from './when.ts'
 import s from './write.module.css'
 
 export interface Prefill {
@@ -23,21 +24,20 @@ export interface Created {
 
 const BODY_MAX = 2000
 
-/** 긴 이름은 글자를 줄여 한 줄에 들어가게 한다. 한글은 1, 그 밖의 글자는 0.6으로 센다. */
-function nameScale(name: string, fits: number): string | undefined {
-  const units = Array.from(name).reduce((n, ch) => n + (ch.charCodeAt(0) > 0x2e7f ? 1 : 0.6), 0)
-  return units > fits ? `${Math.max(0.5, fits / units).toFixed(2)}em` : undefined
-}
+const Chevron = () => (
+  <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9A9A9A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M9 6l6 6-6 6" />
+  </svg>
+)
 
-/** 문장 안의 이름 입력칸. 글자 수에 맞춰 폭이 늘어난다(보이지 않는 같은 글자가 폭을 정한다). */
-function NameInput({ label, value, placeholder, fits, onChange }: { label: string; value: string; placeholder: string; fits: number; onChange: (v: string) => void }) {
-  return (
-    <span className={s.auto} data-value={value || placeholder} style={{ fontSize: nameScale(value || placeholder, fits) }}>
-      <input aria-label={label} value={value} placeholder={placeholder} maxLength={NAME_MAX} size={1} autoComplete="off" onChange={(e) => onChange(e.target.value)} />
-    </span>
-  )
-}
+const Lock = () => (
+  <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="5" y="11" width="14" height="10" rx="2" />
+    <path d="M8 11V8a4 4 0 0 1 8 0v3" />
+  </svg>
+)
 
+/** 쓰기 화면 (디자인: Write 3차). 편지 카드 하나에 이름·여는 날·본문을 모으고, 그 아래에 받는 사람이 먼저 보는 문장을 보여준다. */
 export function Write({ prefill, onCreated }: { prefill: Prefill | null; onCreated: (c: Created) => void }) {
   const [to, setTo] = useState(prefill?.to ?? '')
   const [from, setFrom] = useState(prefill?.from ?? '')
@@ -99,53 +99,79 @@ export function Write({ prefill, onCreated }: { prefill: Prefill | null; onCreat
   return (
     <>
       <form className={s.page} onSubmit={submit} noValidate>
-        <div className={s.head}>
-          <h1 className={s.sentence}>
-            <NameInput label="받는 사람" value={to} placeholder="받는 사람" fits={7} onChange={setTo} />
-            에게
+        <header className={s.head}>
+          <span className={s.service}>할 말이 있는데 나중에 할게</span>
+          <h1 className={s.title}>
+            정한 날이 와야
             <br />
-            할 말이 있는데
-            <br />
-            <button type="button" className={s.whenButton} aria-haspopup="dialog"
-              onClick={(e) => {
-                // Safari는 버튼을 눌러도 포커스를 주지 않는다. 시트를 닫을 때 여기로 돌아오게 미리 잡아 둔다.
-                e.currentTarget.focus()
-                setSheet(true)
-              }}
-            >
-              {whenLabel(unlock, now)}
-            </button>
-            에
-            <br />
-            할게
+            열리는 편지를 써요
           </h1>
-          <div className={s.sender}>
-            <NameInput label="보내는 사람" value={from} placeholder="보내는 사람" fits={12} onChange={setFrom} />
-            <span>보냄</span>
-          </div>
-          <p className={s.note}>{inPast ? '정한 시각이 이미 지났습니다. 노란 날짜를 눌러 다시 정해 주세요.' : '노란 부분을 눌러서 바꾸세요. 이 문장이 받는 사람에게 먼저 보입니다.'}</p>
-        </div>
+          <p className={s.lead}>완성된 링크를 보내면, 그날 전에는 받는 사람도 나도 열 수 없어요.</p>
+        </header>
 
-        <div className={s.letter}>
-          <div className={s.sectionHead}>
-            <label htmlFor="wBody" className={s.sectionTitle}>
-              그날 할 말
-            </label>
-            <span className={s.count}>
+        <section aria-label="편지" className={s.card}>
+          <label className={s.row}>
+            <span className={s.rowLabel}>받는 사람</span>
+            <input className={s.rowInput} value={to} placeholder="이름이나 별명" maxLength={NAME_MAX} autoComplete="off" onChange={(e) => setTo(e.target.value)} />
+          </label>
+          <label className={s.row}>
+            <span className={s.rowLabel}>보내는 사람</span>
+            <input className={s.rowInput} value={from} placeholder="내 이름" maxLength={NAME_MAX} autoComplete="off" onChange={(e) => setFrom(e.target.value)} />
+          </label>
+          <button
+            type="button"
+            className={s.row}
+            aria-haspopup="dialog"
+            onClick={(e) => {
+              // Safari는 버튼을 눌러도 포커스를 주지 않는다. 시트를 닫을 때 여기로 돌아오게 미리 잡아 둔다.
+              e.currentTarget.focus()
+              setSheet(true)
+            }}
+          >
+            <span className={s.rowLabel}>여는 날</span>
+            <span className={s.rowValue} data-past={inPast || undefined}>
+              {fullDate(unlock)} {openClock(unlock)}
+            </span>
+            <Chevron />
+          </button>
+          <textarea
+            aria-label="편지 내용"
+            className={s.textarea}
+            value={body}
+            placeholder={'여기에 하고 싶은 말을 쓰세요.\n\n빈 줄을 넣으면 문단이 나뉘고, 테마에 따라 말풍선이나 장면이 나뉩니다.'}
+            onChange={(e) => setBody(Array.from(e.target.value).slice(0, BODY_MAX).join(''))}
+          />
+          <div className={s.cardFoot}>
+            <span className={s.lockNote}>
+              <Lock />이 칸만 잠겨요
+            </span>
+            <span>
               {Array.from(body).length.toLocaleString('ko-KR')} / {BODY_MAX.toLocaleString('ko-KR')}
             </span>
           </div>
-          <textarea
-            id="wBody"
-            className={s.textarea}
-            value={body}
-            placeholder={'여기에 써 주세요.\n그날이 되기 전에는 아무도 못 봅니다. 쓴 사람도요.\n\n한 줄을 비우면 말풍선이 나뉩니다.'}
-            onChange={(e) => setBody(Array.from(e.target.value).slice(0, BODY_MAX).join(''))}
-          />
-        </div>
+        </section>
 
-        <div className={s.look}>
-          <span className={`${s.sectionTitle} ${s.sectionLine}`}>어떻게 도착할까요</span>
+        <section className={s.group12}>
+          <h2 className={s.sectionTitle}>링크를 열면 바로 보이는 문장</h2>
+          <div className={s.teaser}>
+            <span className={s.teaserSub}>{to.trim() || '받는 사람'}에게</span>
+            <span className={s.teaserMain}>
+              할 말이 있는데
+              <br />
+              <mark className={s.teaserDate}>{teaserDate(unlock, now)}</mark>에 할게
+            </span>
+            {from.trim() && <span className={s.teaserSub}>{from.trim()}</span>}
+          </div>
+          <p className={s.note} role={inPast ? 'alert' : undefined}>
+            {inPast ? '정한 시각이 이미 지났어요. 여는 날을 눌러 다시 정해 주세요.' : '이름과 날짜는 위 칸에서 바뀝니다. 편지 내용은 그날까지 보이지 않아요.'}
+          </p>
+        </section>
+
+        <section className={s.look}>
+          <div className={s.lookHead}>
+            <h2 className={s.sectionTitle}>어떤 모습으로 도착할까요</h2>
+            <span className={s.note}>받는 사람 화면을 미리 볼 수 있어요.</span>
+          </div>
 
           <div className={s.pills}>
             {THEMES.map((t) => (
@@ -157,7 +183,7 @@ export function Write({ prefill, onCreated }: { prefill: Prefill | null; onCreat
 
           {theme.tints && (
             <div className={s.tints}>
-              <span className={s.tintLabel}>색</span>
+              <span className={s.note}>색</span>
               {theme.tints.map((c, i) => (
                 <button key={c.hex} type="button" className={s.tint} aria-label={c.name} aria-pressed={i === tint} style={{ background: c.hex }} onClick={() => setTint(i)} />
               ))}
@@ -166,8 +192,10 @@ export function Write({ prefill, onCreated }: { prefill: Prefill | null; onCreat
 
           <PreviewPair draft={draft} onOpen={setPreview} />
 
-          <p className={s.note}>이름과 날짜, 맨 위 문장은 링크를 받은 사람에게 바로 보입니다. 그날 할 말만 잠깁니다.</p>
-        </div>
+          <button type="button" className={s.fullButton} onClick={(e) => (e.currentTarget.focus(), setPreview('before'))}>
+            내 편지로 전체 화면 미리보기
+          </button>
+        </section>
 
         <div className={s.bottom}>
           {error && (
@@ -178,7 +206,7 @@ export function Write({ prefill, onCreated }: { prefill: Prefill | null; onCreat
           <button type="submit" className={s.submit} disabled={busy}>
             {busy ? '잠그는 중…' : '잠그고 링크 만들기'}
           </button>
-          <span className={s.noteCenter}>편지는 서버에 저장되지 않습니다. 링크를 잃어버리면 다시 찾을 수 없어요.</span>
+          <span className={s.noteCenter}>편지는 서버에 저장되지 않아요. 링크를 잃어버리면 다시 찾을 수 없어요.</span>
         </div>
       </form>
 

@@ -37,6 +37,12 @@ export function clock(d: Date): string {
   return `${h < 12 ? '오전' : '오후'} ${h % 12 || 12}:${String(d.getMinutes()).padStart(2, '0')}`
 }
 
+/** 여는 날을 고를 때의 시각 표기. 자정을 "오전 0:00"으로 써서 그날 밤 12시와 헷갈리지 않게 한다. 정오는 "오후 12:00". */
+export function openClock(d: Date): string {
+  const h = d.getHours()
+  return `${h < 12 ? `오전 ${h}` : `오후 ${h % 12 || 12}`}:${String(d.getMinutes()).padStart(2, '0')}`
+}
+
 /** "2026년 11월 11일 오전 11:06" */
 export function dateClock(d: Date): string {
   return `${ymd(d)} ${clock(d)}`

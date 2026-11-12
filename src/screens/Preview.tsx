@@ -89,25 +89,24 @@ export function PreviewPair({ draft, onOpen }: { draft: Draft; onOpen: (side: Si
   return (
     <div className={s.previews}>
       <div className={s.previewCol}>
-        <span className={s.previewLabel}>그날 전</span>
+        <span className={s.previewLabel}>여는 날 전</span>
         <div className={s.previewBox} ref={box}>
           <div className={s.previewFrame} style={frame} inert>
             <LockedScreen theme={theme} letter={letter} now={now} />
           </div>
-          <button type="button" className={s.previewHit} aria-label="그날 전 화면 크게 보기" onClick={(e) => (e.currentTarget.focus(), onOpen('before'))} />
+          <button type="button" className={s.previewHit} aria-label="여는 날 전 화면 크게 보기" onClick={(e) => (e.currentTarget.focus(), onOpen('before'))} />
         </div>
       </div>
       <div className={s.previewCol}>
-        <span className={s.previewLabel}>그날 이후</span>
+        <span className={s.previewLabel}>여는 날 이후</span>
         <div className={s.previewBox}>
           {/* 연출 없이 끝 상태만 보여준다. 글이 바뀌면 새로 그린다. */}
           <div className={s.previewFrame} style={{ ...frame, opacity: example ? 0.45 : 1 }} inert>
             <OpenScreen key={`${theme.id}|${text}`} theme={theme} letter={letter} text={text} autoplay={false} reducedMotion />
           </div>
-          <button type="button" className={s.previewHit} aria-label="그날 이후 화면 크게 보기" onClick={(e) => (e.currentTarget.focus(), onOpen('after'))} />
+          <button type="button" className={s.previewHit} aria-label="여는 날 이후 화면 크게 보기" onClick={(e) => (e.currentTarget.focus(), onOpen('after'))} />
         </div>
       </div>
-      <span className={s.previewHint}>눌러서 크게 보기</span>
     </div>
   )
 }

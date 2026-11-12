@@ -1,13 +1,17 @@
 import { useEffect, useRef, useState, type PointerEvent } from 'react'
-import { dateClock, dayDate, fullDate, longDate, nextNewYear, oneYearLater } from '../lib/date.ts'
+import { dayDate, daysBetween, nextNewYear, oneYearLater, openClock } from '../lib/date.ts'
 import { useModal } from './useModal.ts'
 import { resolveWhen, type When } from './when.ts'
 import s from './write.module.css'
 
 const pad = (n: number) => String(n).padStart(2, '0')
 const isoDate = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+/** "2027년 1월 1일 금요일 오전 0:00" */
+const dayClock = (d: Date) => `${dayDate(d)} ${openClock(d)}`
 // 이만큼 아래로 끌면 닫는다.
 const DRAG_CLOSE = 90
+
+type Choice = When['kind']
 
 interface Props {
   now: Date
@@ -16,11 +20,14 @@ interface Props {
   onClose: () => void
 }
 
-/** 날짜·시각 시트 (디자인: Write-when). 아래에서 올라오고, 밖을 누르거나 아래로 내리면 닫힌다. */
+/**
+ * 여는 날 시트 (디자인: Write-when 3차). 새해 0시 / 1년 뒤 지금 / 직접 고르기 중 하나를 고르고 "이때로 정하기"로 확정한다.
+ * 날짜·시각 칸은 직접 고르기를 골랐을 때만 펼쳐진다. 아래에서 올라오고, 밖을 누르거나 아래로 내리면 닫힌다.
+ */
 export function WhenSheet({ now, value, onConfirm, onClose }: Props) {
   const start = resolveWhen(value, now)
-  // 빠른 선택을 고른 상태인지. 날짜·시각을 직접 고치면 풀린다.
-  const [preset, setPreset] = useState<'newyear' | 'year' | null>(value.kind === 'custom' ? null : value.kind)
+  const [choice, setChoice] = useState<Choice>(value.kind)
+  // 직접 고르기 칸. 프리셋을 오가도 적어 둔 값은 그대로 둔다.
   const [date, setDate] = useState(isoDate(start))
   const [pm, setPm] = useState(start.getHours() >= 12)
   const [hourText, setHourText] = useState(String(start.getHours() % 12 || 12))
@@ -34,28 +41,17 @@ export function WhenSheet({ now, value, onConfirm, onClose }: Props) {
   useModal(onClose)
   useEffect(() => sheet.current?.focus({ preventScroll: true }), [])
 
-  const fill = (at: Date) => {
-    setDate(isoDate(at))
-    setPm(at.getHours() >= 12)
-    setHourText(String(at.getHours() % 12 || 12))
-    setMinText(pad(at.getMinutes()))
-  }
-  const pick = (kind: 'newyear' | 'year') => {
-    setPreset(kind)
-    fill(resolveWhen({ kind }, now))
-  }
-
   const [y, m, d] = date.split('-').map(Number)
   const custom = new Date(y, m - 1, d, ((Number(hourText) || 12) % 12) + (pm ? 12 : 0), Number(minText) || 0)
-  const at = preset ? resolveWhen({ kind: preset }, now) : custom
+  const at = choice === 'custom' ? custom : resolveWhen({ kind: choice }, now)
   const past = at.getTime() <= now.getTime()
+  const days = daysBetween(now, at)
 
   const typeHour = (raw: string) => {
     let t = raw.replace(/[^0-9]/g, '').slice(0, 2)
     if (t.length === 2 && Number(t) === 0) t = '12'
     else if (Number(t) > 12) t = '12'
     setHourText(t)
-    setPreset(null)
     // 두 자리를 치면 분 칸으로 넘어간다.
     if (t.length === 2) {
       minInput.current?.focus()
@@ -65,7 +61,6 @@ export function WhenSheet({ now, value, onConfirm, onClose }: Props) {
   const typeMin = (raw: string) => {
     const t = raw.replace(/[^0-9]/g, '').slice(0, 2)
     setMinText(Number(t) > 59 ? '59' : t)
-    setPreset(null)
   }
 
   const onDragStart = (e: PointerEvent) => {
@@ -82,6 +77,17 @@ export function WhenSheet({ now, value, onConfirm, onClose }: Props) {
     else setDrag(0)
   }
 
+  const option = (kind: Choice, name: string, sub?: string) => (
+    <label className={s.option}>
+      <input type="radio" name="when" className={s.radio} checked={choice === kind} onChange={() => setChoice(kind)} />
+      <span aria-hidden="true" className={s.radioDot} />
+      <span className={s.optionText}>
+        <span className={s.optionName}>{name}</span>
+        {sub && <span className={s.optionSub}>{sub}</span>}
+      </span>
+    </label>
+  )
+
   return (
     <div className={s.backdrop} onClick={onClose}>
       <div
@@ -97,99 +103,86 @@ export function WhenSheet({ now, value, onConfirm, onClose }: Props) {
         <div className={s.grab} onPointerDown={onDragStart} onPointerMove={onDragMove} onPointerUp={onDragEnd} onPointerCancel={onDragEnd}>
           <div aria-hidden="true" className={s.grabBar} />
           <h2 id="whenTitle" className={s.sheetTitle}>
-            언제 할까요
+            언제 열리게 할까요
           </h2>
         </div>
 
-        <div className={s.quick}>
-          <button type="button" className={s.quickButton} aria-pressed={preset === 'newyear'} onClick={() => pick('newyear')}>
-            <span className={s.quickName}>새해 0시</span>
-            <span className={s.quickDate}>{fullDate(nextNewYear(now))}</span>
-          </button>
-          <button type="button" className={s.quickButton} aria-pressed={preset === 'year'} onClick={() => pick('year')}>
-            <span className={s.quickName}>1년 뒤 지금</span>
-            <span className={s.quickDate}>{dateClock(oneYearLater(now))}</span>
-          </button>
-        </div>
+        <div role="radiogroup" aria-labelledby="whenTitle" className={s.options}>
+          {option('newyear', '새해 0시', dayClock(nextNewYear(now)))}
+          {option('year', '1년 뒤 지금', dayClock(oneYearLater(now)))}
+          <div className={s.customOption}>
+            {option('custom', '직접 고르기')}
+            {choice === 'custom' && (
+              <div className={s.custom}>
+                <label className={s.dateButton}>
+                  <span>{dayDate(custom)}</span>
+                  <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6B6B6B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="5" width="18" height="16" rx="2" />
+                    <path d="M3 10h18M8 3v4M16 3v4" />
+                  </svg>
+                  {/* 기기 기본 달력을 쓴다. 투명한 입력칸을 버튼 위에 겹쳐 두고, 지원하는 브라우저에서는 showPicker로 연다. */}
+                  <input
+                    type="date"
+                    aria-label="날짜"
+                    className={s.dateInput}
+                    value={date}
+                    min={isoDate(now)}
+                    onChange={(e) => {
+                      if (!e.target.value || e.target.value < isoDate(now)) return
+                      setDate(e.target.value)
+                    }}
+                    onClick={(e) => {
+                      try {
+                        e.currentTarget.showPicker()
+                      } catch {
+                        // showPicker가 없거나 막힌 브라우저는 입력칸 기본 동작으로 열린다.
+                      }
+                    }}
+                  />
+                </label>
 
-        <div className={s.custom}>
-          <span className={s.customLabel}>아니면 직접</span>
-          <label className={s.dateButton}>
-            <span>{dayDate(custom)}</span>
-            <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="5" width="18" height="16" rx="2" />
-              <path d="M3 10h18M8 3v4M16 3v4" />
-            </svg>
-            {/* 기기 기본 달력을 쓴다. 투명한 입력칸을 버튼 위에 겹쳐 두고, 지원하는 브라우저에서는 showPicker로 연다. */}
-            <input
-              type="date"
-              aria-label="날짜"
-              className={s.dateInput}
-              value={date}
-              min={isoDate(now)}
-              onChange={(e) => {
-                if (!e.target.value || e.target.value < isoDate(now)) return
-                setDate(e.target.value)
-                setPreset(null)
-              }}
-              onClick={(e) => {
-                try {
-                  e.currentTarget.showPicker()
-                } catch {
-                  // showPicker가 없거나 막힌 브라우저는 입력칸 기본 동작으로 열린다.
-                }
-              }}
-            />
-          </label>
-
-          <div className={s.time}>
-            <div role="group" aria-label="오전 오후" className={s.ampm}>
-              {[false, true].map((isPm) => (
-                <button
-                  key={String(isPm)}
-                  type="button"
-                  aria-pressed={pm === isPm}
-                  onClick={() => {
-                    setPm(isPm)
-                    setPreset(null)
-                  }}
-                >
-                  {isPm ? '오후' : '오전'}
-                </button>
-              ))}
-            </div>
-            <input
-              aria-label="시"
-              inputMode="numeric"
-              className={s.timeInput}
-              value={hourText}
-              onFocus={(e) => e.target.select()}
-              onChange={(e) => typeHour(e.target.value)}
-              onBlur={() => setHourText(String(Number(hourText) || 12))}
-            />
-            <span className={s.colon}>:</span>
-            <input
-              ref={minInput}
-              aria-label="분"
-              inputMode="numeric"
-              className={s.timeInput}
-              value={minText}
-              onFocus={(e) => e.target.select()}
-              onChange={(e) => typeMin(e.target.value)}
-              onBlur={() => setMinText(pad(Number(minText) || 0))}
-            />
+                <div className={s.time}>
+                  <div role="group" aria-label="오전 오후" className={s.ampm}>
+                    {[false, true].map((isPm) => (
+                      <button key={String(isPm)} type="button" aria-pressed={pm === isPm} onClick={() => setPm(isPm)}>
+                        {isPm ? '오후' : '오전'}
+                      </button>
+                    ))}
+                  </div>
+                  <input
+                    aria-label="시"
+                    inputMode="numeric"
+                    className={s.timeInput}
+                    value={hourText}
+                    onFocus={(e) => e.target.select()}
+                    onChange={(e) => typeHour(e.target.value)}
+                    onBlur={() => setHourText(String(Number(hourText) || 12))}
+                  />
+                  <span className={s.colon}>:</span>
+                  <input
+                    ref={minInput}
+                    aria-label="분"
+                    inputMode="numeric"
+                    className={s.timeInput}
+                    value={minText}
+                    onFocus={(e) => e.target.select()}
+                    onChange={(e) => typeMin(e.target.value)}
+                    onBlur={() => setMinText(pad(Number(minText) || 0))}
+                  />
+                </div>
+              </div>
+            )}
           </div>
-          <span className={s.hint}>숫자를 눌러 바로 입력하세요.</span>
         </div>
 
-        <div className={s.confirm}>
-          <span className={s.summary} role="status">
-            {past ? `이미 지난 시각입니다(${longDate(at)}). 지금보다 뒤로 정해 주세요.` : `${longDate(at)}에 열립니다.`}
-          </span>
-          <button type="button" className={s.confirmButton} disabled={past} onClick={() => onConfirm(preset ? { kind: preset } : { kind: 'custom', at: custom })}>
-            이때로 정하기
-          </button>
-        </div>
+        <p className={s.summary} role="status">
+          {past
+            ? `이미 지난 시각이에요(${dayClock(at)}). 지금보다 뒤로 정해 주세요.`
+            : `${dayClock(at)}에 열려요. ${days > 0 ? `앞으로 ${days}일 남았어요.` : '오늘 안에 열려요.'}`}
+        </p>
+        <button type="button" className={s.confirmButton} disabled={past} onClick={() => onConfirm(choice === 'custom' ? { kind: 'custom', at: custom } : { kind: choice })}>
+          이때로 정하기
+        </button>
       </div>
     </div>
   )
