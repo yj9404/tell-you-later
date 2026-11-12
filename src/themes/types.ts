@@ -8,7 +8,10 @@ export interface Tint {
 
 /** 테마 컴포넌트가 받는 편지 정보. 본문은 여기 없다(열린 뒤에만 따로 전달). */
 export interface LetterInfo {
+  /** 받는 사람. 미리보기에서 이름을 비워 두면 자리표시 글("받는 사람")이 들어간다 */
   to: string
+  /** 미리보기에서 받는 사람을 비워 둔 경우 true. 이름을 부르는 말(“지민아”)을 빼는 데 쓴다 */
+  toEmpty?: boolean
   from: string
   /** 색을 고르는 테마에서 고른 색. 그 외에는 null */
   tint: string | null

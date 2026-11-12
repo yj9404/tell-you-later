@@ -43,6 +43,7 @@ function useLetter(draft: Draft): { theme: Theme; letter: LetterInfo; text: stri
   const letter = useMemo<LetterInfo>(
     () => ({
       to: to.trim() || '받는 사람',
+      toEmpty: !to.trim(),
       from: from.trim() || '보내는 사람',
       tint: theme.tints ? (theme.tints[tint] ?? theme.tints[0]).hex : null,
       createdAt,

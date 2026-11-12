@@ -1,5 +1,5 @@
-import { chatStamp, dateClock, teaserDate, whenText } from '../../lib/date.ts'
-import { LockError, remaining, st, useBubblePlayback } from '../shared.tsx'
+import { chatStamp, dateClock, teaser, whenText } from '../../lib/date.ts'
+import { chatIntro, LockError, remaining, st, useBubblePlayback } from '../shared.tsx'
 import type { LockedProps, OpenProps, Theme } from '../types.ts'
 import './msg.css'
 
@@ -46,6 +46,28 @@ function Typing({ label, animated, style }: { label: string; animated: boolean; 
   )
 }
 
+// 받은 말풍선. 첫 말풍선들과 편지 말풍선이 같은 모양·글자 크기다.
+const BUBBLE = 'margin:0;align-self:flex-start;max-width:290px;background:#E9E9EB;border-radius:20px;padding:9px 14px;font-size:16px;font-weight:400;line-height:1.4'
+
+/** "지민아" / "할 말이 있는데 {날짜}에 할게" / "그게 뭐냐면…". 예고 문구 말풍선은 화면의 제목(h1)이다. */
+function Intro({ lines, teaserText }: { lines: string[]; teaserText: string }) {
+  return (
+    <>
+      {lines.map((line, i) =>
+        line === teaserText ? (
+          <h1 key={i} className="tyl-keep" style={st(BUBBLE)}>
+            {line}
+          </h1>
+        ) : (
+          <div key={i} className="tyl-keep" style={st(BUBBLE)}>
+            {line}
+          </div>
+        ),
+      )}
+    </>
+  )
+}
+
 const PRIMARY =
   'flex-grow:1;height:50px;border:0;border-radius:25px;background:#0B6BF2;color:#FFFFFF;font-family:inherit;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer'
 const ICON = 'flex-shrink:0;width:50px;height:50px;border:1px solid #C7C7CC;border-radius:50%;background:#FFFFFF;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0'
@@ -53,6 +75,7 @@ const ICON = 'flex-shrink:0;width:50px;height:50px;border:1px solid #C7C7CC;bord
 function Locked(p: LockedProps) {
   const { letter, now } = p
   const today = new Date(now)
+  const lockedTeaser = teaser(letter.unlockAt, today)
   return (
     <div className="tyl-screen msg-screen" style={st(`min-height:var(--screen-h, 100dvh);${SCREEN}`)}>
       <Header name={letter.from} />
@@ -60,16 +83,10 @@ function Locked(p: LockedProps) {
       <div style={st('flex-grow:1;display:flex;flex-direction:column;justify-content:flex-end;padding:16px 16px 18px;gap:8px')}>
         <span style={st('align-self:center;font-size:12px;color:#6D6D72;margin-bottom:8px')}>{chatStamp(letter.createdAt, today)}</span>
 
-        <h1
-          className="tyl-keep"
-          style={st('margin:0;align-self:flex-start;max-width:310px;background:#E9E9EB;border-radius:26px 26px 26px 8px;padding:16px 20px;font-size:31px;font-weight:800;line-height:1.3;letter-spacing:-1.2px')}
-        >
-          할 말이 있는데
-          <br />
-          {teaserDate(letter.unlockAt, today)}에 할게
-        </h1>
-
-        <Typing label="입력 중 표시" animated={false} style="margin:4px 0 6px 6px" />
+        <div style={st('display:flex;flex-direction:column;gap:4px')}>
+          <Intro lines={chatIntro(letter, lockedTeaser)} teaserText={lockedTeaser} />
+          <Typing label="입력 중 표시" animated={false} style="margin:4px 0 6px 6px" />
+        </div>
 
         <div style={st('align-self:flex-start;border:1.5px dashed #0B6BF2;color:#0B6BF2;border-radius:20px;padding:10px 15px;font-size:15px;font-weight:500;display:flex;align-items:center;gap:8px')}>
           <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0B6BF2" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
@@ -109,20 +126,14 @@ function Locked(p: LockedProps) {
 
 function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenProps) {
   const play = useBubblePlayback(text, autoplay, reducedMotion)
+  const openTeaser = teaser(letter.unlockAt, letter.createdAt)
   return (
     <div className="tyl-screen msg-screen" style={st(`height:var(--screen-h, 100dvh);${SCREEN}`)}>
       <Header name={letter.from} />
 
       <div ref={play.scroller} style={st('flex-grow:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;padding:16px;gap:4px')}>
         <span style={st('align-self:center;font-size:12px;color:#6D6D72;margin-top:auto;margin-bottom:8px')}>{dateClock(letter.createdAt)}</span>
-        <div
-          className="tyl-keep"
-          style={st('align-self:flex-start;max-width:290px;background:#E9E9EB;border-radius:22px 22px 22px 7px;padding:12px 16px;font-size:23px;font-weight:800;line-height:1.3;letter-spacing:-0.8px')}
-        >
-          할 말이 있는데
-          <br />
-          {teaserDate(letter.unlockAt, letter.createdAt)}에 할게
-        </div>
+        <Intro lines={chatIntro(letter, openTeaser)} teaserText={openTeaser} />
 
         <span style={st('align-self:center;font-size:12px;color:#6D6D72;margin:18px 0 8px')}>{dateClock(letter.unlockAt)}</span>
 
@@ -130,7 +141,7 @@ function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenP
           <div
             key={`${play.run}-${i}`}
             className="tyl-text"
-            style={st(`align-self:flex-start;max-width:290px;background:#E9E9EB;border-radius:20px;padding:9px 14px;font-size:16px;line-height:1.4${play.run > 0 ? ';animation:lPop 0.24s ease-out both' : ''}`)}
+            style={st(`${BUBBLE}${play.run > 0 ? ';animation:lPop 0.24s ease-out both' : ''}`)}
           >
             {b}
           </div>

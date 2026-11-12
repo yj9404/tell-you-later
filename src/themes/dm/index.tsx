@@ -1,4 +1,4 @@
-import { useBubblePlayback } from '../shared.tsx'
+import { chatIntro, useBubblePlayback } from '../shared.tsx'
 import { chatStamp, countdown, dateClock, dateHour, teaserDate } from '../../lib/date.ts'
 import type { LockedProps, OpenProps, Theme } from '../types.ts'
 import s from './dm.module.css'
@@ -41,6 +41,7 @@ function TypingDots({ label }: { label: string }) {
 function Locked({ letter, now, status, error, onRetry, onSaveCalendar, onWrite, preview }: LockedProps) {
   const today = new Date(now)
   const date = teaserDate(letter.unlockAt, today)
+  const intro = chatIntro(letter, '할 말이 있는데')
   return (
     <div className={`tyl-screen ${s.screen}`}>
       <Header name={letter.from} status={`${date}까지 입력 중`} />
@@ -56,8 +57,12 @@ function Locked({ letter, now, status, error, onRetry, onSaveCalendar, onWrite, 
           <span className={s.stamp} style={{ marginBottom: 12 }}>
             {chatStamp(letter.createdAt, today)}
           </span>
-          <div className={`${s.bubble} ${s.first} ${s.indent}`}>{letter.to}에게</div>
-          <div className={`${s.bubble} ${s.middle} ${s.indent}`}>할 말 있어서 예약해 뒀어</div>
+          {/* 말풍선 뒤에 입력 중 점이 이어지므로 마지막 말풍선도 가운데 모양이다. */}
+          {intro.map((line, i) => (
+            <div key={i} className={`${s.bubble} ${i === 0 ? s.first : s.middle} ${s.indent}`}>
+              {line}
+            </div>
+          ))}
           <div className={s.row}>
             <Avatar size={28} />
             <TypingDots label="입력 중 표시" />
@@ -101,6 +106,7 @@ function Locked({ letter, now, status, error, onRetry, onSaveCalendar, onWrite, 
 
 function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenProps) {
   const { bubbles, shown, typing, run, done, showAll, replay, scroller: chat } = useBubblePlayback(text, autoplay, reducedMotion)
+  const intro = chatIntro(letter, '할 말이 있는데')
 
   return (
     <div className={`tyl-screen ${s.screen}`}>
@@ -110,8 +116,11 @@ function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenP
         <span className={`${s.stamp} ${s.pushDown}`} style={{ marginBottom: 10 }}>
           {dateClock(letter.createdAt)}
         </span>
-        <div className={`${s.bubble} ${s.first} ${s.indent}`}>{letter.to}에게</div>
-        <div className={`${s.bubble} ${s.last} ${s.indent}`}>할 말 있어서 예약해 뒀어</div>
+        {intro.map((line, i) => (
+          <div key={i} className={`${s.bubble} ${i === 0 ? s.first : i === intro.length - 1 ? s.last : s.middle} ${s.indent}`}>
+            {line}
+          </div>
+        ))}
 
         <span className={s.stamp} style={{ margin: '18px 0 10px' }}>
           {dateClock(letter.unlockAt)}

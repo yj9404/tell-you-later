@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { splitBubbles } from '../lib/bubbles.ts'
-import { countdown, teaserDate } from '../lib/date.ts'
-import type { LockedProps } from './types.ts'
+import { callName, countdown, teaserDate } from '../lib/date.ts'
+import type { LetterInfo, LockedProps } from './types.ts'
 import './shared.css'
 
 const cache = new Map<string, CSSProperties>()
@@ -120,6 +120,15 @@ export function useBubblePlayback(text: string, autoplay: boolean, reducedMotion
   }
   const replay = () => (reducedMotion ? showAll() : setRun((r) => r + 1))
   return { bubbles, shown, typing, run, done: shown >= bubbles.length, showAll, replay, scroller }
+}
+
+/**
+ * 채팅형 테마(dm, msg)의 첫 말풍선들: "지민아" / 가운데 말 / "그게 뭐냐면…".
+ * 받는 사람을 비워 둔 미리보기에서는 부르는 말을 뺀다.
+ */
+export function chatIntro(letter: LetterInfo, middle: string): string[] {
+  const call = letter.toEmpty ? '' : callName(letter.to)
+  return [...(call ? [call] : []), middle, '그게 뭐냐면…']
 }
 
 /** 예고 문구를 두 줄로: "할 말이 있는데 / 1월 1일에 할게" */

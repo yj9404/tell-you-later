@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { decodeLink, encodeLink, LinkError, linkHash, type Letter } from './codec.ts'
 import { androidIntentUrl, detectPlatform, eventTitle, googleCalendarUrl, icsDataUrl, isInAppBrowser, outlookCalendarUrl } from './calendar.ts'
 import { buildIcs } from './ics.ts'
-import { countdown, longDate, shareText, teaserDate } from './date.ts'
+import { callName, countdown, longDate, shareText, teaserDate } from './date.ts'
 import { lyricLines, splitBubbles } from './bubbles.ts'
 import { QUICKNET, roundForTime, timeForRound } from './drand.ts'
 import { lockLetter, openLetter } from './timelock.ts'
@@ -89,6 +89,7 @@ describe('예고 문구의 날짜 표기', () => {
     expect(shareText('하나', jan1, now)).toBe('하나야, 할 말이 있는데 1월 1일에 할게')
     expect(shareText(' 영진 ', jan1, now)).toBe('영진아, 할 말이 있는데 1월 1일에 할게')
     expect(shareText('Alex', jan1, now)).toBe('Alex, 할 말이 있는데 1월 1일에 할게')
+    expect([callName('지민'), callName('하나'), callName('Alex'), callName('  ')]).toEqual(['지민아', '하나야', 'Alex', ''])
     expect(shareText('하나 🎄', jan1, now)).toBe('하나 🎄, 할 말이 있는데 1월 1일에 할게')
     expect(shareText('', jan1, now)).toBe('할 말이 있는데 1월 1일에 할게')
     expect(shareText('  ', new Date(2030, 4, 5), now)).toBe('할 말이 있는데 2030년 5월 5일에 할게')
