@@ -38,7 +38,7 @@ function TypingDots({ label }: { label: string }) {
   )
 }
 
-function Locked({ letter, now, status, error, onRetry, onSaveCalendar, onWrite }: LockedProps) {
+function Locked({ letter, now, status, error, onRetry, onSaveCalendar, onWrite, preview }: LockedProps) {
   const today = new Date(now)
   const date = teaserDate(letter.unlockAt, today)
   return (
@@ -84,10 +84,10 @@ function Locked({ letter, now, status, error, onRetry, onSaveCalendar, onWrite }
           </div>
         )}
         <div className={s.actions}>
-          <button type="button" className={s.gradientButton} onClick={onWrite}>
+          <button type="button" className={s.gradientButton} onClick={onWrite} disabled={preview}>
             나도 예약 DM 쓰기
           </button>
-          <button type="button" aria-label="캘린더에 저장" className={s.iconButton} onClick={onSaveCalendar}>
+          <button type="button" aria-label="캘린더에 저장" className={s.iconButton} onClick={onSaveCalendar} disabled={preview}>
             <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <rect x="3" y="5" width="18" height="16" rx="2" />
               <path d="M3 10h18M8 3v4M16 3v4" />
@@ -99,7 +99,7 @@ function Locked({ letter, now, status, error, onRetry, onSaveCalendar, onWrite }
   )
 }
 
-function Open({ letter, text, autoplay, reducedMotion, onReply }: OpenProps) {
+function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenProps) {
   const { bubbles, shown, typing, run, done, showAll, replay, scroller: chat } = useBubblePlayback(text, autoplay, reducedMotion)
 
   return (
@@ -138,7 +138,7 @@ function Open({ letter, text, autoplay, reducedMotion, onReply }: OpenProps) {
       <div className={s.openFooter}>
         {done ? (
           <div className={s.actions}>
-            <button type="button" className={s.gradientButton} onClick={onReply}>
+            <button type="button" className={s.gradientButton} onClick={onReply} disabled={preview}>
               답장도 예약해서 보내기
             </button>
             <button type="button" aria-label="다시 보기" className={s.iconButton} onClick={replay}>

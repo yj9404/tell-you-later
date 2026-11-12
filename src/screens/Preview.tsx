@@ -60,12 +60,12 @@ function useLetter(draft: Draft): { theme: Theme; letter: LetterInfo; text: stri
 }
 
 // 열림 화면은 1초마다 다시 그릴 필요가 없다.
-const OpenScreen = memo(function OpenScreen({ theme, letter, text, autoplay, reducedMotion }: { theme: Theme; letter: LetterInfo; text: string; autoplay: boolean; reducedMotion: boolean }) {
-  return <theme.Open letter={letter} text={text} autoplay={autoplay} reducedMotion={reducedMotion} onReply={noop} />
+const OpenScreen = memo(function OpenScreen({ theme, letter, text, autoplay, reducedMotion, preview }: { theme: Theme; letter: LetterInfo; text: string; autoplay: boolean; reducedMotion: boolean; preview?: boolean }) {
+  return <theme.Open letter={letter} text={text} autoplay={autoplay} reducedMotion={reducedMotion} onReply={noop} preview={preview} />
 })
 
-function LockedScreen({ theme, letter, now }: { theme: Theme; letter: LetterInfo; now: number }) {
-  return <theme.Locked letter={letter} now={now} status="waiting" onRetry={noop} onSaveCalendar={noop} onWrite={noop} />
+function LockedScreen({ theme, letter, now, preview }: { theme: Theme; letter: LetterInfo; now: number; preview?: boolean }) {
+  return <theme.Locked letter={letter} now={now} status="waiting" onRetry={noop} onSaveCalendar={noop} onWrite={noop} preview={preview} />
 }
 
 /** 쓰기 화면의 작은 미리보기 두 개. 실제 테마 화면을 390×844로 그린 뒤 줄여서 넣는다. */
@@ -113,7 +113,8 @@ export function PreviewPair({ draft, onOpen }: { draft: Draft; onOpen: (side: Si
 }
 
 /**
- * 전체 화면 미리보기. 위쪽 띠만 동작하고, 테마 화면 안의 버튼은 눌리지 않는다.
+ * 전체 화면 미리보기. 테마 화면 안에서 스크롤·한 번에 보기·다시 보기는 되고,
+ * 밖으로 나가는 버튼(나도 쓰기, 답장, 캘린더 저장)만 preview 값으로 비활성이 된다.
  * 재생 기록(localStorage)은 남기지 않는다. 받는 사람의 "처음 한 번" 연출을 써 버리면 안 된다.
  */
 export function FullPreview({ draft, start, onClose }: { draft: Draft; start: Side; onClose: () => void }) {
@@ -168,11 +169,11 @@ export function FullPreview({ draft, start, onClose }: { draft: Draft; start: Si
 
       {/* 띠만큼 화면을 아래로 민다. 테마 화면은 남은 높이를 화면 높이로 쓴다. */}
       <div className={s.fullScreen}>
-        <div inert>
+        <div>
           {side === 'before' ? (
-            <LockedScreen theme={theme} letter={letter} now={now} />
+            <LockedScreen theme={theme} letter={letter} now={now} preview />
           ) : (
-            <OpenScreen key={run} theme={theme} letter={letter} text={text} autoplay={!reducedMotion} reducedMotion={reducedMotion} />
+            <OpenScreen key={run} theme={theme} letter={letter} text={text} autoplay={!reducedMotion} reducedMotion={reducedMotion} preview />
           )}
         </div>
       </div>

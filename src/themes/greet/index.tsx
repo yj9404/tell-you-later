@@ -69,10 +69,10 @@ function Locked(p: LockedProps) {
       </div>
 
       <div style={st('display:flex;flex-direction:column;gap:10px;position:relative')}>
-        <button type="button" style={st(PRIMARY)} onClick={p.onWrite}>
+        <button type="button" style={st(PRIMARY)} onClick={p.onWrite} disabled={p.preview}>
           나도 편지 보내기
         </button>
-        <button type="button" style={st(SECOND)} onClick={p.onSaveCalendar}>
+        <button type="button" style={st(SECOND)} onClick={p.onSaveCalendar} disabled={p.preview}>
           달력에 적어두기
         </button>
       </div>
@@ -94,7 +94,7 @@ const PETALS = Array.from({ length: 40 }, (_, i) => ({
   color: PETAL_COLORS[i % PETAL_COLORS.length],
 }))
 
-function Open({ letter, text, autoplay, reducedMotion, onReply }: OpenProps) {
+function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenProps) {
   const { phase, run, done, skip, replay } = usePhases(STEPS, autoplay, reducedMotion)
   const open = phase === 'open'
   return (
@@ -143,7 +143,7 @@ function Open({ letter, text, autoplay, reducedMotion, onReply }: OpenProps) {
       </div>
 
       <div style={st('display:flex;flex-direction:column;gap:10px;position:relative')}>
-        <button type="button" style={st(PRIMARY)} onClick={onReply}>
+        <button type="button" style={st(PRIMARY)} onClick={onReply} disabled={preview}>
           답장 보내기
         </button>
         <button type="button" style={st(SECOND)} onClick={done ? replay : skip}>

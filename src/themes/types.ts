@@ -33,6 +33,8 @@ export interface LockedProps {
   onRetry: () => void
   onSaveCalendar: () => void
   onWrite: () => void
+  /** 쓰기 화면의 미리보기 중. 밖으로 나가는 버튼(나도 쓰기, 캘린더 저장)을 비활성으로 둔다 */
+  preview?: boolean
 }
 
 export interface OpenProps {
@@ -43,6 +45,8 @@ export interface OpenProps {
   /** 모션 줄이기 설정. true면 다시 보기도 연출 없이 보여준다 */
   reducedMotion: boolean
   onReply: () => void
+  /** 쓰기 화면의 미리보기 중. 밖으로 나가는 버튼(답장)을 비활성으로 둔다. 스크롤·한 번에 보기·다시 보기는 그대로 된다 */
+  preview?: boolean
 }
 
 /** 쓰기 화면의 테마 타일 */

@@ -114,10 +114,10 @@ function Locked(p: LockedProps) {
       )}
 
       <div style={st('display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px')}>
-        <button type="button" style={st(OUTLINE)} onClick={p.onSaveCalendar}>
+        <button type="button" style={st(OUTLINE)} onClick={p.onSaveCalendar} disabled={p.preview}>
           캘린더에 저장
         </button>
-        <button type="button" style={st(SOLID)} onClick={p.onWrite}>
+        <button type="button" style={st(SOLID)} onClick={p.onWrite} disabled={p.preview}>
           나도 줄 세우기
         </button>
       </div>
@@ -138,7 +138,7 @@ const FIRST_STEPS = [
   ['in', 800],
 ] as const
 
-function Open({ letter, text, autoplay, reducedMotion, onReply }: OpenProps) {
+function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenProps) {
   const [replayed, setReplayed] = useState(false)
   const first = usePhases(FIRST_STEPS, autoplay, reducedMotion)
   const again = usePhases(REPLAY_STEPS, false, reducedMotion)
@@ -173,7 +173,7 @@ function Open({ letter, text, autoplay, reducedMotion, onReply }: OpenProps) {
             >
               다시 입장하기
             </button>
-            <button type="button" style={st(SOLID)} onClick={onReply}>
+            <button type="button" style={st(SOLID)} onClick={onReply} disabled={preview}>
               나도 줄 세우기
             </button>
           </div>

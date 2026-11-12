@@ -72,10 +72,10 @@ function Locked(p: LockedProps) {
           </p>
         )}
         <div style={st(ROW)}>
-          <button type="button" style={st(`${PRIMARY};padding:0 26px`)} onClick={p.onWrite}>
+          <button type="button" style={st(`${PRIMARY};padding:0 26px`)} onClick={p.onWrite} disabled={p.preview}>
             나도 한 통 쓰기
           </button>
-          <button type="button" style={st(LINK)} onClick={p.onSaveCalendar}>
+          <button type="button" style={st(LINK)} onClick={p.onSaveCalendar} disabled={p.preview}>
             캘린더에 넣어 두기
           </button>
         </div>
@@ -104,7 +104,7 @@ function tokenize(text: string): Token[] {
   return out
 }
 
-function Open({ letter, text, autoplay, reducedMotion, onReply }: OpenProps) {
+function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenProps) {
   const tokens = useMemo(() => tokenize(text), [text])
   const count = useMemo(() => tokens.filter((t) => 'word' in t).length, [tokens])
   const [shown, setShown] = useState(autoplay ? 0 : count)
@@ -164,7 +164,7 @@ function Open({ letter, text, autoplay, reducedMotion, onReply }: OpenProps) {
       <div style={st('display:flex;flex-direction:column;gap:18px')}>
         <p style={st('margin:0;font-size:16px;color:#4A4A4A')}>{fullDate(letter.createdAt)}에 씀</p>
         <div style={st(ROW)}>
-          <button type="button" style={st(`${PRIMARY};padding:0 22px`)} onClick={onReply}>
+          <button type="button" style={st(`${PRIMARY};padding:0 22px`)} onClick={onReply} disabled={preview}>
             답장도 잠가서 보내기
           </button>
           {done ? (

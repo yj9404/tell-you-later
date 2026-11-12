@@ -92,10 +92,10 @@ function Locked(p: LockedProps) {
           </div>
         )}
         <div style={st('display:flex;gap:8px;align-items:center')}>
-          <button type="button" style={st(PRIMARY)} onClick={p.onWrite}>
+          <button type="button" style={st(PRIMARY)} onClick={p.onWrite} disabled={p.preview}>
             나도 예약 문자 쓰기
           </button>
-          <button type="button" aria-label="캘린더에 저장" style={st(ICON)} onClick={p.onSaveCalendar}>
+          <button type="button" aria-label="캘린더에 저장" style={st(ICON)} onClick={p.onSaveCalendar} disabled={p.preview}>
             <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0B6BF2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <rect x="3" y="5" width="18" height="16" rx="2" />
               <path d="M3 10h18M8 3v4M16 3v4" />
@@ -107,7 +107,7 @@ function Locked(p: LockedProps) {
   )
 }
 
-function Open({ letter, text, autoplay, reducedMotion, onReply }: OpenProps) {
+function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenProps) {
   const play = useBubblePlayback(text, autoplay, reducedMotion)
   return (
     <div className="tyl-screen msg-screen" style={st(`height:var(--screen-h, 100dvh);${SCREEN}`)}>
@@ -142,7 +142,7 @@ function Open({ letter, text, autoplay, reducedMotion, onReply }: OpenProps) {
       <div style={st('padding:12px 16px 20px;min-height:50px;display:flex;flex-direction:column;justify-content:flex-end;border-top:1px solid #EFEFEF')}>
         {play.done ? (
           <div style={st('display:flex;gap:8px;align-items:center')}>
-            <button type="button" style={st(PRIMARY)} onClick={onReply}>
+            <button type="button" style={st(PRIMARY)} onClick={onReply} disabled={preview}>
               답장도 예약해서 보내기
             </button>
             <button type="button" aria-label="다시 보기" style={st(ICON)} onClick={play.replay}>

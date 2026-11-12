@@ -115,10 +115,10 @@ function Locked(p: LockedProps) {
       </div>
 
       <div style={st(BUTTONS)}>
-        <button type="button" style={st(OUTLINE)} onClick={p.onSaveCalendar}>
+        <button type="button" style={st(OUTLINE)} onClick={p.onSaveCalendar} disabled={p.preview}>
           일정 등록
         </button>
-        <button type="button" style={st(SOLID)} onClick={p.onWrite}>
+        <button type="button" style={st(SOLID)} onClick={p.onWrite} disabled={p.preview}>
           나도 기안하기
         </button>
       </div>
@@ -133,7 +133,7 @@ const STEPS = [
   ['open', 1900],
 ] as const
 
-function Open({ letter, text, autoplay, reducedMotion, onReply }: OpenProps) {
+function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenProps) {
   const { phase, done, skip, replay } = usePhases(STEPS, autoplay, reducedMotion)
   const stamped = phase !== 'wait'
   const seal = sealName(letter.to)
@@ -214,7 +214,7 @@ function Open({ letter, text, autoplay, reducedMotion, onReply }: OpenProps) {
         <button type="button" style={st(OUTLINE)} onClick={done ? replay : skip}>
           {done ? '다시 결재' : '한 번에 보기'}
         </button>
-        <button type="button" style={st(SOLID)} onClick={onReply}>
+        <button type="button" style={st(SOLID)} onClick={onReply} disabled={preview}>
           회신 기안하기
         </button>
       </div>

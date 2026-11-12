@@ -71,10 +71,10 @@ function Locked(p: LockedProps) {
       </div>
 
       <div style={st('display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px')}>
-        <button type="button" style={st(OUTLINE)} onClick={p.onSaveCalendar}>
+        <button type="button" style={st(OUTLINE)} onClick={p.onSaveCalendar} disabled={p.preview}>
           캘린더에 저장
         </button>
-        <button type="button" style={st(SOLID)} onClick={p.onWrite}>
+        <button type="button" style={st(SOLID)} onClick={p.onWrite} disabled={p.preview}>
           나도 예약 편지 쓰기
         </button>
       </div>
@@ -89,7 +89,7 @@ const ROW = 72
 // 한 줄(72px)에 두 줄까지 들어가는 글자 수. 좁은 화면(360px) 기준이다.
 const LINE_MAX = 24
 
-function Open({ letter, text, autoplay, reducedMotion, onReply }: OpenProps) {
+function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenProps) {
   const lines = useMemo(() => splitLines(text, LINE_MAX), [text])
   const total = lines.length
   const [idx, setIdx] = useState(autoplay ? -1 : total)
@@ -179,7 +179,7 @@ function Open({ letter, text, autoplay, reducedMotion, onReply }: OpenProps) {
             한 번에 보기
           </button>
         )}
-        <button type="button" style={st(SOLID)} onClick={onReply}>
+        <button type="button" style={st(SOLID)} onClick={onReply} disabled={preview}>
           나도 예약 편지 쓰기
         </button>
       </div>

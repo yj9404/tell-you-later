@@ -45,10 +45,10 @@ function Locked(p: LockedProps) {
       </div>
 
       <div style={st('display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px')}>
-        <button type="button" style={st(OUTLINE)} onClick={p.onSaveCalendar}>
+        <button type="button" style={st(OUTLINE)} onClick={p.onSaveCalendar} disabled={p.preview}>
           캘린더에 저장
         </button>
-        <button type="button" style={st(SOLID)} onClick={p.onWrite}>
+        <button type="button" style={st(SOLID)} onClick={p.onWrite} disabled={p.preview}>
           나도 구워두기
         </button>
       </div>
@@ -64,7 +64,7 @@ const STEPS = [
   ['paper', 2350],
 ] as const
 
-function Open({ letter, text, autoplay, reducedMotion, onReply }: OpenProps) {
+function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenProps) {
   const { phase, run, done, skip, replay } = usePhases(STEPS, autoplay, reducedMotion)
   const intact = phase === 'closed' || phase === 'shake'
   const paper = phase === 'paper'
@@ -149,7 +149,7 @@ function Open({ letter, text, autoplay, reducedMotion, onReply }: OpenProps) {
         <button type="button" style={st(OUTLINE)} onClick={done ? replay : skip}>
           {done ? '다시 깨기' : '한 번에 보기'}
         </button>
-        <button type="button" style={st(SOLID)} onClick={onReply}>
+        <button type="button" style={st(SOLID)} onClick={onReply} disabled={preview}>
           나도 구워두기
         </button>
       </div>

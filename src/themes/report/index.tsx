@@ -153,10 +153,10 @@ function Locked(p: LockedProps) {
       </div>
 
       <div style={st(BUTTONS)}>
-        <button type="button" style={st(OUTLINE)} onClick={p.onSaveCalendar}>
+        <button type="button" style={st(OUTLINE)} onClick={p.onSaveCalendar} disabled={p.preview}>
           달력에 기입
         </button>
-        <button type="button" style={st(SOLID)} onClick={p.onWrite}>
+        <button type="button" style={st(SOLID)} onClick={p.onWrite} disabled={p.preview}>
           나도 보고하기
         </button>
       </div>
@@ -172,7 +172,7 @@ const STEPS = [
 ] as const
 const OPEN_ITEM = 'margin:0;padding-left:10px;font-size:14px;font-weight:700;line-height:1.6'
 
-function Open({ letter, text, autoplay, reducedMotion, onReply }: OpenProps) {
+function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenProps) {
   const { phase, done, skip, replay } = usePhases(STEPS, autoplay, reducedMotion)
   // 편지의 문단 하나가 "○" 항목 하나다.
   const items = useMemo(() => paragraphs(text), [text])
@@ -258,7 +258,7 @@ function Open({ letter, text, autoplay, reducedMotion, onReply }: OpenProps) {
         <button type="button" style={st(OUTLINE)} onClick={done ? replay : skip}>
           {done ? '다시 결재' : '한 번에 보기'}
         </button>
-        <button type="button" style={st(SOLID)} onClick={onReply}>
+        <button type="button" style={st(SOLID)} onClick={onReply} disabled={preview}>
           회신 보고하기
         </button>
       </div>

@@ -46,10 +46,10 @@ function Locked(p: LockedProps) {
             </div>
           )}
         </div>
-        <button type="button" style={{ ...st(PRIMARY), color: tint }} onClick={p.onWrite}>
+        <button type="button" style={{ ...st(PRIMARY), color: tint }} onClick={p.onWrite} disabled={p.preview}>
           나도 한 통 쓰기
         </button>
-        <button type="button" style={st(LINK)} onClick={p.onSaveCalendar}>
+        <button type="button" style={st(LINK)} onClick={p.onSaveCalendar} disabled={p.preview}>
           캘린더에 넣어 두기
         </button>
       </div>
@@ -70,7 +70,7 @@ const GLYPH_FLY = [
   ['translate(300px,-90px) rotate(60deg)', 0.9],
 ] as const
 
-function Open({ letter, text, autoplay, reducedMotion, onReply }: OpenProps) {
+function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenProps) {
   const { done, skip, replay } = usePhases(STEPS, autoplay, reducedMotion)
   const tint = letter.tint ?? DEFAULT_TINT
   const date = monthDot(letter.unlockAt)
@@ -121,7 +121,7 @@ function Open({ letter, text, autoplay, reducedMotion, onReply }: OpenProps) {
             {dotDate(letter.unlockAt)} {hm(letter.unlockAt)}
           </span>
         </div>
-        <button type="button" style={{ ...st(PRIMARY), color: tint }} onClick={onReply}>
+        <button type="button" style={{ ...st(PRIMARY), color: tint }} onClick={onReply} disabled={preview}>
           답장도 잠가서 보내기
         </button>
         <button type="button" style={st(LINK)} onClick={done ? replay : skip}>

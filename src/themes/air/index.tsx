@@ -67,10 +67,10 @@ function Locked(p: LockedProps) {
       </div>
 
       <div style={st(BUTTONS)}>
-        <button type="button" style={st(OUTLINE)} onClick={p.onSaveCalendar}>
+        <button type="button" style={st(OUTLINE)} onClick={p.onSaveCalendar} disabled={p.preview}>
           캘린더에 넣기
         </button>
-        <button type="button" style={st(SOLID)} onClick={p.onWrite}>
+        <button type="button" style={st(SOLID)} onClick={p.onWrite} disabled={p.preview}>
           나도 한 통 쓰기
         </button>
       </div>
@@ -84,7 +84,7 @@ const ROLL_TIME = 22_000
 // 디자인 예시 편지가 22초 동안 움직이는 거리(약 400px). 더 긴 편지는 같은 속도로 더 오래 올라간다.
 const DESIGN_DISTANCE = 400
 
-function Open({ letter, text, autoplay, reducedMotion, onReply }: OpenProps) {
+function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenProps) {
   const paras = useMemo(() => paragraphs(text), [text])
   const [manual, setManual] = useState(!autoplay)
   const [run, setRun] = useState(0)
@@ -165,7 +165,7 @@ function Open({ letter, text, autoplay, reducedMotion, onReply }: OpenProps) {
             직접 넘겨 읽기
           </button>
         )}
-        <button type="button" style={st(SOLID)} onClick={onReply}>
+        <button type="button" style={st(SOLID)} onClick={onReply} disabled={preview}>
           답장 부치기
         </button>
       </div>

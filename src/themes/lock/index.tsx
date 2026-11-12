@@ -80,14 +80,14 @@ function Locked(p: LockedProps) {
         <button
           type="button"
           style={{ ...st('height:56px;border:0;border-radius:28px;background:#FFFFFF;font-family:inherit;font-size:16px;font-weight:700;cursor:pointer'), color: tint }}
-          onClick={p.onWrite}
+          onClick={p.onWrite} disabled={p.preview}
         >
           나도 예약 편지 쓰기
         </button>
         <button
           type="button"
           style={st('height:44px;border:0;background:transparent;color:#FFFFFF;font-family:inherit;font-size:15px;font-weight:500;text-decoration:underline;text-underline-offset:4px;cursor:pointer')}
-          onClick={p.onSaveCalendar}
+          onClick={p.onSaveCalendar} disabled={p.preview}
         >
           캘린더에 저장
         </button>
@@ -169,7 +169,7 @@ const STEPS = [
 
 const LAYER = 'position:absolute;left:0;right:0;top:0;bottom:0;box-sizing:border-box'
 
-function Open({ letter, text, autoplay, reducedMotion, onReply }: OpenProps) {
+function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenProps) {
   const { phase, done, skip, replay } = usePhases(STEPS, autoplay, reducedMotion)
   const tint = letter.tint ?? DEFAULT_TINT
   const lock = phase === 'lock'
@@ -247,7 +247,7 @@ function Open({ letter, text, autoplay, reducedMotion, onReply }: OpenProps) {
           <button
             type="button"
             style={st('height:54px;border:0;border-radius:27px;background:#000000;color:#FFFFFF;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer')}
-            onClick={onReply}
+            onClick={onReply} disabled={preview}
           >
             나도 예약 편지 쓰기
           </button>
