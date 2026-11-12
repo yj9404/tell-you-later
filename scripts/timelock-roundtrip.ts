@@ -19,6 +19,21 @@ try {
   console.log('개봉 전 복호화 시도 → 거절됨 (정상)')
 }
 
+// 위 단계는 tlock-js의 기기 시계 검사에서 멈춘다. 시계를 조작한 사용자처럼
+// Date.now를 미래로 돌려 그 검사를 통과시킨 뒤에도, drand가 미래 라운드의 서명을
+// 내주지 않아 거절되는지 확인한다. 잠금의 실제 근거는 이쪽이다.
+const realNow = Date.now
+Date.now = () => realNow() + 365 * 24 * 60 * 60_000
+try {
+  await openLetter(cipher, round)
+  throw new Error('실패: 기기 시계를 조작하자 개봉 시각 전에 열렸다')
+} catch (e) {
+  if ((e as { kind?: string }).kind !== 'not-yet') throw e
+  console.log('시계를 1년 뒤로 조작한 복호화 시도 → drand가 거절함 (정상)')
+} finally {
+  Date.now = realNow
+}
+
 console.log('개봉 시각까지 대기…')
 await new Promise((r) => setTimeout(r, unlockAt - Date.now() + 2000))
 
