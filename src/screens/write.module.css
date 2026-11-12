@@ -231,35 +231,28 @@
 
 .pills {
   display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  margin: 0 -20px;
-  padding: 3px 20px;
-  scrollbar-width: none;
-}
-
-.pills::-webkit-scrollbar {
-  display: none;
+  flex-wrap: wrap;
+  gap: 8px 8px;
 }
 
 .pill {
   flex-shrink: 0;
   height: 40px;
-  padding: 0 15px;
+  padding: 0 13px;
   border: 0;
   border-radius: 20px;
   background: #f2f2f3;
   color: #333333;
   font-family: inherit;
   font-size: 14px;
-  font-weight: 500;
+  /* 선택 여부와 같은 굵기 — 선택을 바꿔도 칩 폭이 변해 줄 배치가 흔들리지 않게 */
+  font-weight: 600;
   cursor: pointer;
 }
 
 .pill[aria-pressed='true'] {
   background: #111111;
   color: #ffffff;
-  font-weight: 600;
 }
 
 .tints {
