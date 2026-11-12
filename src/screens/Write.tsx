@@ -100,7 +100,7 @@ export function Write({ prefill, onCreated }: { prefill: Prefill | null; onCreat
     <>
       <form className={s.page} onSubmit={submit} noValidate>
         <header className={s.head}>
-          <span className={s.service}>할 말이 있는데 나중에 할게</span>
+          <img className={s.wordmark} src="/wordmark.svg" alt="할 말이 있는데 나중에 할게" width={94} height={40} />
           <h1 className={s.title}>
             정한 날이 와야
             <br />

@@ -40,10 +40,12 @@
   gap: 10px;
 }
 
-.service {
-  font-size: 14px;
-  font-weight: 600;
-  color: #6b6b6b;
+/* .head가 세로 flex라 그냥 두면 가로로 늘어난다. 원본 비율(553:235)대로 높이만 맞춘다. */
+.wordmark {
+  display: block;
+  align-self: flex-start;
+  height: 40px;
+  width: auto;
 }
 
 .title {
