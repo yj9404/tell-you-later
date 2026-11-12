@@ -245,7 +245,7 @@
   color: #333333;
   font-family: inherit;
   font-size: 14px;
-  /* 선택 여부와 같은 굵기 — 선택을 바꿔도 칩 폭이 변해 줄 배치가 흔들리지 않게 */
+  /* 선택/비선택 굵기를 같게 둬서 선택을 바꿔도 칩 폭이 그대로 — 줄 배치가 흔들리지 않는다 */
   font-weight: 600;
   cursor: pointer;
 }
