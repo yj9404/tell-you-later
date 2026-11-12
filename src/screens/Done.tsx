@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react'
-import { longDate, teaser } from '../lib/date.ts'
+import { longDate, shareText } from '../lib/date.ts'
 import { FullPreview } from './Preview.tsx'
 import type { Created } from './Write.tsx'
 import s from './screens.module.css'
@@ -27,19 +27,21 @@ async function copyText(text: string): Promise<boolean> {
 }
 
 export function Done({ created, onPreview, onNew }: { created: Created; onPreview: () => void; onNew: () => void }) {
-  const [copied, setCopied] = useState<'' | 'ok' | 'fail'>('')
+  const [copied, setCopied] = useState<'' | 'link' | 'text' | 'fail'>('')
   const [watching, setWatching] = useState(false)
   const stopWatching = useCallback(() => setWatching(false), [])
   const link = `${location.origin}${location.pathname}#${created.fragment}`
   const canShare = typeof navigator.share === 'function'
+  const message = () => shareText(created.draft.to, created.unlockAt, new Date())
 
-  async function copy() {
-    setCopied((await copyText(link)) ? 'ok' : 'fail')
+  async function copy(what: 'link' | 'text') {
+    const text = what === 'link' ? link : `${message()}\n${link}`
+    setCopied((await copyText(text)) ? what : 'fail')
   }
 
   async function share() {
     try {
-      await navigator.share({ title: '할 말이 있는데 나중에 할게', text: teaser(created.unlockAt, new Date()), url: link })
+      await navigator.share({ text: message(), url: link })
     } catch {
       // 사용자가 공유 창을 닫은 경우
     }
@@ -72,9 +74,14 @@ export function Done({ created, onPreview, onNew }: { created: Created; onPrevie
       </div>
 
       <div className={s.group10}>
-        <button type="button" className={s.primary} onClick={copy}>
-          {copied === 'ok' ? '복사했어요' : '링크 복사'}
-        </button>
+        <div className={s.row}>
+          <button type="button" className={s.primary} onClick={() => copy('link')}>
+            {copied === 'link' ? '복사했어요' : '링크 복사'}
+          </button>
+          <button type="button" className={s.secondary} onClick={() => copy('text')}>
+            {copied === 'text' ? '복사했어요' : '문구와 함께 복사'}
+          </button>
+        </div>
         {copied === 'fail' && (
           <span className={s.error} role="alert">
             복사하지 못했습니다. 위 링크를 길게 눌러 직접 복사해 주세요.

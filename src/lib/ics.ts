@@ -1,5 +1,5 @@
-/** UTC 기준 YYYYMMDDTHHmmssZ. iCalendar와 구글 캘린더 링크가 같은 형식을 쓴다. */
-export const stamp = (d: Date) => d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '')
+import { EVENT_MINUTES, stamp } from './calendar.ts'
+
 const escape = (s: string) => s.replace(/[\\;,]/g, (c) => '\\' + c).replace(/\n/g, '\\n')
 
 /** RFC 5545: 한 줄은 75옥텟까지. 넘으면 다음 줄을 공백으로 시작해 잇는다. */
@@ -28,7 +28,7 @@ export function buildIcs(opts: { title: string; unlockAt: Date; link: string; ui
     `UID:${opts.uid}@tell-you-later`,
     `DTSTAMP:${stamp(new Date())}`,
     `DTSTART:${stamp(opts.unlockAt)}`,
-    `DTEND:${stamp(new Date(opts.unlockAt.getTime() + 10 * 60_000))}`,
+    `DTEND:${stamp(new Date(opts.unlockAt.getTime() + EVENT_MINUTES * 60_000))}`,
     `SUMMARY:${escape(opts.title)}`,
     `DESCRIPTION:${escape(`이 링크로 편지를 열 수 있어요.\n${opts.link}`)}`,
     'END:VEVENT',

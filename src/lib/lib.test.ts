@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import { decodeLink, encodeLink, LinkError, linkHash, type Letter } from './codec.ts'
 import { androidIntentUrl, detectPlatform, eventTitle, googleCalendarUrl, icsDataUrl, isInAppBrowser, outlookCalendarUrl } from './calendar.ts'
-import { countdown, longDate, teaserDate } from './date.ts'
+import { buildIcs } from './ics.ts'
+import { countdown, longDate, shareText, teaserDate } from './date.ts'
 import { splitBubbles } from './bubbles.ts'
 import { QUICKNET, roundForTime, timeForRound } from './drand.ts'
 import { lockLetter, openLetter } from './timelock.ts'
@@ -81,6 +82,16 @@ describe('예고 문구의 날짜 표기', () => {
     expect(countdown(61_000)).toBe('1분 1초')
     expect(countdown(900)).toBe('1초')
     expect(countdown(-5)).toBe('0초')
+  })
+  it('공유 문구: 받침 있으면 "아", 없으면 "야", 한글이 아니면 조사 없이', () => {
+    const jan1 = new Date(2027, 0, 1)
+    expect(shareText('지민', jan1, now)).toBe('지민아, 할 말이 있는데 1월 1일에 할게')
+    expect(shareText('하나', jan1, now)).toBe('하나야, 할 말이 있는데 1월 1일에 할게')
+    expect(shareText(' 영진 ', jan1, now)).toBe('영진아, 할 말이 있는데 1월 1일에 할게')
+    expect(shareText('Alex', jan1, now)).toBe('Alex, 할 말이 있는데 1월 1일에 할게')
+    expect(shareText('하나 🎄', jan1, now)).toBe('하나 🎄, 할 말이 있는데 1월 1일에 할게')
+    expect(shareText('', jan1, now)).toBe('할 말이 있는데 1월 1일에 할게')
+    expect(shareText('  ', new Date(2030, 4, 5), now)).toBe('할 말이 있는데 2030년 5월 5일에 할게')
   })
 })
 
@@ -191,18 +202,18 @@ describe('캘린더 링크', () => {
     expect(decodeURIComponent(parts['S.title'])).toBe(ev.title)
     expect(decodeURIComponent(parts['S.description'])).toBe(ev.link)
     expect(parts['l.beginTime']).toBe(String(Date.UTC(2026, 11, 24, 15, 0)))
-    expect(parts['l.endTime']).toBe(String(Date.UTC(2026, 11, 24, 15, 30)))
+    expect(parts['l.endTime']).toBe(String(Date.UTC(2026, 11, 24, 15, 10)))
     expect(decodeURIComponent(parts['S.browser_fallback_url'])).toBe(googleCalendarUrl(ev))
     // 값 안의 ; # & = 가 인텐트 구분자를 깨지 않는다
     expect(parts['S.description']).not.toMatch(/[;#&=]/)
   })
 
-  it('구글 캘린더: 30분 일정, UTC 시각, 링크 전체를 설명에 넣는다', () => {
+  it('구글 캘린더: 10분 일정, UTC 시각, 링크 전체를 설명에 넣는다', () => {
     const u = new URL(googleCalendarUrl(ev))
     expect(u.origin + u.pathname).toBe('https://calendar.google.com/calendar/render')
     expect(u.searchParams.get('action')).toBe('TEMPLATE')
     expect(u.searchParams.get('text')).toBe('영진이 할 말이 있는 날')
-    expect(u.searchParams.get('dates')).toBe('20261224T150000Z/20261224T153000Z')
+    expect(u.searchParams.get('dates')).toBe('20261224T150000Z/20261224T151000Z')
     expect(u.searchParams.get('details')).toBe(ev.link)
   })
 
@@ -213,8 +224,15 @@ describe('캘린더 링크', () => {
     const u = new URL(s)
     expect(u.searchParams.get('subject')).toBe('영진이 할 말이 있는 날')
     expect(u.searchParams.get('startdt')).toBe('2026-12-24T15:00:00Z')
-    expect(u.searchParams.get('enddt')).toBe('2026-12-24T15:30:00Z')
+    expect(u.searchParams.get('enddt')).toBe('2026-12-24T15:10:00Z')
     expect(u.searchParams.get('body')).toBe(ev.link)
+  })
+
+  it('.ics: 10분 일정, 제목을 그대로 쓴다', () => {
+    const ics = buildIcs({ title: ev.title, unlockAt: ev.start, link: ev.link, uid: 'x' })
+    expect(ics).toContain('\r\nDTSTART:20261224T150000Z\r\n')
+    expect(ics).toContain('\r\nDTEND:20261224T151000Z\r\n')
+    expect(ics).toContain('\r\nSUMMARY:영진이 할 말이 있는 날\r\n')
   })
 
   it('data URL은 ics를 그대로 되돌릴 수 있게 인코딩한다', () => {

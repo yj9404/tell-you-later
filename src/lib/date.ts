@@ -19,6 +19,18 @@ export function teaser(unlock: Date, now: Date): string {
   return `할 말이 있는데 ${teaserDate(unlock, now)}에 할게`
 }
 
+/**
+ * 공유·복사에 붙이는 문구: "지민아, 할 말이 있는데 1월 1일에 할게".
+ * 호칭 조사는 받침 있으면 "아", 없으면 "야", 한글로 끝나지 않으면 조사 없이 "Alex, ". 이름이 없으면 예고 문구만.
+ */
+export function shareText(to: string, unlock: Date, now: Date): string {
+  const name = to.trim()
+  if (!name) return teaser(unlock, now)
+  const last = [...name].at(-1)?.codePointAt(0) ?? 0
+  const josa = last >= 0xac00 && last <= 0xd7a3 ? ((last - 0xac00) % 28 ? '아' : '야') : ''
+  return `${name}${josa}, ${teaser(unlock, now)}`
+}
+
 /** "2027년 1월 1일 금요일 0시" (분이 0이 아니면 "0시 30분") */
 export function longDate(d: Date): string {
   const min = d.getMinutes() ? ` ${d.getMinutes()}분` : ''
