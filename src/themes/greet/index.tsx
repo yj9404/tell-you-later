@@ -44,13 +44,13 @@ function Locked(p: LockedProps) {
       </h1>
 
       <div className="tyl-keep" style={st(`position:relative;${NOTICE};margin-top:6px`)}>
-        {letter.from} 님의 편지는
+        {letter.from} 님의 카드는
         <br />
         {dateHour(letter.unlockAt)}에 열립니다
       </div>
 
       <p style={st('margin:0;text-align:center;font-size:17px;font-weight:700;line-height:1.6;position:relative')}>
-        그 전에는 누구도 열 수 없습니다.
+        그 전에는 누구도 열어 볼 수 없습니다.
         <br />
         건강이 최고입니다.
       </p>
@@ -70,7 +70,7 @@ function Locked(p: LockedProps) {
 
       <div style={st('display:flex;flex-direction:column;gap:10px;position:relative')}>
         <button type="button" style={st(PRIMARY)} onClick={p.onWrite} disabled={p.preview}>
-          나도 편지 보내기
+          나도 카드 보내기
         </button>
         <button type="button" style={st(SECOND)} onClick={p.onSaveCalendar} disabled={p.preview}>
           달력에 적어두기
@@ -129,7 +129,7 @@ function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenP
           }}
         >
           <div style={st('margin:auto 0;display:flex;flex-direction:column;gap:12px;padding:4px 0')}>
-            <h1 style={st(`margin:0;text-align:center;font-family:${BRUSH};font-weight:400;font-size:54px;line-height:1.05;color:#E3001B;${HALO3}`)}>편지가 열렸습니다</h1>
+            <h1 style={st(`margin:0;text-align:center;font-family:${BRUSH};font-weight:400;font-size:54px;line-height:1.05;color:#E3001B;${HALO3}`)}>카드가 열렸습니다</h1>
             <div style={st('background:#FFFFFF;border:4px solid #E3001B;padding:16px 16px 12px;display:flex;flex-direction:column;gap:8px')}>
               <p className="tyl-text" style={st('margin:0;font-size:18px;font-weight:700;line-height:1.75')}>
                 {text}
@@ -144,7 +144,7 @@ function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenP
 
       <div style={st('display:flex;flex-direction:column;gap:10px;position:relative')}>
         <button type="button" style={st(PRIMARY)} onClick={onReply} disabled={preview}>
-          답장 보내기
+          답장 카드 보내기
         </button>
         <button type="button" style={st(SECOND)} onClick={done ? replay : skip}>
           {done ? '다시 보기' : '한 번에 보기'}

@@ -38,7 +38,7 @@ function Locked(p: LockedProps) {
         {p.status !== 'error' && (
           <>
             <span style={st('font-size:15px;font-weight:700')}>깨지기까지</span>
-            <span style={st(`font-family:${DISPLAY};font-size:42px;line-height:1.1`)}>{remaining(p)}</span>
+            <span style={st(`font-family:${DISPLAY};font-size:42px;line-height:1.1`)}>{remaining(p, '깨는 중…')}</span>
           </>
         )}
         <p style={st('margin:4px 0 0;font-size:14px;font-weight:500;line-height:1.6')}>그 전엔 누구도 못 깨. 진짜로.</p>

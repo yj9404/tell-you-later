@@ -58,13 +58,13 @@ function Locked(p: LockedProps) {
     >
       <div style={st('display:flex;flex-direction:column;align-items:center;gap:0')}>
         <Clock at={letter.unlockAt} open={false} />
-        <span style={st('font-size:15px;font-weight:500')}>이 시각이 되면 열려요</span>
+        <span style={st('font-size:15px;font-weight:500')}>이 시각이 되면 잠금이 풀려요</span>
       </div>
 
       <div style={st('flex-grow:1;display:flex;flex-direction:column;justify-content:center')}>
         <Notification name={letter.from} line={teaser(letter.unlockAt, today)} />
         <div aria-hidden="true" style={st('height:14px;margin:0 16px;background:#FFFFFF;opacity:0.14;border-radius:0 0 18px 18px')} />
-        <p style={st('margin:16px 6px 0;font-size:14px;line-height:1.6')}>내용은 {whenText(letter.unlockAt, today)}까지 숨겨져 있어요. 그 전에는 누구도 열 수 없어요.</p>
+        <p style={st('margin:16px 6px 0;font-size:14px;line-height:1.6')}>알림 내용은 {whenText(letter.unlockAt, today)}까지 숨겨져 있어요. 그 전에는 누구도 잠금을 풀 수 없어요.</p>
       </div>
 
       <div style={st('display:flex;flex-direction:column;gap:12px')}>
@@ -74,7 +74,7 @@ function Locked(p: LockedProps) {
         {p.status !== 'error' && (
           <div style={st('display:flex;justify-content:space-between;align-items:baseline;padding:0 6px')}>
             <span style={st('font-size:15px;font-weight:500')}>잠금 해제까지</span>
-            <span style={st('font-size:24px;font-weight:700;letter-spacing:-0.5px;font-variant-numeric:tabular-nums')}>{remaining(p)}</span>
+            <span style={st('font-size:24px;font-weight:700;letter-spacing:-0.5px;font-variant-numeric:tabular-nums')}>{remaining(p, '잠금 해제 중…')}</span>
           </div>
         )}
         <button
@@ -82,7 +82,7 @@ function Locked(p: LockedProps) {
           style={{ ...st('height:56px;border:0;border-radius:28px;background:#FFFFFF;font-family:inherit;font-size:16px;font-weight:700;cursor:pointer'), color: tint }}
           onClick={p.onWrite} disabled={p.preview}
         >
-          나도 예약 편지 쓰기
+          나도 예약 메모 남기기
         </button>
         <button
           type="button"
@@ -249,7 +249,7 @@ function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenP
             style={st('height:54px;border:0;border-radius:27px;background:#000000;color:#FFFFFF;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer')}
             onClick={onReply} disabled={preview}
           >
-            나도 예약 편지 쓰기
+            나도 예약 메모 남기기
           </button>
         </div>
       </div>

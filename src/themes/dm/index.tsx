@@ -57,14 +57,14 @@ function Locked({ letter, now, status, error, onRetry, onSaveCalendar, onWrite, 
             {chatStamp(letter.createdAt, today)}
           </span>
           <div className={`${s.bubble} ${s.first} ${s.indent}`}>{letter.to}에게</div>
-          <div className={`${s.bubble} ${s.middle} ${s.indent}`}>편지 하나 써놨어</div>
+          <div className={`${s.bubble} ${s.middle} ${s.indent}`}>할 말 있어서 예약해 뒀어</div>
           <div className={s.row}>
             <Avatar size={28} />
             <TypingDots label="입력 중 표시" />
           </div>
           <span className={s.arrival}>
             {dateHour(letter.unlockAt)}에 도착해요.
-            <br />그 전에는 누구도 열 수 없어요.
+            <br />그 전에는 누구도 읽을 수 없어요.
           </span>
         </div>
       </div>
@@ -85,7 +85,7 @@ function Locked({ letter, now, status, error, onRetry, onSaveCalendar, onWrite, 
         )}
         <div className={s.actions}>
           <button type="button" className={s.gradientButton} onClick={onWrite} disabled={preview}>
-            나도 예약 DM 쓰기
+            나도 예약 DM 보내기
           </button>
           <button type="button" aria-label="캘린더에 저장" className={s.iconButton} onClick={onSaveCalendar} disabled={preview}>
             <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -111,7 +111,7 @@ function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenP
           {dateClock(letter.createdAt)}
         </span>
         <div className={`${s.bubble} ${s.first} ${s.indent}`}>{letter.to}에게</div>
-        <div className={`${s.bubble} ${s.last} ${s.indent}`}>편지 하나 써놨어</div>
+        <div className={`${s.bubble} ${s.last} ${s.indent}`}>할 말 있어서 예약해 뒀어</div>
 
         <span className={s.stamp} style={{ margin: '18px 0 10px' }}>
           {dateClock(letter.unlockAt)}

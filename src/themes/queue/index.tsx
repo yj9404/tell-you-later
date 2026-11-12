@@ -32,7 +32,7 @@ const totalWait = (letter: LetterInfo) => Math.max(1, Math.round((letter.unlockA
 function Header({ letter }: { letter: LetterInfo }) {
   return (
     <div style={st('display:flex;justify-content:space-between;align-items:center;gap:12px;height:32px;padding:0 4px;font-size:13px;color:#6B7280')}>
-      <span style={st('font-weight:700;color:#191B1F;flex-shrink:0')}>예약 편지 입장</span>
+      <span style={st('font-weight:700;color:#191B1F;flex-shrink:0')}>예약 입장</span>
       <span style={st('min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap')}>
         {letter.from} → {letter.to}
       </span>
@@ -85,8 +85,8 @@ function QueueCard({ letter, now, status, spinning, num, progress, left, childre
           <span style={st('font-weight:600;font-variant-numeric:tabular-nums;text-align:right')}>{left}</span>
         </div>
         <div style={st(ROW)}>
-          <span style={st('color:#6B7280;flex-shrink:0')}>먼저 입장</span>
-          <span style={st('font-weight:600;text-align:right')}>누구도 할 수 없어요</span>
+          <span style={st('color:#6B7280;flex-shrink:0')}>그 전에는</span>
+          <span style={st('font-weight:600;text-align:right')}>누구도 입장할 수 없어요</span>
         </div>
       </div>
       <div style={st('margin-top:auto;padding-top:16px')}>{children}</div>
@@ -118,7 +118,7 @@ function Locked(p: LockedProps) {
         spinning={p.status !== 'error'}
         num={num}
         progress={Math.min(1, Math.max(0, 1 - num / total))}
-        left={p.status === 'opening' ? '여는 중…' : waitText(num)}
+        left={p.status === 'opening' ? '입장 준비 중…' : waitText(num)}
       >
         {p.status === 'error' ? <LockError {...p} /> : NOTE}
       </QueueCard>

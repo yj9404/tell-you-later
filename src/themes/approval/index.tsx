@@ -76,12 +76,12 @@ function Locked(p: LockedProps) {
           }
         />
 
-        <h1 style={st(TITLE)}>편지 개봉 예정 통지</h1>
+        <h1 style={st(TITLE)}>문서 개봉 예정 통지</h1>
 
         <div className="tyl-keep" style={st(FIELDS)}>
           <span style={st(LABEL)}>문서번호</span>
           <span>
-            편지 {c.getFullYear()}-{pad2(c.getMonth() + 1)}
+            기안 {c.getFullYear()}-{pad2(c.getMonth() + 1)}
             {pad2(c.getDate())}호
           </span>
           <span style={st(LABEL)}>시행일자</span>
@@ -91,21 +91,21 @@ function Locked(p: LockedProps) {
           <span style={st(LABEL)}>발 신</span>
           <span>{letter.from}</span>
           <span style={st(LABEL)}>제 목</span>
-          <span style={st('font-weight:900')}>편지 개봉 예정의 건</span>
+          <span style={st('font-weight:900')}>붙임 문서 개봉 예정의 건</span>
         </div>
 
         <div style={st('font-size:15px;line-height:1.9;display:flex;flex-direction:column;gap:6px')}>
           <p style={st('margin:0')}>1. 귀하의 무궁한 발전을 기원합니다.</p>
-          <p style={st('margin:0')}>2. 아래와 같이 편지 개봉이 예정되어 있음을 알려드리오니 업무에 참고하시기 바랍니다.</p>
+          <p style={st('margin:0')}>2. 아래와 같이 붙임 문서의 개봉이 예정되어 있음을 알려드리오니 업무에 참고하시기 바랍니다.</p>
           <p style={st('margin:4px 0;text-align:center;letter-spacing:6px')}>- 아 래 -</p>
           <p style={st('margin:0;padding-left:14px')}>
             가. 개봉 일시: <span style={st('font-weight:900')}>{dotDateTime(u)}</span>
           </p>
           <p style={st('margin:0;padding-left:14px')}>
-            나. 남은 기간: <span style={st('font-weight:900;font-variant-numeric:tabular-nums')}>{p.status === 'error' ? '개봉 지연' : remaining(p)}</span>
+            나. 남은 기간: <span style={st('font-weight:900;font-variant-numeric:tabular-nums')}>{p.status === 'error' ? '개봉 지연' : remaining(p, '개봉 진행 중')}</span>
           </p>
           <p style={st('margin:0;padding-left:14px')}>다. 내 용: 대외비 (개봉 전 누구도 열람 불가)</p>
-          <p style={st('margin:6px 0 0')}>붙임 편지 1부. 끝.</p>
+          <p style={st('margin:6px 0 0')}>붙임 문서 1부. 끝.</p>
           <LockError {...p} />
         </div>
 
@@ -170,7 +170,7 @@ function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenP
           }
         />
 
-        <h1 style={st(TITLE)}>{done ? '편지 개봉 완료 통지' : '편지 개봉 결재 요청'}</h1>
+        <h1 style={st(TITLE)}>{done ? '문서 개봉 완료 통지' : '문서 개봉 결재 요청'}</h1>
 
         <div className="tyl-keep" style={st(FIELDS)}>
           <span style={st(LABEL)}>수 신</span>
@@ -178,7 +178,7 @@ function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenP
           <span style={st(LABEL)}>발 신</span>
           <span>{letter.from}</span>
           <span style={st(LABEL)}>제 목</span>
-          <span style={st('font-weight:900')}>편지 개봉의 건</span>
+          <span style={st('font-weight:900')}>붙임 문서 개봉의 건</span>
         </div>
 
         <div style={st('flex-grow:1;min-height:0;position:relative')}>
@@ -188,7 +188,7 @@ function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenP
           >
             <p style={st('margin:0')}>1. 귀하의 무궁한 발전을 기원합니다.</p>
             <p style={st('margin:0')}>2. 개봉 일시가 도래하였으므로 수신인의 결재를 받아 붙임 문서를 개봉하고자 합니다.</p>
-            <p style={st('margin:6px 0 0')}>붙임 편지 1부. 끝.</p>
+            <p style={st('margin:6px 0 0')}>붙임 문서 1부. 끝.</p>
           </div>
           <div
             aria-hidden={!done}
@@ -199,7 +199,7 @@ function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenP
               pointerEvents: done ? 'auto' : 'none',
             }}
           >
-            <span style={st('font-size:13px;font-weight:600;border-bottom:1px solid #000000;padding-bottom:4px;align-self:flex-start;white-space:pre')}>붙임  편지 1부</span>
+            <span style={st('font-size:13px;font-weight:600;border-bottom:1px solid #000000;padding-bottom:4px;align-self:flex-start;white-space:pre')}>붙임  문서 1부</span>
             <p className="tyl-text" style={st('margin:0;font-size:16px;line-height:1.9')}>
               {text} 끝.
             </p>

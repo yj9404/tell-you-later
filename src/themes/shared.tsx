@@ -31,9 +31,9 @@ export function st(css: string): CSSProperties {
   return style
 }
 
-/** 잠김 화면의 남은 시간 자리에 들어갈 글. 열쇠를 받는 중에는 그 사실을 알린다. */
-export function remaining(p: Pick<LockedProps, 'letter' | 'now' | 'status'>): string {
-  return p.status === 'opening' ? '여는 중…' : countdown(p.letter.unlockAt.getTime() - p.now)
+/** 잠김 화면의 남은 시간 자리에 들어갈 글. 열쇠를 받는 중에는 테마의 말(opening)로 그 사실을 알린다. */
+export function remaining(p: Pick<LockedProps, 'letter' | 'now' | 'status'>, opening = '여는 중…'): string {
+  return p.status === 'opening' ? opening : countdown(p.letter.unlockAt.getTime() - p.now)
 }
 
 /** 복호화 실패 안내. 글꼴과 색은 놓인 자리(테마)의 것을 그대로 물려받는다. */

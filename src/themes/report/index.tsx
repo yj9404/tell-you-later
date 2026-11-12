@@ -68,7 +68,7 @@ function Header({ letter, rows, approval, title }: { letter: LetterInfo; rows: [
   )
 }
 
-const registerNo = (letter: LetterInfo) => `편지-${pad2(letter.createdAt.getMonth() + 1)}${pad2(letter.createdAt.getDate())}`
+const registerNo = (letter: LetterInfo) => `보고-${pad2(letter.createdAt.getMonth() + 1)}${pad2(letter.createdAt.getDate())}`
 
 function Locked(p: LockedProps) {
   const { letter, now } = p
@@ -77,7 +77,7 @@ function Locked(p: LockedProps) {
   // 세부계획 표: 남은 날에 맞는 줄만 넣는다.
   const plan: [string, string][] = []
   if (daysLeft > 0) plan.push([`D-${daysLeft}`, '현 시각부로 대기 개시'])
-  if (daysLeft > 30) plan.push(['D-30', '편지 존재 망각'])
+  if (daysLeft > 30) plan.push(['D-30', '보고서 존재 망각'])
   if (daysLeft > 1) plan.push(['D-1', '달력 확인 후 취침 대기'])
   const Head = ({ children }: { children: ReactNode }) => <span style={st(`${B2};background:#D5F2F2;font-weight:600`)}>{children}</span>
   const Cell = ({ children, style = '' }: { children: ReactNode; style?: string }) => <span style={st(`${B2};${CLIP};${style}`)}>{children}</span>
@@ -87,7 +87,7 @@ function Locked(p: LockedProps) {
       <div style={st(PAPER)}>
         <Header
           letter={letter}
-          title="편지 개봉계획 (보고)"
+          title="보고서 개봉계획 (보고)"
           rows={[
             ['등록번호', registerNo(letter)],
             ['보존기간', '개봉 시까지'],
@@ -101,7 +101,7 @@ function Locked(p: LockedProps) {
         <div style={st('flex-grow:1;border:2px solid #000000;padding:8px 9px;display:flex;flex-direction:column;gap:7px')}>
           <div style={st('display:flex;flex-direction:column;gap:1px')}>
             <h2 style={st(H2)}>□ 개요 및 목적</h2>
-            <p style={st(ITEM)}>○ 편지 1통을 지정 일시에 개봉</p>
+            <p style={st(ITEM)}>○ 보고서 1부를 지정 일시에 개봉</p>
             <p style={st(ITEM)}>○ 개봉 전 열람 시도 원천 봉쇄</p>
             <p style={st(STAR)}>* 개봉 전 누구도 열람 불가</p>
           </div>
@@ -144,7 +144,7 @@ function Locked(p: LockedProps) {
             <p style={st(`${ITEM};color:#D2161C`)}>○ 개봉 일시 최우선으로 엄수</p>
             <p style={st(`${ITEM};font-variant-numeric:tabular-nums`)}>○ {p.status === 'waiting' ? `잔여 ${remaining(p)}, 대기할 것` : p.status === 'opening' ? '개봉 절차 진행 중' : '개봉 실패, 재시도할 것'}</p>
             <p style={st(ITEM)}>○ 새로고침으로 개봉 시각 단축 불가</p>
-            <p style={st(STAR)}>* 붙임 : 편지 1부. 끝.</p>
+            <p style={st(STAR)}>* 붙임 : 보고서 1부. 끝.</p>
             <div style={st('padding:4px 0 0 10px')}>
               <LockError {...p} />
             </div>
@@ -183,7 +183,7 @@ function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenP
       <div style={st(`${PAPER};min-height:0`)}>
         <Header
           letter={letter}
-          title={done ? '편지 개봉결과 (보고)' : '편지 개봉 (결재)'}
+          title={done ? '보고서 개봉결과 (보고)' : '보고서 개봉 (결재)'}
           rows={[
             ['등록번호', registerNo(letter)],
             ['보존기간', '영구'],
@@ -235,7 +235,7 @@ function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenP
               pointerEvents: done ? 'auto' : 'none',
             }}
           >
-            <h2 style={st(H2)}>□ 붙임 (편지 1부)</h2>
+            <h2 style={st(H2)}>□ 붙임 (보고서 1부)</h2>
             {items.map((item, i) => (
               <p
                 key={i}

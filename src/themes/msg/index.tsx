@@ -76,9 +76,9 @@ function Locked(p: LockedProps) {
             <rect x="5" y="11" width="14" height="10" rx="2" />
             <path d="M8 11V7a4 4 0 0 1 8 0v4" />
           </svg>
-          <span>편지 1통, {whenText(letter.unlockAt, today)}에 도착</span>
+          <span>문자 1통, {whenText(letter.unlockAt, today)}에 도착</span>
         </div>
-        <span style={st('font-size:12px;color:#6D6D72;padding-left:6px')}>그 전에는 누구도 열 수 없어요.</span>
+        <span style={st('font-size:12px;color:#6D6D72;padding-left:6px')}>그 전에는 누구도 읽을 수 없어요.</span>
       </div>
 
       <div style={st('padding:12px 16px 20px;display:flex;flex-direction:column;gap:12px;border-top:1px solid #EFEFEF')}>
@@ -88,12 +88,12 @@ function Locked(p: LockedProps) {
         {p.status !== 'error' && (
           <div style={st('display:flex;justify-content:space-between;align-items:baseline;padding:0 6px')}>
             <span style={st('font-size:14px;color:#6D6D72')}>도착까지</span>
-            <span style={st('font-size:22px;font-weight:800;letter-spacing:-0.5px;font-variant-numeric:tabular-nums')}>{remaining(p)}</span>
+            <span style={st('font-size:22px;font-weight:800;letter-spacing:-0.5px;font-variant-numeric:tabular-nums')}>{remaining(p, '받는 중…')}</span>
           </div>
         )}
         <div style={st('display:flex;gap:8px;align-items:center')}>
           <button type="button" style={st(PRIMARY)} onClick={p.onWrite} disabled={p.preview}>
-            나도 예약 문자 쓰기
+            나도 예약 문자 보내기
           </button>
           <button type="button" aria-label="캘린더에 저장" style={st(ICON)} onClick={p.onSaveCalendar} disabled={p.preview}>
             <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0B6BF2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

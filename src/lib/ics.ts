@@ -30,7 +30,7 @@ export function buildIcs(opts: { title: string; unlockAt: Date; link: string; ui
     `DTSTART:${stamp(opts.unlockAt)}`,
     `DTEND:${stamp(new Date(opts.unlockAt.getTime() + EVENT_MINUTES * 60_000))}`,
     `SUMMARY:${escape(opts.title)}`,
-    `DESCRIPTION:${escape(`이 링크로 편지를 열 수 있어요.\n${opts.link}`)}`,
+    `DESCRIPTION:${escape(`그날 이 링크에서 열어 볼 수 있어요.\n${opts.link}`)}`,
     'END:VEVENT',
     'END:VCALENDAR',
   ]

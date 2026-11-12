@@ -77,7 +77,7 @@ function Band({ letter, now, style }: { letter: LetterInfo; now: Date; style?: C
       <span className="tyl-keep" style={st('font-size:15px;font-weight:700;letter-spacing:-0.3px')}>
         {whenText(letter.unlockAt, now)}에 펼칠 수 있어요
       </span>
-      <span style={st('font-size:12px;color:#5A5A5A')}>그 전에는 누구도 열 수 없어요</span>
+      <span style={st('font-size:12px;color:#5A5A5A')}>그 전에는 누구도 펼칠 수 없어요</span>
     </div>
   )
 }
@@ -85,7 +85,7 @@ function Band({ letter, now, style }: { letter: LetterInfo; now: Date; style?: C
 function Locked(p: LockedProps) {
   const { letter } = p
   const now = new Date(p.now)
-  const label = `${teaser(letter.unlockAt, now)}. ${letter.from} 지음. ${letter.to}에게. ${whenText(letter.unlockAt, now)}에 펼칠 수 있어요. 그 전에는 누구도 열 수 없어요.`
+  const label = `${teaser(letter.unlockAt, now)}. ${letter.from} 지음. ${letter.to}에게. ${whenText(letter.unlockAt, now)}에 펼칠 수 있어요. 그 전에는 누구도 펼칠 수 없어요.`
   return (
     <div className="tyl-screen tyl-focus-dark" style={st(`min-height:var(--screen-h, 100dvh);${SCREEN}`)}>
       <Caption letter={letter} />
@@ -104,7 +104,7 @@ function Locked(p: LockedProps) {
         ) : (
           <>
             <span style={st('font-size:14px;color:#555555')}>펼칠 수 있을 때까지</span>
-            <span style={st('font-size:20px;font-weight:700;letter-spacing:-0.4px;font-variant-numeric:tabular-nums')}>{remaining(p)}</span>
+            <span style={st('font-size:20px;font-weight:700;letter-spacing:-0.4px;font-variant-numeric:tabular-nums')}>{remaining(p, '펼치는 중…')}</span>
           </>
         )}
       </div>
@@ -222,7 +222,7 @@ function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenP
           </button>
         )}
         <button type="button" style={st(SOLID)} onClick={onReply} disabled={preview}>
-          답장도 잠가서 보내기
+          답장 한 권 보내기
         </button>
       </div>
     </div>

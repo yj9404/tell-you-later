@@ -109,7 +109,7 @@ function Locked(p: LockedProps) {
           <>
             <span className="tyl-keep" style={st('font-size:14px;line-height:1.6;color:#3B4A6B')}>
               {whenText(letter.unlockAt, now)}에 열려요
-              <br />그 전에는 누구도 열 수 없어요
+              <br />그 전에는 누구도 뜯어 볼 수 없어요
             </span>
             <span style={st('font-size:24px;letter-spacing:-0.5px;flex-shrink:0;font-variant-numeric:tabular-nums')}>{remaining(p)}</span>
           </>
