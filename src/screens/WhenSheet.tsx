@@ -25,9 +25,10 @@ interface Props {
  * 날짜·시각 칸은 직접 고르기를 골랐을 때만 펼쳐진다. 아래에서 올라오고, 밖을 누르거나 아래로 내리면 닫힌다.
  */
 export function WhenSheet({ now, value, onConfirm, onClose }: Props) {
-  const start = resolveWhen(value, now)
+  // 직접 고르기 칸의 처음 값. 이미 직접 고른 시각이 있으면 그것을, 아니면 오늘 지금 시각에서 시작한다.
+  const start = value.kind === 'custom' ? value.at : now
   const [choice, setChoice] = useState<Choice>(value.kind)
-  // 직접 고르기 칸. 프리셋을 오가도 적어 둔 값은 그대로 둔다.
+  // 프리셋을 오가도 적어 둔 값은 그대로 둔다.
   const [date, setDate] = useState(isoDate(start))
   const [pm, setPm] = useState(start.getHours() >= 12)
   const [hourText, setHourText] = useState(String(start.getHours() % 12 || 12))
