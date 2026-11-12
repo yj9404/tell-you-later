@@ -1,4 +1,7 @@
-# Cloudflare Pages 설정. 정적 파일만 올린다(Functions 없음).
+# Cloudflare Workers 정적 자산 배포. 서버 코드 없이 dist만 올린다.
+# 라우팅이 # 해시 기반이라 SPA 폴백 설정은 필요 없다.
 name = "tell-you-later"
 compatibility_date = "2026-11-01"
-pages_build_output_dir = "dist"
+
+[assets]
+directory = "./dist"
