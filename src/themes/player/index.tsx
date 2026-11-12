@@ -1,7 +1,7 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { lyricLines } from '../../lib/bubbles.ts'
 import { monthDot, teaser, whenText } from '../../lib/date.ts'
-import { fitSize, LockError, remaining, st } from '../shared.tsx'
+import { LockError, remaining, st } from '../shared.tsx'
 import type { LetterInfo, LockedProps, OpenProps, Theme } from '../types.ts'
 import './player.css'
 
@@ -70,7 +70,7 @@ function TopBar({ to }: { to: string }) {
         </svg>
       </span>
       <div style={st('display:flex;flex-direction:column;align-items:center;line-height:1.35;min-width:0')}>
-        <span style={st('font-size:11px;color:#E0E0E0')}>예약 편지에서 재생 중</span>
+        <span style={st('font-size:11px;color:#E0E0E0')}>예약 재생목록에서 재생 중</span>
         <span style={st('font-size:13px;font-weight:700;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap')}>{to}에게</span>
       </div>
       <span style={st('width:32px;display:flex;justify-content:flex-end;flex-shrink:0')}>
@@ -116,6 +116,14 @@ interface AlbumSize {
 }
 const BIG: AlbumSize = { h: 290, jacket: 290, vinyl: 276, vtop: 6, label: 99, labelFont: 30, sideFont: 9, pad: 20, topFont: 15, big: 168, nameFont: 14 }
 const SMALL: AlbumSize = { h: 176, jacket: 176, vinyl: 166, vtop: 5, label: 60, labelFont: 18, sideFont: 6, pad: 12, topFont: 9, big: 100, nameFont: 8 }
+// 재킷 날짜 글자 폭(em). Bricolage 800 기준으로 1과 점은 좁고 나머지 숫자는 넓다. 실측보다 조금 넉넉하다.
+const GLYPH_EM: Record<string, number> = { '1': 0.32, '.': 0.2 }
+/** 재킷 안쪽 폭(inner, 디자인 px)에 들어가는 날짜 글자 크기. 390px보다 좁은 화면에서는 같은 비율로 줄인다. */
+function dateSize(date: string, base: number, inner: number): string {
+  const em = [...date].reduce((sum, ch) => sum + (GLYPH_EM[ch] ?? 0.6), 0)
+  const px = Math.min(base, Math.floor((inner * 0.95) / em))
+  return `min(${px}px, ${((px / 390) * 100).toFixed(1)}vw)`
+}
 const pct = (v: number, of: number) => `${((v / of) * 100).toFixed(3)}%`
 
 function Album({ letter, size: s, left, spin, slide }: { letter: LetterInfo; size: AlbumSize; left: number; spin?: 'running' | 'paused'; slide?: boolean }) {
@@ -138,7 +146,8 @@ function Album({ letter, size: s, left, spin, slide }: { letter: LetterInfo; siz
             <span>할 말이 있는데</span>
             <span style={st('opacity:.8')}>{letter.unlockAt.getFullYear()}</span>
           </div>
-          <span style={{ ...st(`font-family:${DISPLAY};font-weight:800;line-height:.8;letter-spacing:-0.06em;margin-left:-0.03em;white-space:nowrap`), fontSize: fitSize(date, s.big) }}>{date}</span>
+          {/* 디자인 값(-0.06em)이면 Bricolage에서 점이 양옆 1과 겹친다. 대체 글꼴까지 재 보고 모두 틈이 남는 -0.01em으로 둔다. */}
+          <span style={{ ...st(`font-family:${DISPLAY};font-weight:800;line-height:.8;letter-spacing:-0.01em;margin-left:-0.03em;white-space:nowrap`), fontSize: dateSize(date, s.big, s.jacket - s.pad * 2) }}>{date}</span>
           <span style={{ ...st('align-self:flex-end;max-width:100%;font-weight:500;opacity:.85;overflow:hidden;text-overflow:ellipsis;white-space:nowrap'), fontSize: s.nameFont }}>{letter.from}</span>
         </div>
       </div>
@@ -159,7 +168,7 @@ function Album({ letter, size: s, left, spin, slide }: { letter: LetterInfo; siz
               background: tint,
             }}
           >
-            <span style={{ ...st(`font-family:${DISPLAY};font-weight:800;line-height:1;letter-spacing:-1px;white-space:nowrap`), fontSize: s.labelFont * labelScale }}>{date}</span>
+            <span style={{ ...st(`font-family:${DISPLAY};font-weight:800;line-height:1;letter-spacing:-0.01em;white-space:nowrap`), fontSize: s.labelFont * labelScale }}>{date}</span>
             <span style={{ ...st('font-weight:700;margin-top:2px;opacity:.85'), fontSize: s.sideFont }}>SIDE A</span>
             <div style={st('position:absolute;width:6px;height:6px;border-radius:50%;background:#121212')} />
           </div>
@@ -189,7 +198,7 @@ function Locked(p: LockedProps) {
           </div>
           <div style={st('display:flex;justify-content:space-between;font-size:12px;color:#B3B3B3')}>
             <span>오늘</span>
-            <span style={st('font-variant-numeric:tabular-nums')}>{p.status === 'waiting' ? `-${remaining(p)}` : remaining(p)}</span>
+            <span style={st('font-variant-numeric:tabular-nums')}>{p.status === 'waiting' ? `-${remaining(p)}` : remaining(p, '재생 준비 중…')}</span>
           </div>
         </div>
 
@@ -221,7 +230,7 @@ function Locked(p: LockedProps) {
           ) : (
             <p className="tyl-keep" style={st('margin:0;font-size:14px;line-height:1.6;color:#D0D0D0;text-align:center')}>
               {whenText(letter.unlockAt, today)}에 재생돼요.
-              <br />그 전에는 누구도 열 수 없어요.
+              <br />그 전에는 누구도 재생할 수 없어요.
             </p>
           )}
         </div>
@@ -230,7 +239,7 @@ function Locked(p: LockedProps) {
             캘린더에 저장
           </button>
           <button type="button" style={st(SOLID)} onClick={p.onWrite} disabled={p.preview}>
-            나도 예약 편지 쓰기
+            나도 한 곡 남기기
           </button>
         </div>
       </div>
@@ -410,7 +419,7 @@ function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenP
         </div>
 
         <button type="button" style={st('height:50px;border:0;border-radius:25px;background:#FFFFFF;color:#121212;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer')} onClick={onReply} disabled={preview}>
-          나도 예약 편지 쓰기
+          나도 한 곡 남기기
         </button>
       </div>
     </div>

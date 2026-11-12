@@ -20,7 +20,7 @@ function DocHead({ letter, now, state }: { letter: LetterInfo; now: Date; state:
   return (
     <>
       <div style={st(`display:flex;justify-content:space-between;gap:12px;font-family:${SANS};font-size:11.5px;color:#6B6B6B;padding-bottom:10px;border-bottom:1px solid #141414`)}>
-        <span>편지 문서</span>
+        <span>비공개 문서</span>
         <span>
           {state} {dotDate(letter.unlockAt)} {hhmm(letter.unlockAt)}
         </span>
@@ -54,7 +54,7 @@ function Locked(p: LockedProps) {
         <div aria-hidden="true" style={{ ...st(STAMP), color: RED }}>
           공개 전
         </div>
-        <div role="img" aria-label="가려진 편지 본문" style={st('flex-grow:1;min-height:0;overflow:hidden')}>
+        <div role="img" aria-label="가려진 문서 본문" style={st('flex-grow:1;min-height:0;overflow:hidden')}>
           {BARS.map((row, r) => (
             <div key={r} style={st('display:flex;flex-wrap:wrap;gap:9px 6px;margin-bottom:12px')}>
               {row.map(([w, deg], i) => (
@@ -69,8 +69,8 @@ function Locked(p: LockedProps) {
           <LockError {...p} />
         ) : (
           <>
-            <span style={st('font-size:13px;color:#4A4A4A;line-height:1.6')}>공개 전에는 누구도 열 수 없어요</span>
-            <span style={st('font-size:19px;font-weight:700;flex-shrink:0;font-variant-numeric:tabular-nums')}>{remaining(p)}</span>
+            <span style={st('font-size:13px;color:#4A4A4A;line-height:1.6')}>공개 전에는 누구도 볼 수 없어요</span>
+            <span style={st('font-size:19px;font-weight:700;flex-shrink:0;font-variant-numeric:tabular-nums')}>{remaining(p, '공개하는 중…')}</span>
           </>
         )}
       </div>
@@ -79,7 +79,7 @@ function Locked(p: LockedProps) {
           캘린더에 저장
         </button>
         <button type="button" style={st(SOLID)} onClick={p.onWrite} disabled={p.preview}>
-          나도 한 통 쓰기
+          나도 비공개 문서 만들기
         </button>
       </div>
     </div>
@@ -113,6 +113,10 @@ function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenP
   const [run, setRun] = useState(autoplay ? 1 : 0)
   const timer = useRef(0)
   const body = useRef<HTMLDivElement>(null)
+  // 걷히는 줄을 따라 스크롤하는 중인지. 사용자가 직접 스크롤하면 멈춘다.
+  const following = useRef(true)
+  // 진행 중인 부드러운 스크롤의 목적지. 도착 전에 같은 줄로 다시 스크롤하지 않게 한다.
+  const target = useRef(0)
 
   useEffect(() => {
     if (run === 0) return
@@ -121,26 +125,43 @@ function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenP
       if (n < count) timer.current = window.setTimeout(() => step(n + 1), WORD_TIME)
     }
     setShown(0)
+    following.current = true
+    target.current = 0
     if (body.current) body.current.scrollTop = 0
     timer.current = window.setTimeout(() => step(1), START_DELAY)
     return () => clearTimeout(timer.current)
   }, [run, count])
 
-  const done = shown >= count
-
-  // 걷히는 단어가 문서 아래로 내려가면 따라 내려간다.
+  // 손으로 스크롤하는 입력(휠, 터치, 스크롤 막대, 키보드)이 오면 따라가기를 멈춘다.
+  // scroll 이벤트는 우리가 부른 scrollTo에서도 나므로 쓰지 않는다.
   useEffect(() => {
     const el = body.current
-    if (!el || run === 0 || done || shown === 0) return
+    if (!el) return
+    const stop = () => (following.current = false)
+    const events = ['wheel', 'touchstart', 'pointerdown', 'keydown'] as const
+    events.forEach((e) => el.addEventListener(e, stop, { passive: true }))
+    return () => events.forEach((e) => el.removeEventListener(e, stop))
+  }, [])
+
+  const done = shown >= count
+
+  // 걷히는 단어가 문서 보이는 영역 아래로 내려가면, 그 줄이 보이도록 부드럽게 따라 내려간다.
+  useEffect(() => {
+    const el = body.current
+    if (!el || run === 0 || done || shown === 0 || !following.current) return
     const word = el.querySelectorAll<HTMLElement>('[data-word]')[shown - 1]
     if (!word) return
     const bottom = word.offsetTop + word.offsetHeight
-    if (bottom > el.scrollTop + el.clientHeight - 24) el.scrollTop = bottom - el.clientHeight * 0.6
-  }, [shown, run, done])
+    const viewTop = Math.max(el.scrollTop, target.current)
+    if (bottom <= viewTop + el.clientHeight - 24) return
+    target.current = Math.max(0, word.offsetTop - el.clientHeight * 0.4)
+    el.scrollTo({ top: target.current, behavior: reducedMotion ? 'auto' : 'smooth' })
+  }, [shown, run, done, reducedMotion])
 
   const showAll = () => {
     clearTimeout(timer.current)
     setShown(count)
+    target.current = 0
     if (body.current) body.current.scrollTop = 0
   }
   const animate = run > 0 && !reducedMotion
@@ -175,7 +196,7 @@ function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenP
         </div>
       </div>
       <div style={st(`display:flex;justify-content:space-between;align-items:baseline;gap:12px;font-family:${SANS}`)}>
-        <span style={st('font-size:13px;color:#4A4A4A')}>{fullDate(letter.createdAt)}에 씀</span>
+        <span style={st('font-size:13px;color:#4A4A4A')}>{fullDate(letter.createdAt)} 작성</span>
         {!done && (
           <button type="button" style={st('min-height:44px;border:0;background:transparent;padding:0;color:#141414;font-family:inherit;font-size:14px;text-decoration:underline;text-underline-offset:4px;cursor:pointer')} onClick={showAll}>
             한 번에 보기
@@ -187,7 +208,7 @@ function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenP
           다시 보기
         </button>
         <button type="button" style={st(SOLID)} onClick={onReply} disabled={preview}>
-          답장도 잠가서 보내기
+          답장도 비공개로 보내기
         </button>
       </div>
     </div>
