@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { decodeLink, encodeLink, LinkError, linkHash, type Letter } from './codec.ts'
-import { detectPlatform, googleCalendarUrl, icsDataUrl, isInAppBrowser, outlookCalendarUrl } from './calendar.ts'
+import { androidIntentUrl, detectPlatform, eventTitle, googleCalendarUrl, icsDataUrl, isInAppBrowser, outlookCalendarUrl } from './calendar.ts'
 import { countdown, longDate, teaserDate } from './date.ts'
 import { splitBubbles } from './bubbles.ts'
 import { QUICKNET, roundForTime, timeForRound } from './drand.ts'
@@ -171,13 +171,37 @@ describe('타임락 암호문', () => {
 })
 
 describe('캘린더 링크', () => {
-  const ev = { start: new Date('2026-12-24T15:00:00Z'), link: 'https://example.com/#abc&d=1' }
+  const ev = { title: '영진이 할 말이 있는 날', start: new Date('2026-12-24T15:00:00Z'), link: 'https://example.com/#abc&d=1' }
+
+  it('제목 조사: 받침 있으면 "이", 없거나 한글이 아니면 "가"', () => {
+    expect(eventTitle('영진')).toBe('영진이 할 말이 있는 날')
+    expect(eventTitle('지민 ')).toBe('지민이 할 말이 있는 날')
+    expect(eventTitle('하나')).toBe('하나가 할 말이 있는 날')
+    expect(eventTitle('엄마')).toBe('엄마가 할 말이 있는 날')
+    expect(eventTitle('Alex')).toBe('Alex가 할 말이 있는 날')
+    expect(eventTitle('영진 🎄')).toBe('영진 🎄가 할 말이 있는 날')
+    expect(eventTitle('ㄱ')).toBe('ㄱ가 할 말이 있는 날')
+  })
+
+  it('Android 인텐트: 값은 인코딩, 시각은 ms, 구글 캘린더 웹 링크로 대체', () => {
+    const s = androidIntentUrl(ev)
+    expect(s.startsWith('intent:#Intent;action=android.intent.action.INSERT;type=vnd.android.cursor.item/event;')).toBe(true)
+    expect(s.endsWith(';end')).toBe(true)
+    const parts = Object.fromEntries(s.split(';').slice(1, -1).map((p) => [p.slice(0, p.indexOf('=')), p.slice(p.indexOf('=') + 1)]))
+    expect(decodeURIComponent(parts['S.title'])).toBe(ev.title)
+    expect(decodeURIComponent(parts['S.description'])).toBe(ev.link)
+    expect(parts['l.beginTime']).toBe(String(Date.UTC(2026, 11, 24, 15, 0)))
+    expect(parts['l.endTime']).toBe(String(Date.UTC(2026, 11, 24, 15, 30)))
+    expect(decodeURIComponent(parts['S.browser_fallback_url'])).toBe(googleCalendarUrl(ev))
+    // 값 안의 ; # & = 가 인텐트 구분자를 깨지 않는다
+    expect(parts['S.description']).not.toMatch(/[;#&=]/)
+  })
 
   it('구글 캘린더: 30분 일정, UTC 시각, 링크 전체를 설명에 넣는다', () => {
     const u = new URL(googleCalendarUrl(ev))
     expect(u.origin + u.pathname).toBe('https://calendar.google.com/calendar/render')
     expect(u.searchParams.get('action')).toBe('TEMPLATE')
-    expect(u.searchParams.get('text')).toBe('할 말이 있는 날')
+    expect(u.searchParams.get('text')).toBe('영진이 할 말이 있는 날')
     expect(u.searchParams.get('dates')).toBe('20261224T150000Z/20261224T153000Z')
     expect(u.searchParams.get('details')).toBe(ev.link)
   })
@@ -187,7 +211,7 @@ describe('캘린더 링크', () => {
     expect(s.startsWith('https://outlook.live.com/calendar/0/deeplink/compose?')).toBe(true)
     expect(s).not.toContain('+')
     const u = new URL(s)
-    expect(u.searchParams.get('subject')).toBe('할 말이 있는 날')
+    expect(u.searchParams.get('subject')).toBe('영진이 할 말이 있는 날')
     expect(u.searchParams.get('startdt')).toBe('2026-12-24T15:00:00Z')
     expect(u.searchParams.get('enddt')).toBe('2026-12-24T15:30:00Z')
     expect(u.searchParams.get('body')).toBe(ev.link)

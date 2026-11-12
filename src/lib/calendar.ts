@@ -1,10 +1,20 @@
 import { stamp } from './ics.ts'
 
-/** 외부 캘린더에 남는 제목. 누가 보냈는지는 드러내지 않는다. */
+/** 보낸 사람을 모를 때(서버로 이름을 보내지 않는 경로)의 제목 */
 export const EVENT_TITLE = '할 말이 있는 날'
 const EVENT_MINUTES = 30
 
+/** "{보낸 사람}{이/가} 할 말이 있는 날". 조사는 마지막 글자의 받침으로, 한글이 아니면 "가". */
+export function eventTitle(from: string): string {
+  const name = from.trim()
+  const last = [...name].at(-1)?.codePointAt(0) ?? 0
+  const isSyllable = last >= 0xac00 && last <= 0xd7a3
+  const josa = isSyllable && (last - 0xac00) % 28 !== 0 ? '이' : '가'
+  return `${name}${josa} ${EVENT_TITLE}`
+}
+
 export interface CalendarEvent {
+  title: string
   start: Date
   /** 받은 편지 링크(현재 페이지 URL 전체) */
   link: string
@@ -30,11 +40,30 @@ const endOf = (e: CalendarEvent) => new Date(e.start.getTime() + EVENT_MINUTES *
 export function googleCalendarUrl(e: CalendarEvent): string {
   const q = [
     'action=TEMPLATE',
-    `text=${encodeURIComponent(EVENT_TITLE)}`,
+    `text=${encodeURIComponent(e.title)}`,
     `dates=${stamp(e.start)}/${stamp(endOf(e))}`,
     `details=${encodeURIComponent(e.link)}`,
   ]
   return `https://calendar.google.com/calendar/render?${q.join('&')}`
+}
+
+/**
+ * Android 캘린더 앱의 일정 추가 화면을 여는 인텐트 주소.
+ * 캘린더 앱이 없거나 인텐트를 못 받는 브라우저는 구글 캘린더 웹 링크로 넘어간다.
+ */
+export function androidIntentUrl(e: CalendarEvent): string {
+  const enc = encodeURIComponent
+  return [
+    'intent:#Intent',
+    'action=android.intent.action.INSERT',
+    'type=vnd.android.cursor.item/event',
+    `S.title=${enc(e.title)}`,
+    `S.description=${enc(e.link)}`,
+    `l.beginTime=${e.start.getTime()}`,
+    `l.endTime=${endOf(e).getTime()}`,
+    `S.browser_fallback_url=${enc(googleCalendarUrl(e))}`,
+    'end',
+  ].join(';')
 }
 
 const iso = (d: Date) => d.toISOString().replace(/\.\d{3}Z$/, 'Z')
@@ -45,7 +74,7 @@ export function outlookCalendarUrl(e: CalendarEvent): string {
   const params: Record<string, string> = {
     path: '/calendar/action/compose',
     rru: 'addevent',
-    subject: EVENT_TITLE,
+    subject: e.title,
     startdt: iso(e.start),
     enddt: iso(endOf(e)),
     body: e.link,

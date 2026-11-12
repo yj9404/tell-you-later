@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState, type KeyboardEvent, type MouseEvent, type ReactNode } from 'react'
 import {
+  androidIntentUrl,
   detectPlatform,
+  eventTitle,
   googleCalendarUrl,
   icsDataUrl,
   isInAppBrowser,
@@ -23,18 +25,20 @@ interface Source {
 
 /**
  * 캘린더 저장 버튼의 동작. 폰에서는 파일을 받는 대신 캘린더를 바로 연다.
- * - Android: 구글 캘린더 일정 추가 링크
+ * - Android: 캘린더 앱 인텐트(안 되면 브라우저가 구글 캘린더 웹으로 넘김). 일반 Chrome·인앱 모두 같은 방식
  * - iOS: data:text/calendar로 이동(실기기 확인용 1단계)
  * - 데스크톱: 구글 캘린더 / Outlook / .ics 파일 메뉴
- * 인앱 브라우저에서 막히면 외부 브라우저로 열라고 안내한다.
+ * iOS·데스크톱의 인앱 브라우저에서 막히면 외부 브라우저로 열라고 안내한다.
+ * Android는 인앱 브라우저가 캘린더를 열었다 닫아도 실패로 보이는 오탐이 있어 판정·안내를 하지 않는다.
  */
 export function useSaveCalendar(src: Source): { onSaveCalendar: (e: MouseEvent<HTMLElement>) => void; overlay: ReactNode } {
   const [anchor, setAnchor] = useState<DOMRect | null>(null)
   const [blocked, setBlocked] = useState(false)
 
   // 링크는 누른 순간의 주소를 쓴다.
-  const event = (): CalendarEvent => ({ start: src.unlockAt, link: location.href })
-  const ics = () => buildIcs({ from: src.from, unlockAt: src.unlockAt, link: location.href, uid: src.uid })
+  const title = eventTitle(src.from)
+  const event = (): CalendarEvent => ({ title, start: src.unlockAt, link: location.href })
+  const ics = () => buildIcs({ title, unlockAt: src.unlockAt, link: location.href, uid: src.uid })
 
   /** action은 클릭 처리 안에서 동기로 불러야 팝업 차단에 걸리지 않는다. false면 바로 실패. */
   const run = (action: () => boolean) => {
@@ -48,7 +52,8 @@ export function useSaveCalendar(src: Source): { onSaveCalendar: (e: MouseEvent<H
   const onSaveCalendar = (e: MouseEvent<HTMLElement>) => {
     switch (detectPlatform(navigator.userAgent, navigator.maxTouchPoints)) {
       case 'android':
-        return run(() => openTab(googleCalendarUrl(event())))
+        location.href = androidIntentUrl(event())
+        return
       case 'ios':
         return run(() => {
           location.href = icsDataUrl(ics())

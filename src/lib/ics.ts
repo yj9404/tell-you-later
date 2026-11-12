@@ -19,7 +19,7 @@ function fold(line: string): string {
   return out
 }
 
-export function buildIcs(opts: { from: string; unlockAt: Date; link: string; uid: string }): string {
+export function buildIcs(opts: { title: string; unlockAt: Date; link: string; uid: string }): string {
   return [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
@@ -29,7 +29,7 @@ export function buildIcs(opts: { from: string; unlockAt: Date; link: string; uid
     `DTSTAMP:${stamp(new Date())}`,
     `DTSTART:${stamp(opts.unlockAt)}`,
     `DTEND:${stamp(new Date(opts.unlockAt.getTime() + 10 * 60_000))}`,
-    `SUMMARY:${escape(`${opts.from}의 편지가 열리는 날`)}`,
+    `SUMMARY:${escape(opts.title)}`,
     `DESCRIPTION:${escape(`이 링크로 편지를 열 수 있어요.\n${opts.link}`)}`,
     'END:VEVENT',
     'END:VCALENDAR',
