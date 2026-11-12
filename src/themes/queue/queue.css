@@ -1,10 +1,31 @@
 @keyframes jIn {
   from {
     opacity: 0;
-    transform: translateY(14px);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: none;
   }
+}
+
+@keyframes jspin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.j-spin {
+  animation: jspin 0.9s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .j-spin {
+    animation: none;
+  }
+}
+
+/* 남는 높이는 카드만 나눠 가진다. */
+.j-col > * {
+  flex-shrink: 0;
 }

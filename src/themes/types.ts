@@ -14,10 +14,6 @@ export interface LetterInfo {
   tint: string | null
   createdAt: Date
   unlockAt: Date
-  /** 링크 해시. 같은 링크는 항상 같은 값(의사난수 시드용) */
-  hash: string
-  /** 암호문 바이트 수 */
-  cipherLength: number
 }
 
 /** waiting: 개봉 전 / opening: 열쇠를 받아 푸는 중 / error: 실패 */

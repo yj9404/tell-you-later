@@ -68,6 +68,7 @@ function Letter({ letter, fragment, onWrite }: Props & { letter: Letter }) {
   const [text, setText] = useState<string | null>(null)
   const started = useRef(false)
 
+  const hash = useMemo(() => linkHash(fragment), [fragment])
   const info: LetterInfo = useMemo(
     () => ({
       to: letter.to,
@@ -75,15 +76,13 @@ function Letter({ letter, fragment, onWrite }: Props & { letter: Letter }) {
       tint: theme.tints ? (theme.tints[letter.tint] ?? theme.tints[0]).hex : null,
       createdAt: new Date(letter.created * 60_000),
       unlockAt: new Date(unlockMs),
-      hash: linkHash(fragment),
-      cipherLength: letter.body.length,
     }),
-    [letter, theme, unlockMs, fragment],
+    [letter, theme, unlockMs],
   )
 
   // 연출을 재생할지는 처음 그릴 때 한 번만 정한다.
   const [reducedMotion] = useState(() => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false)
-  const [autoplay] = useState(() => !reducedMotion && !wasPlayed(info.hash))
+  const [autoplay] = useState(() => !reducedMotion && !wasPlayed(hash))
 
   useEffect(() => loadFonts(theme.fonts), [theme])
 
@@ -94,7 +93,7 @@ function Letter({ letter, fragment, onWrite }: Props & { letter: Letter }) {
       for (let attempt = 0; ; attempt++) {
         try {
           setText(await openLetter(letter.body, letter.round))
-          markPlayed(info.hash)
+          markPlayed(hash)
           return
         } catch (e) {
           const retry = e instanceof DrandError && e.kind === 'not-yet' && attempt < NOT_YET_RETRIES
@@ -106,7 +105,7 @@ function Letter({ letter, fragment, onWrite }: Props & { letter: Letter }) {
       setError(describe(e))
       setStatus('error')
     }
-  }, [letter, info.hash])
+  }, [letter, hash])
 
   // 개봉 시각 전에는 복호화를 시도하지 않는다. 시각이 되면 새로고침 없이 연다.
   useEffect(() => {
@@ -125,7 +124,7 @@ function Letter({ letter, fragment, onWrite }: Props & { letter: Letter }) {
     return () => clearInterval(id)
   }, [unlockMs, open, text])
 
-  const calendar = useSaveCalendar({ from: letter.from, unlockAt: info.unlockAt, uid: info.hash })
+  const calendar = useSaveCalendar({ from: letter.from, unlockAt: info.unlockAt, uid: hash })
 
   if (text !== null) {
     return (

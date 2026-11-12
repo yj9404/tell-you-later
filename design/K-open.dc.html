@@ -11,45 +11,86 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,800&amp;family=Noto+Sans+KR:wght@400;500;700;900&amp;display=swap">
 <style>
 body{margin:0}
-a{color:#000000}a:hover{color:#000000}
-a:focus-visible,button:focus-visible{outline:3px solid #000000;outline-offset:3px}
-@media (prefers-reduced-motion: reduce){*{transition:none !important}}
+a{color:#FFFFFF}a:hover{color:#FFFFFF}
+a:focus-visible,button:focus-visible{outline:2px solid #FFFFFF;outline-offset:3px}
+@keyframes kspin{to{transform:rotate(360deg)}}
+.k-grooves{background:repeating-radial-gradient(circle at center,#151515 0 1.6px,#1F1F1F 1.6px 2.6px)}
+.k-sheen{background:conic-gradient(from 20deg,rgba(255,255,255,0) 0deg,rgba(255,255,255,.16) 25deg,rgba(255,255,255,0) 55deg,rgba(255,255,255,0) 180deg,rgba(255,255,255,.12) 205deg,rgba(255,255,255,0) 235deg)}
+@media (prefers-reduced-motion: reduce){*{transition:none !important;animation:none !important}}
+
+.k-col>*{flex-shrink:0}
 </style>
 </helmet>
-<div style="width:390px;height:844px;box-sizing:border-box;background:#FFFFFF;color:#000000;font-family:'Noto Sans KR',sans-serif;padding:28px 28px 26px;display:flex;flex-direction:column;gap:20px">
-  <div style="display:flex;align-items:center;gap:14px">
-    <div aria-hidden="true" style="width:76px;height:76px;flex-shrink:0;border-radius:8px;background:{{tint}};color:#FFFFFF;display:flex;align-items:flex-end;padding:6px 8px;box-sizing:border-box;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:36px;line-height:0.9;letter-spacing:-2px">1.1</div>
+<div style="position:relative;width:390px;height:844px;box-sizing:border-box;background:linear-gradient(180deg,{{tint}} 0%,#121212 68%);background-color:#121212;color:#FFFFFF;font-family:'Noto Sans KR',sans-serif;padding:14px 24px 24px;display:flex;flex-direction:column;gap:16px;overflow:hidden">
+  <div aria-hidden="true" style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.25),rgba(0,0,0,0) 40%);pointer-events:none"></div>
+  <div class="k-col" style="position:relative;display:flex;flex-direction:column;gap:16px;height:100%">
+  <div style="display:flex;align-items:center;justify-content:space-between;height:44px">
+    <span style="width:32px;display:flex"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"></path></svg></span>
+    <div style="display:flex;flex-direction:column;align-items:center;line-height:1.35">
+      <span style="font-size:11px;color:#E0E0E0">예약 편지에서 재생 중</span>
+      <span style="font-size:13px;font-weight:700">지민에게</span>
+    </div>
+    <span style="width:32px;display:flex;justify-content:flex-end"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1.3" fill="#FFFFFF"></circle><circle cx="12" cy="12" r="1.3" fill="#FFFFFF"></circle><circle cx="19" cy="12" r="1.3" fill="#FFFFFF"></circle></svg></span>
+  </div>
+  <div style="position:relative;width:342px;height:176px">
+    <div aria-hidden="true" style="position:absolute;left:0;top:0;width:176px;height:176px;border-radius:4px;overflow:hidden;background:{{tint}};box-shadow:0 18px 40px rgba(0,0,0,.45);z-index:2">
+      <svg width="100%" height="100%" style="position:absolute;inset:0;opacity:.22;mix-blend-mode:overlay"><filter id="kn176"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" stitchTiles="stitch"></feTurbulence></filter><rect width="100%" height="100%" filter="url(#kn176)"></rect></svg>
+      <div style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.22) 0%,rgba(255,255,255,0) 38%,rgba(0,0,0,0) 60%,rgba(0,0,0,.28) 100%)"></div>
+      <div style="position:absolute;inset:0;padding:12px;display:flex;flex-direction:column;justify-content:space-between;color:#FFFFFF">
+        <div style="display:flex;justify-content:space-between;font-size:9px;font-weight:700;letter-spacing:-0.2px"><span>할 말이 있는데</span><span style="opacity:.8">2027</span></div>
+        <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:100px;line-height:.8;letter-spacing:-6px;margin-left:-3px">1.1</span>
+        <span style="align-self:flex-end;font-size:8px;font-weight:500;opacity:.85">영진</span>
+      </div>
+    </div>
+    <div aria-hidden="true" style="position:absolute;top:{{vtop}};left:{{vleft}};width:166px;height:166px;border-radius:50%;z-index:1;box-shadow:0 10px 30px rgba(0,0,0,.5);transition:left .9s cubic-bezier(.3,0,.2,1)">
+      <div class="k-grooves" style="position:absolute;inset:0;border-radius:50%;animation:kspin 1.8s linear infinite;animation-play-state:{{spin}}">
+        <div style="position:absolute;left:50%;top:50%;width:60px;height:60px;margin:-30px 0 0 -30px;border-radius:50%;background:{{tint}};display:flex;flex-direction:column;align-items:center;justify-content:center;color:#FFFFFF">
+          <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:18px;line-height:1;letter-spacing:-1px">1.1</span>
+          <span style="font-size:6px;font-weight:700;margin-top:2px;opacity:.85">SIDE A</span>
+          <div style="position:absolute;width:6px;height:6px;border-radius:50%;background:#121212"></div>
+        </div>
+      </div>
+      <div class="k-sheen" style="position:absolute;inset:0;border-radius:50%;pointer-events:none"></div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
     <div style="display:flex;flex-direction:column;gap:3px;min-width:0">
-      <h1 style="margin:0;font-size:17px;font-weight:900;letter-spacing:-0.5px;line-height:1.35">할 말이 있는데 1월 1일에 할게</h1>
-      <span style="font-size:14px;color:#5C5C5C">영진</span>
+      <h1 style="margin:0;font-size:19px;font-weight:700;letter-spacing:-0.5px;line-height:1.35">할 말이 있는데 1월 1일에 할게</h1>
+      <span style="font-size:14px;color:#B3B3B3">영진</span>
+    </div>
+    <span style="flex-shrink:0;padding-top:2px"><svg aria-hidden="true" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"></path></svg></span>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:7px">
+    <div role="img" aria-label="재생 진행" style="height:4px;background:rgba(255,255,255,.25);border-radius:2px;position:relative">
+      <div style="height:4px;width:{{pct}};background:#FFFFFF;border-radius:2px;transition:width 1.7s linear"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:12px;color:#B3B3B3"><span>{{elapsed}}</span><span>{{count}}</span></div>
+  </div>
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:0 4px">
+    <span aria-hidden="true" style="opacity:.6"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#B3B3B3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"></path></svg></span>
+    <button onClick="{{replay}}" aria-label="처음부터" style="border:0;background:transparent;padding:0;cursor:pointer;display:flex"><svg aria-hidden="true" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 20L9 12l10-8z" fill="#FFFFFF"></path><path d="M5 19V5"></path></svg></button>
+    <button onClick="{{toggle}}" aria-label="{{toggleLabel}}" style="width:62px;height:62px;border:0;border-radius:50%;background:#FFFFFF;display:flex;align-items:center;justify-content:center;cursor:pointer">
+      <sc-if value="{{playing}}"><svg aria-hidden="true" width="26" height="26" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16" rx="1" fill="#121212"></rect><rect x="14" y="4" width="4" height="16" rx="1" fill="#121212"></rect></svg></sc-if><sc-if value="{{paused}}"><svg aria-hidden="true" width="26" height="26" viewBox="0 0 24 24"><path d="M7 4l13 8-13 8z" fill="#121212"></path></svg></sc-if>
+    </button>
+    <button onClick="{{skip}}" aria-label="한 번에 보기" style="border:0;background:transparent;padding:0;cursor:pointer;display:flex"><svg aria-hidden="true" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4l10 8-10 8z" fill="#FFFFFF"></path><path d="M19 5v14"></path></svg></button>
+    <span aria-hidden="true" style="opacity:.6"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#B3B3B3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2l4 4-4 4M3 11V10a4 4 0 0 1 4-4h14M7 22l-4-4 4-4M21 13v1a4 4 0 0 1-4 4H3"></path></svg></span>
+  </div>
+  <div style="flex-grow:1;flex-shrink:1;min-height:0;border-radius:14px;background:{{tint}};position:relative;overflow:hidden;display:flex;flex-direction:column">
+    <div aria-hidden="true" style="position:absolute;inset:0;background:rgba(0,0,0,.18)"></div>
+    <span style="position:relative;padding:14px 16px 4px;font-size:15px;font-weight:700">가사</span>
+    <div style="position:relative;flex-grow:1;overflow:hidden;padding:0 16px">
+      <div style="transform:{{shift}};transition:transform .6s cubic-bezier(.3,0,.2,1)">
+        <sc-for list="{{lines}}" as="l" hint-placeholder-count="5">
+          <div style="height:62px;display:flex;align-items:center;font-size:20px;font-weight:700;letter-spacing:-0.6px;line-height:1.4;color:{{l.color}};transition:color .4s">{{l.text}}</div>
+        </sc-for>
+      </div>
     </div>
   </div>
-
-  <div style="display:flex;flex-direction:column;gap:8px">
-    <div role="img" aria-label="재생 진행" style="height:4px;background:#E2E2E2;border-radius:2px">
-      <div style="height:4px;width:{{pct}};background:#000000;border-radius:2px;transition:width 1.7s linear"></div>
-    </div>
-    <div style="display:flex;justify-content:space-between;font-size:12px;color:#5C5C5C">
-      <span>2027년 1월 1일 0:00</span>
-      <span>{{count}}</span>
-    </div>
-  </div>
-
-  <div style="flex-grow:1;overflow:hidden;position:relative">
-    <div style="transform:{{shift}};transition:transform 0.6s cubic-bezier(0.3,0,0.2,1)">
-      <sc-for list="{{lines}}" as="l" hint-placeholder-count="5">
-        <div style="height:72px;display:flex;align-items:center;font-size:23px;font-weight:900;letter-spacing:-1px;line-height:1.3;color:{{l.color}};transition:color 0.4s">{{l.text}}</div>
-      </sc-for>
-    </div>
-  </div>
-
-  <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px">
-    <button onClick="{{replay}}" style="height:54px;border:1px solid #BDBDBD;border-radius:27px;background:#FFFFFF;color:#000000;font-family:'Noto Sans KR',sans-serif;font-size:15px;font-weight:700;cursor:pointer">처음부터 듣기</button>
-    <a href="Main.dc.html" style="height:54px;border-radius:27px;background:#000000;color:#FFFFFF;font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center;text-decoration:none">나도 예약 편지 쓰기</a>
+  <a href="Main.dc.html" style="flex-shrink:0;height:50px;border-radius:25px;background:#FFFFFF;color:#121212;font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center;text-decoration:none">나도 예약 편지 쓰기</a>
   </div>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"tint":{"editor":"color","default":"#2F6BFF","options":["#2F6BFF","#FF5A1F","#12A150","#FF3D8B"]},"$preview":{"width":390,"height":844}}'>
+<script type="text/x-dc" data-dc-script data-props='{"tint": {"editor": "color", "default": "#3A5BD9", "options": ["#3A5BD9", "#E0552B", "#0F8A6A", "#C93A78"]}, "$preview": {"width": 390, "height": 844}}'>
 var K_LINES = [
   '지민아,',
   '이걸 쓰는 지금은 11월이야',
@@ -59,41 +100,59 @@ var K_LINES = [
   '틀렸으면, 그것도 잘한 결정이었을 거야',
   '새해 복 많이 받아'
 ];
+var K_ROW = 62;
 class Component extends DCLogic {
   constructor(props) {
     super(props);
-    this.state = { idx: -1 };
+    this.state = { idx: -1, out: false, playing: false };
     this.timer = null;
   }
   componentDidMount() {
     var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (reduce) { this.setState({ idx: K_LINES.length }); return; }
+    if (reduce) { this.setState({ idx: K_LINES.length, out: true, playing: false }); return; }
     this.play();
   }
   componentWillUnmount() { clearTimeout(this.timer); }
   play() {
     clearTimeout(this.timer);
-    this.setState({ idx: -1 });
-    this.timer = setTimeout(() => this.step(), 700);
+    this.setState({ idx: -1, out: false, playing: false });
+    this.timer = setTimeout(() => {
+      this.setState({ out: true });
+      this.timer = setTimeout(() => { this.setState({ playing: true }); this.step(); }, 900);
+    }, 400);
   }
   step() {
     var n = this.state.idx + 1;
     this.setState({ idx: n });
     if (n < K_LINES.length) this.timer = setTimeout(() => this.step(), 1700);
+    else this.timer = setTimeout(() => this.setState({ playing: false }), 1700);
   }
+  toggle() {
+    if (this.state.idx >= K_LINES.length) { this.play(); return; }
+    if (this.state.playing) { clearTimeout(this.timer); this.setState({ playing: false }); }
+    else { this.setState({ playing: true, out: true }); this.timer = setTimeout(() => this.step(), 600); }
+  }
+  skip() { clearTimeout(this.timer); this.setState({ idx: K_LINES.length, out: true, playing: false }); }
   renderVals() {
-    var i = this.state.idx;
-    var total = K_LINES.length;
-    var done = i >= total;
-    var row = done ? 0 : Math.max(0, i - 1);
+    var i = this.state.idx, total = K_LINES.length, done = i >= total;
     var cur = Math.min(Math.max(i + 1, 0), total);
+    var row = done ? 0 : Math.max(0, i - 1);
+    var secs = cur * 3;
     return {
-      tint: this.props.tint ?? '#2F6BFF',
-      lines: K_LINES.map((t, k) => ({ text: t, color: (done || k === i) ? '#000000' : '#8A8A8A' })),
-      shift: 'translateY(-' + (row * 72) + 'px)',
+      tint: this.props.tint ?? '#3A5BD9',
+      vtop: '5px',
+      vleft: this.state.out ? '130px' : '20px',
+      spin: this.state.playing ? 'running' : 'paused',
+      playing: this.state.playing, paused: !this.state.playing,
+      toggleLabel: this.state.playing ? '일시정지' : '재생',
+      lines: K_LINES.map((t, k) => ({ text: t, color: done ? '#FFFFFF' : (k === i ? '#FFFFFF' : (k < i ? 'rgba(255,255,255,.62)' : 'rgba(0,0,0,.5)')) })),
+      shift: 'translateY(-' + (row * K_ROW) + 'px)',
       pct: Math.round((cur / total) * 100) + '%',
-      count: cur + ' / ' + total,
-      replay: () => this.play()
+      elapsed: '0:' + String(secs).padStart(2, '0'),
+      count: cur + ' / ' + total + '줄',
+      replay: () => this.play(),
+      toggle: () => this.toggle(),
+      skip: () => this.skip()
     };
   }
 }

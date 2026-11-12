@@ -11,84 +11,73 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&amp;display=swap">
 <style>
 body{margin:0}
-a{color:#000000}a:hover{color:#000000}
-a:focus-visible,button:focus-visible{outline:3px solid #000000;outline-offset:3px}
-@keyframes jIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
-@media (prefers-reduced-motion: reduce){*{animation:none !important;transition:none !important}}
+a:focus-visible,button:focus-visible{outline:2px solid currentColor;outline-offset:3px}
+.col>*{flex-shrink:0}
+@media (prefers-reduced-motion: reduce){*{transition:none !important;animation:none !important}}
+@keyframes jspin{to{transform:rotate(360deg)}}
+@keyframes jIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.num{font-variant-numeric:tabular-nums}
 </style>
 </helmet>
-<div style="width:390px;height:844px;box-sizing:border-box;background:#FFE94A;color:#000000;font-family:'Noto Sans KR',sans-serif;padding:36px 24px 26px;display:flex;flex-direction:column;gap:26px">
-  <div style="display:flex;flex-direction:column;gap:8px">
-    <p style="margin:0;font-size:15px;font-weight:500">영진 님이 지민 님에게 보낸 편지</p>
-    <h1 style="margin:0;font-size:38px;font-weight:900;line-height:1.25;letter-spacing:-2px">{{title}}</h1>
+<div class="col" style="width:390px;height:844px;box-sizing:border-box;background:#F2F3F5;color:#191B1F;font-family:'Noto Sans KR',sans-serif;padding:18px 18px 24px;display:flex;flex-direction:column;gap:14px">
+  <div style="display:flex;justify-content:space-between;align-items:center;height:32px;padding:0 4px;font-size:13px;color:#6B7280">
+    <span style="font-weight:700;color:#191B1F">예약 편지 입장</span><span>영진 → 지민</span>
   </div>
-
-  <sc-if value="{{loading}}" hint-placeholder-val="{{false}}">
-    <div style="flex-grow:1;display:flex;flex-direction:column;justify-content:center;gap:22px">
-      <div style="display:flex;flex-direction:column">
-        <span style="font-size:16px;font-weight:700">내 앞에 남은 시간</span>
-        <span style="font-size:84px;font-weight:900;line-height:1.1;letter-spacing:-5px">0일</span>
-        <span style="font-size:34px;font-weight:900;line-height:1.1;letter-spacing:-1.5px">내 차례예요</span>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:8px">
-        <div role="img" aria-label="입장 진행 중" style="height:26px;box-sizing:border-box;border:3px solid #000000;border-radius:13px;background:#FFFFFF;padding:3px;display:flex">
-          <div style="width:{{fill}};min-width:14px;background:#000000;border-radius:8px;transition:width 1.8s cubic-bezier(0.3,0,0.2,1)"></div>
-        </div>
-        <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:500">
-          <span>2026년 11월 11일</span>
-          <span>2027년 1월 1일 0시</span>
-        </div>
-      </div>
-      <p style="margin:0;font-size:14px;font-weight:500;line-height:1.9">자물쇠를 푸는 중이에요. 창을 닫지 마세요.</p>
+  <sc-if value="{{waiting}}" hint-placeholder-val="{{false}}">
+  <div style="flex-grow:1;flex-shrink:1;background:#FFFFFF;border-radius:20px;padding:26px 22px 20px;display:flex;flex-direction:column">
+    <div style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:#2F54EB"><span aria-hidden="true" style="width:14px;height:14px;box-sizing:border-box;border-radius:50%;border:2px solid #D6DBF5;border-top-color:#2F54EB;animation:jspin .9s linear infinite"></span><span>{{status}}</span></div>
+    <h1 style="margin:12px 0 0;font-size:22px;font-weight:700;letter-spacing:-0.6px;line-height:1.45">할 말이 있는데<br>1월 1일에 할게</h1>
+    <span style="margin-top:28px;font-size:14px;color:#6B7280">나의 대기순서</span>
+    <div style="display:flex;align-items:baseline;gap:6px;margin-top:2px"><span class="num" style="font-size:46px;font-weight:800;letter-spacing:-1.5px;line-height:1.15">{{num}}</span><span style="font-size:18px;font-weight:600">번째</span></div>
+    <div role="img" aria-label="대기 진행률" style="margin-top:14px;height:6px;border-radius:3px;background:#EEF0F3;overflow:hidden"><div style="height:100%;width:{{bar}};min-width:6px;border-radius:3px;background:#2F54EB;transition:width 1.8s cubic-bezier(.3,0,.2,1)"></div></div>
+    <div style="margin-top:20px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;padding:11px 0;border-top:1px solid #EEF0F3;font-size:14px"><span style="color:#6B7280">입장 시각</span><span class="num" style="font-weight:600;color:#191B1F">2027년 1월 1일 오전 0:00</span></div>
+      <div style="display:flex;justify-content:space-between;align-items:baseline;padding:11px 0;border-top:1px solid #EEF0F3;font-size:14px"><span style="color:#6B7280">남은 시간</span><span class="num" style="font-weight:600;color:#191B1F">50일 12시간 54분</span></div>
+      <div style="display:flex;justify-content:space-between;align-items:baseline;padding:11px 0;border-top:1px solid #EEF0F3;font-size:14px"><span style="color:#6B7280">먼저 입장</span><span class="num" style="font-weight:600;color:#191B1F">누구도 할 수 없어요</span></div>
     </div>
+    <div style="margin-top:auto;border-radius:12px;background:#F6F7F9;padding:14px 16px;font-size:13px;line-height:1.75;color:#4B5563">대기순서는 1초에 한 번씩 줄어요.<br>창을 닫았다가 다시 와도 순서는 그대로예요.</div>
+  </div>
   </sc-if>
-
   <sc-if value="{{entered}}" hint-placeholder-val="{{true}}">
-    <div style="flex-grow:1;display:flex;flex-direction:column;justify-content:center;animation:jIn 0.45s ease-out both">
-      <div style="background:#FFFFFF;border:3px solid #000000;border-radius:16px;padding:22px 20px;display:flex;flex-direction:column;gap:16px">
-        <p style="margin:0;font-size:17px;font-weight:500;line-height:1.85;white-space:pre-line">지민아, 이걸 쓰는 지금은 11월이야.
-너는 이직할지 말지 아직 고민 중이고, 나는 네가 결국 옮길 거라는 데 만 원 걸었어.
-맞았으면 오늘 밥은 네가 사.
-틀렸으면, 그것도 잘한 결정이었을 거야.
-새해 복 많이 받아.</p>
-        <span style="font-size:15px;font-weight:700;text-align:right">영진, 51일 전에 씀</span>
-      </div>
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;animation:jIn 0.45s 0.15s ease-out both">
-      <button onClick="{{replay}}" style="height:56px;border:3px solid #000000;border-radius:14px;background:transparent;color:#000000;font-family:'Noto Sans KR',sans-serif;font-size:16px;font-weight:700;cursor:pointer">다시 입장하기</button>
-      <a href="Main.dc.html" style="height:56px;box-sizing:border-box;border-radius:14px;background:#000000;color:#FFFFFF;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;text-decoration:none">나도 줄 세우기</a>
-    </div>
+  <div style="flex-grow:1;flex-shrink:1;min-height:0;background:#FFFFFF;border-radius:20px;padding:24px 22px 20px;display:flex;flex-direction:column;animation:jIn .45s ease-out both">
+    <div style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:#2F54EB"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2F54EB" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"></path></svg><span>입장 완료</span></div>
+    <h1 style="margin:12px 0 18px;font-size:22px;font-weight:700;letter-spacing:-0.6px;line-height:1.45">영진이 남긴 말</h1>
+    <div style="flex-grow:1;overflow-y:auto"><p style="margin:0 0 10px;font-size:17px;line-height:1.8">지민아, 이걸 쓰는 지금은 11월이야.</p><p style="margin:0 0 10px;font-size:17px;line-height:1.8">너는 이직할지 말지 아직 고민 중이고, 나는 네가 결국 옮길 거라는 데 만 원 걸었어.</p><p style="margin:0 0 10px;font-size:17px;line-height:1.8">맞았으면 오늘 밥은 네가 사.</p><p style="margin:0 0 10px;font-size:17px;line-height:1.8">틀렸으면, 그것도 잘한 결정이었을 거야.</p><p style="margin:0 0 10px;font-size:17px;line-height:1.8">새해 복 많이 받아.</p></div>
+    <div style="padding-top:12px;border-top:1px solid #EEF0F3;display:flex;justify-content:space-between;font-size:13px;color:#6B7280"><span>2026년 11월 11일에 씀</span><span>51일 기다림</span></div>
+  </div>
   </sc-if>
+  <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px"><button onClick="{{replay}}" style="height:54px;border:1px solid #D1D5DB;border-radius:12px;background:#FFFFFF;color:#191B1F;font-family:inherit;font-size:15px;font-weight:600;cursor:pointer">다시 입장하기</button><a href="Main.dc.html" style="height:54px;border-radius:12px;background:#2F54EB;color:#FFFFFF;font-size:15px;font-weight:600;display:flex;align-items:center;justify-content:center;text-decoration:none">나도 줄 세우기</a></div>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+<script type="text/x-dc" data-dc-script data-props='{"$preview": {"width": 390, "height": 844}}'>
 class Component extends DCLogic {
-  constructor(props) {
-    super(props);
-    this.state = { phase: 'start' };
-    this.timers = [];
-  }
+  constructor(props) { super(props); this.state = { phase: 'wait', n: 4363240 }; this.timers = []; this.iv = null; }
   componentDidMount() {
     var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (reduce) { this.setState({ phase: 'in' }); return; }
+    if (reduce) { this.setState({ phase: 'in', n: 0 }); return; }
     this.play();
   }
-  componentWillUnmount() { this.timers.forEach(clearTimeout); }
+  componentWillUnmount() { this.timers.forEach(clearTimeout); clearInterval(this.iv); }
   play() {
-    this.timers.forEach(clearTimeout);
-    this.setState({ phase: 'start' });
-    this.timers = [
-      setTimeout(() => this.setState({ phase: 'fill' }), 400),
-      setTimeout(() => this.setState({ phase: 'in' }), 2500)
-    ];
+    this.timers.forEach(clearTimeout); clearInterval(this.iv);
+    this.setState({ phase: 'wait', n: 4363240 });
+    this.timers = [setTimeout(() => {
+      this.setState({ phase: 'run' });
+      var t0 = Date.now(), D = 1800, N = 4363240;
+      this.iv = setInterval(() => {
+        var p = Math.min(1, (Date.now() - t0) / D), e = 1 - Math.pow(1 - p, 3);
+        this.setState({ n: Math.round(N * (1 - e)) });
+        if (p >= 1) { clearInterval(this.iv); this.setState({ phase: 'go' }); this.timers.push(setTimeout(() => this.setState({ phase: 'in' }), 700)); }
+      }, 40);
+    }, 600)];
   }
   renderVals() {
-    var p = this.state.phase;
+    var ph = this.state.phase;
     return {
-      loading: p !== 'in',
-      entered: p === 'in',
-      fill: p === 'start' ? '2%' : '100%',
-      title: p === 'in' ? '입장했습니다' : '입장 중입니다',
+      waiting: ph !== 'in', entered: ph === 'in',
+      num: this.state.n.toLocaleString('ko-KR'),
+      bar: ph === 'wait' ? '1%' : '100%',
+      status: ph === 'go' ? '입장하는 중' : (ph === 'run' ? '순서가 다가오고 있어요' : '접속 대기 중'),
       replay: () => this.play()
     };
   }

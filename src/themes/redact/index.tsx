@@ -1,92 +1,94 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { fullDate, hourMin, iGa } from '../../lib/date.ts'
-import { LockError, remaining, st } from '../shared.tsx'
+import { dotDate, fullDate, hhmm } from '../../lib/date.ts'
+import { LockError, remaining, st, TeaserLines } from '../shared.tsx'
 import type { LetterInfo, LockedProps, OpenProps, Theme } from '../types.ts'
 
 // 가려진 글 테마 (디자인: E-text, E-open)
-const FONT = "'Hahmlet',serif"
-const SCREEN = `box-sizing:border-box;background:#F7F7F7;color:#000000;font-family:${FONT};padding:36px 30px 28px;display:flex;flex-direction:column;gap:28px`
-const PRIMARY = 'height:54px;border:0;background:#000000;color:#FFFFFF;font-family:inherit;font-size:16px;font-weight:500;cursor:pointer;flex-shrink:0'
-const LINK = `height:48px;border:0;background:transparent;color:#000000;font-family:${FONT};font-size:15px;text-decoration:underline;text-underline-offset:4px;cursor:pointer;padding:0`
-const ROW = 'display:flex;align-items:center;justify-content:space-between;gap:16px'
-const TIMELOCK_OVERHEAD = 193
+const SERIF = "'Hahmlet',serif"
+const SANS = "'Noto Sans KR',sans-serif"
+const SCREEN = `box-sizing:border-box;background:#DCDDD9;color:#141414;font-family:${SERIF};padding:26px 20px 24px;display:flex;flex-direction:column;gap:18px`
+const DOC = 'position:relative;flex-grow:1;flex-shrink:1;min-height:0;background:#FFFFFF;box-shadow:0 1px 2px rgba(0,0,0,.08),0 12px 30px rgba(0,0,0,.08);padding:22px 22px 18px;display:flex;flex-direction:column;overflow:hidden'
+const STAMP = `position:absolute;right:18px;top:96px;transform:rotate(-9deg);border:2.5px solid currentColor;border-radius:6px;padding:6px 12px;font-family:${SANS};font-size:17px;font-weight:700;letter-spacing:2px;mix-blend-mode:multiply;pointer-events:none`
+const RED = '#C8322B'
+const BLUE = '#1F4FB8'
+const OUTLINE = `height:52px;border:1px solid #9A9A95;border-radius:4px;background:transparent;color:#141414;font-family:${SANS};font-size:15px;font-weight:500;cursor:pointer`
+const SOLID = `height:52px;border:0;border-radius:4px;background:#141414;color:#FFFFFF;font-family:${SANS};font-size:15px;font-weight:500;cursor:pointer`
+const BUTTONS = 'display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px'
 
-/**
- * 잠긴 동안에는 실제 단어 길이를 알 수 없다. 막대 배열은 암호문 길이와 링크 해시를
- * 시드로 한 의사난수로 만든다. 같은 링크는 항상 같은 모양이다.
- */
-function fakeBars(letter: LetterInfo): number[] {
-  let seed = (parseInt(letter.hash, 36) ^ Math.imul(letter.cipherLength, 0x9e3779b1)) >>> 0
-  const next = () => {
-    // mulberry32
-    seed = (seed + 0x6d2b79f5) >>> 0
-    let t = seed
-    t = Math.imul(t ^ (t >>> 15), t | 1)
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61)
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
-  }
-  // 편지가 길수록 막대가 많다. 화면 한 장에 들어갈 만큼만 그린다.
-  const count = Math.min(34, Math.max(6, Math.round((letter.cipherLength - TIMELOCK_OVERHEAD) / 5)))
-  return Array.from({ length: count }, () => 26 + Math.round(next() * 27) * 2)
+/** 문서 머리: 머리줄, 제목, 작성·수신 */
+function DocHead({ letter, now, state }: { letter: LetterInfo; now: Date; state: '공개' | '공개됨' }) {
+  return (
+    <>
+      <div style={st(`display:flex;justify-content:space-between;gap:12px;font-family:${SANS};font-size:11.5px;color:#6B6B6B;padding-bottom:10px;border-bottom:1px solid #141414`)}>
+        <span>편지 문서</span>
+        <span>
+          {state} {dotDate(letter.unlockAt)} {hhmm(letter.unlockAt)}
+        </span>
+      </div>
+      <h1 className="tyl-keep" style={st('margin:16px 0 4px;font-size:21px;font-weight:700;letter-spacing:-0.5px;line-height:1.4')}>
+        <TeaserLines unlock={letter.unlockAt} now={now} />
+      </h1>
+      <div className="tyl-keep" style={st(`font-family:${SANS};font-size:12px;color:#6B6B6B;margin-bottom:22px`)}>
+        작성 {letter.from} / 수신 {letter.to}
+      </div>
+    </>
+  )
 }
 
-const Caption = ({ letter }: { letter: LetterInfo }) => (
-  <p className="tyl-keep" style={st('margin:0;font-size:15px;color:#4A4A4A')}>
-    {iGa(letter.from)} {letter.to}에게
-  </p>
-)
-const TITLE = 'margin:0;font-size:27px;font-weight:500;line-height:1.45;letter-spacing:-0.5px'
+// 잠긴 동안의 검은 막대. 실제 본문과 무관한 고정 패턴이라 단어 길이로 본문을 짐작할 수 없다.
+// [폭(px), 기울기(deg)] — 디자인(E-text)의 값 그대로다.
+const BARS: readonly (readonly (readonly [number, number])[])[] = [
+  [[59, -0.24], [33, -0.12], [29, -0.49], [43, -0.12], [90, 0.36]],
+  [[34, -0.53], [62, 0.04], [30, 0.34], [34, -0.47], [29, 0.53], [58, 0.39], [34, -0.29], [30, -0.37], [30, -0.25], [34, 0.28], [49, 0.42], [15, -0.5], [17, -0.2], [16, 0.01], [59, -0.3]],
+  [[60, -0.49], [34, 0.44], [32, 0.41], [28, 0.49], [32, 0.25]],
+  [[75, 0.42], [47, -0.37], [31, 0.12], [76, -0.06], [44, -0.23]],
+  [[34, 0.36], [13, -0.54], [33, 0.6], [47, 0.04]],
+]
 
 function Locked(p: LockedProps) {
   const { letter } = p
-  const bars = useMemo(() => fakeBars(letter), [letter])
   return (
     <div className="tyl-screen tyl-focus-dark" style={st(`min-height:var(--screen-h, 100dvh);${SCREEN}`)}>
-      <div style={st('display:flex;flex-direction:column;gap:10px')}>
-        <Caption letter={letter} />
-        <h1 className="tyl-keep" style={st(TITLE)}>
-          이 편지는 {fullDate(letter.unlockAt)}
-          <br />
-          {hourMin(letter.unlockAt)}까지 읽을 수 없습니다.
-        </h1>
-      </div>
-
-      <div style={st('flex-grow:1;display:flex;flex-direction:column;justify-content:center')}>
-        <div role="img" aria-label="가려진 편지 본문" style={st('display:flex;flex-wrap:wrap;gap:18px 8px')}>
-          {bars.map((w, i) => (
-            <div key={i} style={{ width: w, height: 15, background: '#000' }} />
+      <div style={st(`${DOC};min-height:420px`)}>
+        <DocHead letter={letter} now={new Date(p.now)} state="공개" />
+        <div aria-hidden="true" style={{ ...st(STAMP), color: RED }}>
+          공개 전
+        </div>
+        <div role="img" aria-label="가려진 편지 본문" style={st('flex-grow:1;min-height:0;overflow:hidden')}>
+          {BARS.map((row, r) => (
+            <div key={r} style={st('display:flex;flex-wrap:wrap;gap:9px 6px;margin-bottom:12px')}>
+              {row.map(([w, deg], i) => (
+                <span key={i} style={{ ...st('display:inline-block;height:17px;margin:3px 0;background:#141414;border-radius:1.5px'), width: w, transform: `rotate(${deg}deg)` }} />
+              ))}
+            </div>
           ))}
         </div>
-        <p style={st('margin:28px 0 0;font-size:13px;line-height:1.7;color:#4A4A4A')}>
-          쓴 사람도, 이 사이트도 지금은 열 수 없습니다.
-          <br />
-          그날이 되면 이 자리에서 글로 바뀝니다.
-        </p>
       </div>
-
-      <div style={st('display:flex;flex-direction:column;gap:18px')}>
-        <LockError {...p} />
-        {p.status !== 'error' && (
-          <p style={st('margin:0;font-size:34px;font-weight:700;letter-spacing:-1px;color:#1838D8;font-variant-numeric:tabular-nums')}>
-            {p.status === 'opening' ? remaining(p) : `${remaining(p)} 남음`}
-          </p>
+      <div style={st(`display:flex;justify-content:space-between;align-items:baseline;gap:12px;font-family:${SANS}`)}>
+        {p.status === 'error' ? (
+          <LockError {...p} />
+        ) : (
+          <>
+            <span style={st('font-size:13px;color:#4A4A4A;line-height:1.6')}>공개 전에는 누구도 열 수 없어요</span>
+            <span style={st('font-size:19px;font-weight:700;flex-shrink:0;font-variant-numeric:tabular-nums')}>{remaining(p)}</span>
+          </>
         )}
-        <div style={st(ROW)}>
-          <button type="button" style={st(`${PRIMARY};padding:0 26px`)} onClick={p.onWrite} disabled={p.preview}>
-            나도 한 통 쓰기
-          </button>
-          <button type="button" style={st(LINK)} onClick={p.onSaveCalendar} disabled={p.preview}>
-            캘린더에 넣어 두기
-          </button>
-        </div>
+      </div>
+      <div style={st(BUTTONS)}>
+        <button type="button" style={st(OUTLINE)} onClick={p.onSaveCalendar} disabled={p.preview}>
+          캘린더에 저장
+        </button>
+        <button type="button" style={st(SOLID)} onClick={p.onWrite} disabled={p.preview}>
+          나도 한 통 쓰기
+        </button>
       </div>
     </div>
   )
 }
 
-// 검은 막대가 단어 단위로 걷힌다 (E-open 스크립트의 값)
+// 실제 단어 폭에 맞춘 막대가 단어 단위로 걷힌다 (E-open 스크립트의 값)
 const START_DELAY = 900
-const WORD_TIME = 110
+const WORD_TIME = 120
 
 type Token = { word: string } | { gap: number }
 
@@ -110,6 +112,7 @@ function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenP
   const [shown, setShown] = useState(autoplay ? 0 : count)
   const [run, setRun] = useState(autoplay ? 1 : 0)
   const timer = useRef(0)
+  const body = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (run === 0) return
@@ -118,65 +121,74 @@ function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenP
       if (n < count) timer.current = window.setTimeout(() => step(n + 1), WORD_TIME)
     }
     setShown(0)
+    if (body.current) body.current.scrollTop = 0
     timer.current = window.setTimeout(() => step(1), START_DELAY)
     return () => clearTimeout(timer.current)
   }, [run, count])
 
   const done = shown >= count
+
+  // 걷히는 단어가 문서 아래로 내려가면 따라 내려간다.
+  useEffect(() => {
+    const el = body.current
+    if (!el || run === 0 || done || shown === 0) return
+    const word = el.querySelectorAll<HTMLElement>('[data-word]')[shown - 1]
+    if (!word) return
+    const bottom = word.offsetTop + word.offsetHeight
+    if (bottom > el.scrollTop + el.clientHeight - 24) el.scrollTop = bottom - el.clientHeight * 0.6
+  }, [shown, run, done])
+
   const showAll = () => {
     clearTimeout(timer.current)
     setShown(count)
+    if (body.current) body.current.scrollTop = 0
   }
+  const animate = run > 0 && !reducedMotion
   let k = 0
 
   return (
-    <div className="tyl-screen tyl-focus-dark" style={st(`height:var(--screen-h, 100dvh);${SCREEN}`)}>
-      <div style={st('display:flex;flex-direction:column;gap:10px')}>
-        <Caption letter={letter} />
-        <h1 className="tyl-keep" style={st(TITLE)}>
-          {fullDate(letter.unlockAt)} {hourMin(letter.unlockAt)},
-          <br />
-          이제 읽을 수 있습니다.
-        </h1>
-      </div>
-
-      <div style={st('flex-grow:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column')}>
-        <div style={st('margin:auto 0;display:flex;flex-wrap:wrap;gap:16px 6px')}>
-          {tokens.map((t, i) => {
-            if ('gap' in t) return <span key={i} style={{ flexBasis: '100%', height: t.gap }} />
-            const open = k++ < shown
-            return (
-              <span
-                key={i}
-                style={{
-                  ...st('font-size:18px;line-height:1.3;padding:1px 2px;overflow-wrap:anywhere;min-width:0;transition:background-color 0.45s ease,color 0.45s ease'),
-                  backgroundColor: open ? 'transparent' : '#000000',
-                  color: open ? '#000000' : 'transparent',
-                }}
-              >
-                {t.word}
-              </span>
-            )
-          })}
+    <div className="tyl-screen tyl-focus-dark" style={st(`height:max(var(--screen-h, 100dvh), 600px);${SCREEN}`)}>
+      <div style={st(DOC)}>
+        <DocHead letter={letter} now={letter.createdAt} state="공개됨" />
+        <div aria-hidden="true" style={{ ...st(STAMP), color: RED, opacity: shown > 0 ? 0 : 1, transition: animate ? 'opacity .4s,transform .4s' : undefined }}>
+          공개 전
+        </div>
+        <div aria-hidden="true" style={{ ...st(STAMP), color: BLUE, opacity: done ? 1 : 0, transition: animate ? 'opacity .4s .1s' : undefined }}>
+          공개됨
+        </div>
+        <div ref={body} tabIndex={0} style={st('position:relative;flex-grow:1;min-height:0;overflow-y:auto;outline:none')}>
+          <div style={st('display:flex;flex-wrap:wrap;align-content:flex-start;gap:9px 6px')}>
+            {tokens.map((t, i) => {
+              if ('gap' in t) return <span key={i} style={{ flexBasis: '100%', height: t.gap }} />
+              const open = k++ < shown
+              return (
+                <span key={i} data-word="" style={st('position:relative;max-width:100%;font-size:17px;line-height:1.45;padding:0 1px;overflow-wrap:anywhere')}>
+                  <span style={{ color: open ? '#141414' : 'transparent', transition: animate ? 'color .3s ease' : undefined }}>{t.word}</span>
+                  <span
+                    aria-hidden="true"
+                    style={{ ...st('position:absolute;left:0;top:2px;bottom:2px;background:#141414;border-radius:1.5px'), width: open ? '0%' : '100%', transition: animate ? 'width .35s cubic-bezier(.6,0,.4,1)' : undefined }}
+                  />
+                </span>
+              )
+            })}
+          </div>
         </div>
       </div>
-
-      <div style={st('display:flex;flex-direction:column;gap:18px')}>
-        <p style={st('margin:0;font-size:16px;color:#4A4A4A')}>{fullDate(letter.createdAt)}에 씀</p>
-        <div style={st(ROW)}>
-          <button type="button" style={st(`${PRIMARY};padding:0 22px`)} onClick={onReply} disabled={preview}>
-            답장도 잠가서 보내기
+      <div style={st(`display:flex;justify-content:space-between;align-items:baseline;gap:12px;font-family:${SANS}`)}>
+        <span style={st('font-size:13px;color:#4A4A4A')}>{fullDate(letter.createdAt)}에 씀</span>
+        {!done && (
+          <button type="button" style={st('min-height:44px;border:0;background:transparent;padding:0;color:#141414;font-family:inherit;font-size:14px;text-decoration:underline;text-underline-offset:4px;cursor:pointer')} onClick={showAll}>
+            한 번에 보기
           </button>
-          {done ? (
-            <button type="button" style={st(LINK)} onClick={() => (reducedMotion ? showAll() : setRun((r) => r + 1))}>
-              다시 보기
-            </button>
-          ) : (
-            <button type="button" style={st(LINK)} onClick={showAll}>
-              한 번에 보기
-            </button>
-          )}
-        </div>
+        )}
+      </div>
+      <div style={st(BUTTONS)}>
+        <button type="button" style={st(OUTLINE)} onClick={() => (reducedMotion ? showAll() : setRun((r) => r + 1))}>
+          다시 보기
+        </button>
+        <button type="button" style={st(SOLID)} onClick={onReply} disabled={preview}>
+          답장도 잠가서 보내기
+        </button>
       </div>
     </div>
   )
@@ -187,9 +199,9 @@ export const redact: Theme = {
   code: 8,
   name: '가려진 글',
   tints: null,
-  fonts: ['Hahmlet:wght@400;500;700'],
-  tile: { bg: '#F7F7F7', markBg: '#000000', markW: '46px', markH: '12px', markRadius: '0' },
-  preview: { bg: '#F7F7F7', fg: '#000000', font: FONT, bubbleBg: 'transparent', bubbleFg: '#000000', radius: '0', pad: '0', size: '21px' },
+  fonts: ['Hahmlet:wght@400;500;700', 'Noto+Sans+KR:wght@400;500;700'],
+  tile: { bg: '#DCDDD9', markBg: '#141414', markW: '46px', markH: '12px', markRadius: '1.5px' },
+  preview: { bg: '#DCDDD9', fg: '#141414', font: SERIF, bubbleBg: '#FFFFFF', bubbleFg: '#141414', radius: '0', pad: '14px 16px', size: '17px' },
   Locked,
   Open,
 }

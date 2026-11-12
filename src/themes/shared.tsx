@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { splitBubbles } from '../lib/bubbles.ts'
-import { countdown } from '../lib/date.ts'
+import { countdown, teaserDate } from '../lib/date.ts'
 import type { LockedProps } from './types.ts'
 import './shared.css'
 
@@ -120,6 +120,17 @@ export function useBubblePlayback(text: string, autoplay: boolean, reducedMotion
   }
   const replay = () => (reducedMotion ? showAll() : setRun((r) => r + 1))
   return { bubbles, shown, typing, run, done: shown >= bubbles.length, showAll, replay, scroller }
+}
+
+/** 예고 문구를 두 줄로: "할 말이 있는데 / 1월 1일에 할게" */
+export function TeaserLines({ unlock, now }: { unlock: Date; now: Date }) {
+  return (
+    <>
+      할 말이 있는데
+      <br />
+      {teaserDate(unlock, now)}에 할게
+    </>
+  )
 }
 
 /** 숫자 글자 수에 따라 큰 날짜 글자를 줄인다: "1.1"은 그대로, "12.25"는 작게. */

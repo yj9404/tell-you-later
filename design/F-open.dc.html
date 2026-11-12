@@ -8,68 +8,59 @@
 <body>
 <x-dc>
 <helmet>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&amp;display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&amp;family=Nanum+Pen+Script&amp;display=swap">
 <style>
 body{margin:0}
-a{color:#1F3C88}a:hover{color:#152A61}
-a:focus-visible,button:focus-visible{outline:3px solid #1F3C88;outline-offset:3px}
-@keyframes fRollA{from{transform:translateY(0)}to{transform:translateY(calc(-100% + 548px))}}
-@keyframes fRollB{from{transform:translateY(0)}to{transform:translateY(calc(-100% + 548px))}}
+a:focus-visible,button:focus-visible{outline:2px solid currentColor;outline-offset:3px}
+.col>*{flex-shrink:0}
+@media (prefers-reduced-motion: reduce){*{transition:none !important;animation:none !important}}
+.pen{font-family:"Nanum Pen Script",cursive}
+@keyframes fRollA{from{transform:translateY(0)}to{transform:translateY(calc(-100% + 520px))}}
+@keyframes fRollB{from{transform:translateY(0)}to{transform:translateY(calc(-100% + 520px))}}
 </style>
 </helmet>
-<div style="width:390px;height:844px;box-sizing:border-box;background:#EEF1F5;color:#1F3C88;font-family:'Gowun Dodum',sans-serif;padding:32px 26px 28px;display:flex;flex-direction:column;gap:20px">
-  <h1 style="margin:0;font-size:24px;font-weight:400;line-height:1.5;letter-spacing:-0.5px">1월 1일 0시, 편지가 열렸어요.</h1>
-
-  <div style="height:570px;box-sizing:border-box;padding:11px;background-image:repeating-linear-gradient(135deg,#D7263D 0,#D7263D 14px,#FFFFFF 14px,#FFFFFF 28px,#1F3C88 28px,#1F3C88 42px,#FFFFFF 42px,#FFFFFF 56px);box-shadow:0 14px 28px rgba(31,60,136,0.16)">
-    <div style="height:100%;background:#FFFFFF;overflow-x:hidden;overflow-y:{{overflowY}}">
-      <div style="padding:26px 24px 40px;animation:{{anim}}">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:26px">
-          <span style="font-size:26px;letter-spacing:-0.5px">지민에게</span>
-          <div style="width:52px;height:60px;box-sizing:border-box;border:2px dotted #D7263D;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#D7263D;line-height:1.1">
-            <span style="font-size:10px">2027</span>
-            <span style="font-size:22px">1.1</span>
+<div class="col" style="width:390px;height:844px;box-sizing:border-box;background:#E3E7EC;color:#1E3A7B;font-family:'Gowun Dodum',sans-serif;padding:32px 24px 24px;display:flex;flex-direction:column;gap:20px;overflow:hidden">
+  <h1 style="margin:0;font-size:22px;font-weight:400;line-height:1.5;letter-spacing:-0.4px">1월 1일 0시, 편지가 열렸어요</h1>
+  <div style="flex-grow:1;flex-shrink:1;min-height:0;position:relative;transform:translateY({{py}});transition:transform .9s cubic-bezier(.2,.7,.2,1)">
+    <div style="position:absolute;inset:0;background:#F4F7FC;border-radius:2px;box-shadow:0 1px 2px rgba(0,0,0,.08),0 14px 30px rgba(30,58,123,.12);overflow:hidden">
+      <div style="height:8px;background:repeating-linear-gradient(135deg,#C8322B 0 12px,transparent 12px 22px,#1E3A7B 22px 34px,transparent 34px 44px)"></div>
+      <div style="position:absolute;top:8px;left:0;right:0;bottom:0;overflow-x:hidden;overflow-y:{{overflowY}}">
+        <div style="padding:22px 24px 40px;color:#13254F;animation:{{anim}}">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;height:64px">
+            <span class="pen" style="font-size:36px;line-height:1">지민에게</span>
+            <div style="position:relative;width:46px;height:56px;padding:5px;box-sizing:border-box;background:radial-gradient(circle at 4px 4px,transparent 2.4px,#FFFFFF 2.8px) -4px -4px/8px 8px;filter:drop-shadow(0 1px 1px rgba(0,0,0,.18))">
+        <div style="width:100%;height:100%;background:#1E3A7B;color:#FFFFFF;display:flex;flex-direction:column;justify-content:space-between;padding:5px 6px;box-sizing:border-box"><span style="font-size:7px;opacity:.8">2027</span><span style="font-size:17px;line-height:1">1.1</span></div>
+      </div>
           </div>
+          <p style="margin:0 0 32px;font-size:17px;line-height:32px">이걸 쓰는 지금은 11월이야. 창밖에 은행잎이 다 떨어졌고, 너는 어제도 야근했다고 했지.</p><p style="margin:0 0 32px;font-size:17px;line-height:32px">요즘 네가 이직할지 말지 고민하는 거 알아. 만날 때마다 괜찮다고 하는데, 괜찮은 사람은 그 얘기를 세 번씩 안 하거든.</p><p style="margin:0 0 32px;font-size:17px;line-height:32px">나는 네가 결국 옮길 거라는 데 만 원 걸었어. 누구랑 걸었는지는 비밀이야.</p><p style="margin:0 0 32px;font-size:17px;line-height:32px">맞았으면 오늘 밥은 네가 사. 틀렸으면, 그것도 잘한 결정이었을 거야. 너는 어디에 있든 결국 잘 해내는 사람이니까.</p><p style="margin:0 0 32px;font-size:17px;line-height:32px">이 편지가 열리는 날에는 둘 다 한 살씩 더 먹었겠다. 올해도 옆에 있어 줘서 고마워.</p><p style="margin:0 0 32px;font-size:17px;line-height:32px">새해 복 많이 받아.</p>
+          <p class="pen" style="margin:0;text-align:right;font-size:26px;line-height:32px">2026년 11월 11일, 영진</p>
         </div>
-        <p style="margin:0 0 20px;font-size:17px;line-height:2;color:#22305A">이걸 쓰는 지금은 11월이야. 창밖에 은행잎이 다 떨어졌고, 너는 어제도 야근했다고 했지.</p>
-        <p style="margin:0 0 20px;font-size:17px;line-height:2;color:#22305A">요즘 네가 이직할지 말지 고민하는 거 알아. 만날 때마다 괜찮다고 하는데, 괜찮은 사람은 그 얘기를 세 번씩 안 하거든.</p>
-        <p style="margin:0 0 20px;font-size:17px;line-height:2;color:#22305A">나는 네가 결국 옮길 거라는 데 만 원 걸었어. 누구랑 걸었는지는 비밀이야.</p>
-        <p style="margin:0 0 20px;font-size:17px;line-height:2;color:#22305A">맞았으면 오늘 밥은 네가 사. 틀렸으면, 그것도 잘한 결정이었을 거야. 너는 어디에 있든 결국 잘 해내는 사람이니까.</p>
-        <p style="margin:0 0 20px;font-size:17px;line-height:2;color:#22305A">이 편지가 열리는 날에는 둘 다 한 살씩 더 먹었겠다. 올해도 옆에 있어 줘서 고마워.</p>
-        <p style="margin:0 0 28px;font-size:17px;line-height:2;color:#22305A">새해 복 많이 받아.</p>
-        <p style="margin:0;font-size:17px;text-align:right;color:#22305A">2026년 11월 11일, 영진</p>
       </div>
     </div>
   </div>
-
-  <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:auto">
-    <sc-if value="{{rolling}}" hint-placeholder-val="{{false}}">
-      <button onClick="{{stop}}" style="height:54px;border:1.5px solid #1F3C88;border-radius:8px;background:transparent;color:#1F3C88;font-family:'Gowun Dodum',sans-serif;font-size:16px;cursor:pointer">직접 넘겨 읽기</button>
-    </sc-if>
-    <sc-if value="{{manual}}" hint-placeholder-val="{{true}}">
-      <button onClick="{{replay}}" style="height:54px;border:1.5px solid #1F3C88;border-radius:8px;background:transparent;color:#1F3C88;font-family:'Gowun Dodum',sans-serif;font-size:16px;cursor:pointer">처음부터 다시</button>
-    </sc-if>
-    <a href="Main.dc.html" style="height:54px;border-radius:8px;background:#1F3C88;color:#FFFFFF;font-size:16px;display:flex;align-items:center;justify-content:center;text-decoration:none">답장 부치기</a>
+  <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px">
+    <sc-if value="{{rolling}}" hint-placeholder-val="{{false}}"><button onClick="{{stop}}" style="height:52px;border:1px solid #1E3A7B;border-radius:6px;background:transparent;color:#1E3A7B;font-family:inherit;font-size:15px;cursor:pointer">직접 넘겨 읽기</button></sc-if>
+    <sc-if value="{{manual}}" hint-placeholder-val="{{true}}"><button onClick="{{replay}}" style="height:52px;border:1px solid #1E3A7B;border-radius:6px;background:transparent;color:#1E3A7B;font-family:inherit;font-size:15px;cursor:pointer">처음부터 다시</button></sc-if>
+    <a href="Main.dc.html" style="height:52px;border-radius:6px;background:#1E3A7B;color:#FFFFFF;font-size:15px;display:flex;align-items:center;justify-content:center;text-decoration:none">답장 부치기</a>
   </div>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+<script type="text/x-dc" data-dc-script data-props='{"$preview": {"width": 390, "height": 844}}'>
 class Component extends DCLogic {
-  constructor(props) {
-    super(props);
-    this.state = { manual: false, run: 0 };
-  }
+  constructor(props) { super(props); this.state = { manual: false, run: 0, up: false }; this.timer = null; }
   componentDidMount() {
     var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (reduce) this.setState({ manual: true });
+    if (reduce) { this.setState({ manual: true, up: true }); return; }
+    this.timer = setTimeout(() => this.setState({ up: true }), 200);
   }
+  componentWillUnmount() { clearTimeout(this.timer); }
   renderVals() {
-    var manual = this.state.manual;
-    var name = this.state.run % 2 === 0 ? 'fRollA' : 'fRollB';
+    var manual = this.state.manual, name = this.state.run % 2 === 0 ? 'fRollA' : 'fRollB';
     return {
-      manual: manual,
-      rolling: !manual,
+      manual: manual, rolling: !manual,
+      py: this.state.up ? '0px' : '120%',
       overflowY: manual ? 'auto' : 'hidden',
-      anim: manual ? 'none' : name + ' 22s linear 1.2s both',
+      anim: manual ? 'none' : name + ' 24s linear 1.6s both',
       stop: () => this.setState({ manual: true }),
       replay: () => this.setState({ manual: false, run: this.state.run + 1 })
     };

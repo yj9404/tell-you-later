@@ -8,45 +8,45 @@
 <body>
 <x-dc>
 <helmet>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&amp;display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&amp;family=Nanum+Pen+Script&amp;display=swap">
 <style>
 body{margin:0}
-a{color:#1F3C88}a:hover{color:#152A61}
-a:focus-visible,button:focus-visible{outline:3px solid #1F3C88;outline-offset:3px}
+a:focus-visible,button:focus-visible{outline:2px solid currentColor;outline-offset:3px}
+.col>*{flex-shrink:0}
+@media (prefers-reduced-motion: reduce){*{transition:none !important;animation:none !important}}
+.pen{font-family:"Nanum Pen Script",cursive}
 </style>
 </helmet>
-<div style="width:390px;height:844px;box-sizing:border-box;background:#EEF1F5;color:#1F3C88;font-family:'Gowun Dodum',sans-serif;padding:36px 26px 28px;display:flex;flex-direction:column;gap:24px">
-  <h1 style="margin:0;font-size:26px;font-weight:400;line-height:1.5;letter-spacing:-0.5px">편지가 도착했어요.<br>1월 1일 0시에 열립니다.</h1>
-
-  <div style="flex-grow:1;display:flex;align-items:center;justify-content:center">
-    <div style="width:330px;height:226px;box-sizing:border-box;padding:11px;transform:rotate(-3deg);background-image:repeating-linear-gradient(135deg,#D7263D 0,#D7263D 14px,#FFFFFF 14px,#FFFFFF 28px,#1F3C88 28px,#1F3C88 42px,#FFFFFF 42px,#FFFFFF 56px);box-shadow:0 14px 28px rgba(31,60,136,0.16)">
-      <div style="width:100%;height:100%;box-sizing:border-box;background:#FFFFFF;padding:16px 18px;display:flex;flex-direction:column;justify-content:space-between">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start">
-          <span style="font-size:13px;line-height:1.5">보내는 사람<br>영진</span>
-          <div style="width:58px;height:68px;box-sizing:border-box;border:2px dotted #D7263D;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#D7263D;line-height:1.1">
-            <span style="font-size:11px">2027</span>
-            <span style="font-size:26px">1.1</span>
-          </div>
+<div class="col" style="width:390px;height:844px;box-sizing:border-box;background:#E3E7EC;color:#1E3A7B;font-family:'Gowun Dodum',sans-serif;padding:32px 24px 24px;display:flex;flex-direction:column;gap:22px;overflow:hidden">
+  <h1 style="margin:0;font-size:24px;font-weight:400;line-height:1.5;letter-spacing:-0.4px">할 말이 있는데<br>1월 1일에 할게</h1>
+  <div style="flex-grow:1;flex-shrink:1;display:flex;align-items:center;justify-content:center"><div style="transform:rotate(-2.5deg)"><div aria-hidden="true" style="position:relative;width:342px;height:228px;box-sizing:border-box;background:#FBFBF8;border-radius:3px;box-shadow:0 1px 2px rgba(0,0,0,.1),0 16px 32px rgba(30,58,123,.14);padding:9px">
+    <div style="position:absolute;inset:0;border-radius:3px;background:repeating-linear-gradient(135deg,#C8322B 0 12px,transparent 12px 22px,#1E3A7B 22px 34px,transparent 34px 44px);-webkit-mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0);mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0);padding:9px"></div>
+    <div style="position:relative;height:100%;padding:12px 14px;box-sizing:border-box;color:#1E3A7B">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <span style="font-size:11px;line-height:1.5">보내는 사람<br><span class="pen" style="font-size:22px">영진</span></span>
+          <span style="align-self:flex-start;border:1.5px solid #1E3A7B;padding:2px 7px;font-size:10px;letter-spacing:1px">항공 우편 · AIR MAIL</span>
         </div>
-        <span style="font-size:34px;letter-spacing:-0.5px;text-align:center">지민에게</span>
-        <span style="font-size:12px;text-align:right;color:#D7263D">2027년 1월 1일 0시 전 개봉 불가</span>
+        <div style="position:relative;width:58px;height:70px;padding:5px;box-sizing:border-box;background:radial-gradient(circle at 4px 4px,transparent 2.4px,#FFFFFF 2.8px) -4px -4px/8px 8px;filter:drop-shadow(0 1px 1px rgba(0,0,0,.18))">
+        <div style="width:100%;height:100%;background:#1E3A7B;color:#FFFFFF;display:flex;flex-direction:column;justify-content:space-between;padding:5px 6px;box-sizing:border-box"><span style="font-size:9px;opacity:.8">2027</span><span style="font-size:21px;line-height:1">1.1</span></div>
       </div>
+      </div>
+      <svg aria-hidden="true" width="120" height="70" viewBox="0 0 120 70" style="position:absolute;right:42px;top:22px;opacity:.75;transform:rotate(-12deg)">
+      <circle cx="35" cy="35" r="28" fill="none" stroke="#3A3A3A" stroke-width="1.6"></circle>
+      <circle cx="35" cy="35" r="21" fill="none" stroke="#3A3A3A" stroke-width="1"></circle>
+      <text x="35" y="33" text-anchor="middle" font-size="8" fill="#3A3A3A" font-family="sans-serif">2026.11.11</text>
+      <text x="35" y="44" text-anchor="middle" font-size="7" fill="#3A3A3A" font-family="sans-serif">SEOUL</text>
+      <path d="M68 22 q8 -5 16 0 t16 0 t16 0 M68 35 q8 -5 16 0 t16 0 t16 0 M68 48 q8 -5 16 0 t16 0 t16 0" fill="none" stroke="#3A3A3A" stroke-width="1.4"></path>
+    </svg>
+      <div style="position:absolute;left:96px;bottom:40px;display:flex;flex-direction:column"><span style="font-size:11px">받는 사람</span><span class="pen" style="font-size:44px;line-height:1;color:#13254F">지민에게</span></div>
+      <span style="position:absolute;right:12px;bottom:10px;font-size:11px;color:#C8322B">1월 1일 0시 전 개봉 금지</span>
     </div>
-  </div>
-
-  <div style="display:flex;flex-direction:column;gap:6px">
-    <span style="font-size:15px">열리기까지</span>
-    <span style="font-size:40px;letter-spacing:-1px;line-height:1.1">50일 13시간</span>
-    <p style="margin:4px 0 0;font-size:14px;line-height:1.65;color:#3B4A6B">그 전에는 쓴 사람도, 이 사이트도 열 수 없어요.</p>
-  </div>
-
-  <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px">
-    <button style="height:54px;border:1.5px solid #1F3C88;border-radius:8px;background:transparent;color:#1F3C88;font-family:'Gowun Dodum',sans-serif;font-size:16px;cursor:pointer">캘린더에 넣기</button>
-    <a href="Main.dc.html" style="height:54px;border-radius:8px;background:#1F3C88;color:#FFFFFF;font-size:16px;display:flex;align-items:center;justify-content:center;text-decoration:none">나도 한 통 쓰기</a>
-  </div>
+  </div></div></div>
+  <div style="display:flex;justify-content:space-between;align-items:flex-end;border-top:1px solid rgba(30,58,123,.25);padding-top:14px"><span style="font-size:14px;line-height:1.6;color:#3B4A6B">1월 1일 0시에 열려요<br>그 전에는 누구도 열 수 없어요</span><span style="font-size:24px;letter-spacing:-0.5px">50일 13시간</span></div>
+  <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px"><button  style="height:52px;border:1px solid #1E3A7B;border-radius:6px;background:transparent;color:#1E3A7B;font-family:inherit;font-size:15px;cursor:pointer">캘린더에 저장</button><a href="Main.dc.html" style="height:52px;border-radius:6px;background:#1E3A7B;color:#FFFFFF;font-size:15px;display:flex;align-items:center;justify-content:center;text-decoration:none">나도 한 통 부치기</a></div>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+<script type="text/x-dc" data-dc-script data-props='{"$preview": {"width": 390, "height": 844}}'>
 class Component extends DCLogic {
   renderVals() { return {}; }
 }

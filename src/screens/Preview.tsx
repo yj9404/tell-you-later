@@ -22,8 +22,6 @@ const EXAMPLE = '여기에 그날 할 말이 보입니다.\n\n지금은 예시 �
 // 테마 화면의 기준 크기 (디자인 아트보드)
 const W = 390
 const H = 844
-// 타임락 암호문에 붙는 고정 길이. 가려진 글 테마가 막대 수를 정할 때 쓴다.
-const CIPHER_OVERHEAD = 193
 const noop = () => {}
 
 const themeOf = (draft: Draft): Theme => THEMES.find((t) => t.id === draft.themeId) ?? THEMES[0]
@@ -49,12 +47,10 @@ function useLetter(draft: Draft): { theme: Theme; letter: LetterInfo; text: stri
       tint: theme.tints ? (theme.tints[tint] ?? theme.tints[0]).hex : null,
       createdAt,
       unlockAt,
-      hash: 'preview',
-      cipherLength: CIPHER_OVERHEAD + new TextEncoder().encode(text).length,
     }),
     // unlockAt은 매번 새 객체일 수 있으므로 시각으로 비교한다.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [to, from, tint, theme, createdAt, unlockAt.getTime(), text],
+    [to, from, tint, theme, createdAt, unlockAt.getTime()],
   )
   return { theme, letter, text: text || EXAMPLE, example: !text }
 }

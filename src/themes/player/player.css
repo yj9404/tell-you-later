@@ -1,0 +1,10 @@
+@keyframes kspin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* 남는 높이는 가사 카드만 나눠 가진다. */
+.k-col > * {
+  flex-shrink: 0;
+}

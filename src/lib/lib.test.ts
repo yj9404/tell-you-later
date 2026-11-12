@@ -3,7 +3,7 @@ import { decodeLink, encodeLink, LinkError, linkHash, type Letter } from './code
 import { androidIntentUrl, detectPlatform, eventTitle, googleCalendarUrl, icsDataUrl, isInAppBrowser, outlookCalendarUrl } from './calendar.ts'
 import { buildIcs } from './ics.ts'
 import { countdown, longDate, shareText, teaserDate } from './date.ts'
-import { splitBubbles } from './bubbles.ts'
+import { lyricLines, splitBubbles } from './bubbles.ts'
 import { QUICKNET, roundForTime, timeForRound } from './drand.ts'
 import { lockLetter, openLetter } from './timelock.ts'
 import type { ChainClient } from 'drand-client'
@@ -124,6 +124,26 @@ describe('말풍선 나누기', () => {
     for (const b of bubbles) expect(b.length).toBeLessThanOrEqual(120)
     expect(splitBubbles('가'.repeat(2000)).every((b) => b.length <= 120)).toBe(true)
     expect(splitBubbles('가'.repeat(2000)).join('')).toBe('가'.repeat(2000))
+  })
+})
+
+describe('가사 줄 나누기', () => {
+  const upTo = (n: number) => (line: string) => line.length <= n
+  it('빈 줄로 구분된 문단이 한 줄이고, 문단 안의 줄바꿈은 공백이 된다', () => {
+    expect(lyricLines('지민아,\n잘 지내?\n\n새해 복 많이 받아', upTo(24))).toEqual(['지민아, 잘 지내?', '새해 복 많이 받아'])
+  })
+  it('긴 문단은 문장 단위로 max자까지 묶는다', () => {
+    const sentence = '이걸 쓰는 지금은 11월이야. ' // 17자
+    const text = sentence.repeat(5).trim()
+    const lines = lyricLines(text, upTo(24))
+    expect(lines).toEqual(Array(5).fill(sentence.trim()))
+    expect(lyricLines(text, upTo(40))).toEqual([...Array(2).fill(`${sentence}${sentence.trim()}`), sentence.trim()])
+  })
+  it('문장 하나가 max자를 넘으면 공백이나 글자 수로 자르고, 글자를 잃지 않는다', () => {
+    const lines = lyricLines('가나다라 '.repeat(30), upTo(24))
+    expect(lines.every((l) => l.length <= 24)).toBe(true)
+    expect(lines.join(' ')).toBe('가나다라 '.repeat(30).trim())
+    expect(lyricLines('가'.repeat(100), upTo(24)).join('')).toBe('가'.repeat(100))
   })
 })
 

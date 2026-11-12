@@ -48,19 +48,39 @@ export function splitBubbles(text: string): string[] {
 
 /**
  * 가사처럼 한 줄씩 보여줄 때 쓰는 나누기 (player 테마).
- * 줄바꿈과 문장 끝에서 나누고, 그래도 max자를 넘으면 공백에서 자른다.
+ * 빈 줄로 구분된 문단이 한 줄이다. 문단이 fits를 넘으면 문장(줄바꿈 포함) 단위로 들어가는 만큼
+ * 묶고, 문장 하나가 넘치면 단어, 단어 하나가 넘치면 글자 단위로 자른다.
+ * fits는 화면에서 두 줄 안에 들어가는지 재는 함수다(글자 폭은 화면이 안다).
  */
-export function splitLines(text: string, max: number): string[] {
+export function lyricLines(text: string, fits: (line: string) => boolean): string[] {
   const out: string[] = []
-  for (const s of text.replace(/\r\n?/g, '\n').split('\n').flatMap(sentences)) {
-    let rest = s.trim()
-    while (rest.length > max) {
-      const space = rest.lastIndexOf(' ', max)
-      const at = space > max / 3 ? space : max
-      out.push(rest.slice(0, at).trim())
-      rest = rest.slice(at).trim()
+  for (const para of paragraphs(text)) {
+    const flat = para.replace(/\s+/g, ' ')
+    if (fits(flat)) {
+      out.push(flat)
+      continue
     }
-    if (rest) out.push(rest)
+    let cur = ''
+    const push = () => {
+      if (cur) out.push(cur)
+      cur = ''
+    }
+    // cur에 이어 붙여 보고, 넘치면 cur를 내보낸 뒤 새로 시작한다. 새로 시작해도 넘치면 false.
+    const add = (piece: string, sep: string) => {
+      const joined = cur ? `${cur}${sep}${piece}` : piece
+      if (fits(joined)) return ((cur = joined), true)
+      push()
+      return fits(piece) && ((cur = piece), true)
+    }
+    for (const s of sentences(para)) {
+      const sentence = s.replace(/\s+/g, ' ').trim()
+      if (!sentence || add(sentence, ' ')) continue
+      for (const word of sentence.split(' ')) {
+        if (add(word, ' ')) continue
+        for (const ch of word) if (!add(ch, '')) cur = ch
+      }
+    }
+    push()
   }
   return out
 }
