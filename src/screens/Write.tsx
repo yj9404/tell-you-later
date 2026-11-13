@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import { encodeLink, NAME_MAX } from '../lib/codec.ts'
 import { clock, fullDate, teaserDate } from '../lib/date.ts'
 import { roundForTime, timeForRound } from '../lib/drand.ts'
+import { errorCode } from '../lib/errors.ts'
 import { loadFonts } from '../lib/fonts.ts'
 import { lockLetter } from '../lib/timelock.ts'
 import { THEMES } from '../themes/registry.ts'
@@ -90,7 +91,9 @@ export function Write({ prefill, onCreated }: { prefill: Prefill | null; onCreat
       const unlockAt = new Date(timeForRound(round))
       onCreated({ fragment, unlockAt, draft: { ...draft, to: to.trim(), from: from.trim(), body: text, unlockAt } })
     } catch (err) {
-      setError(err instanceof Error ? err.message : '링크를 만들지 못했습니다.')
+      // 잠그기는 네트워크를 쓰지 않는다. 여기서 나는 오류는 코드와 상관없이 같은 안내를 보여주고 원인은 console에만 남긴다.
+      console.error(errorCode(err), err)
+      setError('링크를 만들지 못했습니다. 다시 시도해 주세요.')
     } finally {
       setBusy(false)
     }

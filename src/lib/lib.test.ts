@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { decodeLink, encodeLink, LinkError, linkHash, type Letter } from './codec.ts'
 import { androidIntentUrl, detectPlatform, eventTitle, googleCalendarUrl, icsDataUrl, isInAppBrowser, outlookCalendarUrl } from './calendar.ts'
 import { buildIcs } from './ics.ts'
@@ -6,6 +6,8 @@ import { callName, chatStamp, clock, countdown, dateClock, longDate, shareText, 
 import { lyricLines, splitBubbles } from './bubbles.ts'
 import { QUICKNET, roundForTime, timeForRound } from './drand.ts'
 import { lockLetter, openLetter } from './timelock.ts'
+import { AppError, errorCode } from './errors.ts'
+import { DrandError } from './drand.ts'
 import type { ChainClient } from 'drand-client'
 import v1 from './fixtures/v1.json' with { type: 'json' }
 import { fragmentOf, homePath, letterLink } from './route.ts'
@@ -210,6 +212,35 @@ describe('타임락 암호문', () => {
     expect(l.from).toBe(fixture.from)
     expect(l.round).toBe(fixture.beacon.round)
     expect(await openLetter(l.body, l.round, saved)).toBe(fixture.text)
+  })
+
+  // 화면은 Error.message가 아니라 코드로 문구를 고른다.
+  describe('오류 코드', () => {
+    const saved: ChainClient = { ...offline, get: async () => v1.beacon }
+    afterEach(() => vi.unstubAllGlobals())
+
+    it('링크 일부가 바뀌면 corrupt', async () => {
+      const l = decodeLink(v1.link)
+      const body = l.body.slice()
+      body[body.length - 1] ^= 1
+      await expect(openLetter(body, l.round, saved)).rejects.toSatisfy((e) => errorCode(e) === 'corrupt')
+    })
+
+    it('압축을 풀 수 없는 브라우저는 unsupported', async () => {
+      // 압축된 평문(첫 바이트 1)이어야 이 경로를 탄다. 픽스처는 압축되어 있다.
+      vi.stubGlobal('DecompressionStream', undefined)
+      const l = decodeLink(v1.link)
+      await expect(openLetter(l.body, l.round, saved)).rejects.toSatisfy((e) => errorCode(e) === 'unsupported')
+    })
+
+    it('오류 종류별 코드', () => {
+      expect(errorCode(new DrandError('not-yet', 'x'))).toBe('not-yet')
+      expect(errorCode(new DrandError('network', 'x'))).toBe('network')
+      expect(errorCode(new AppError('lock-failed', 'x'))).toBe('lock-failed')
+      expect(errorCode(new LinkError('x'))).toBe('broken-link')
+      expect(errorCode(new Error('x'))).toBe('unknown')
+      expect(errorCode('x')).toBe('unknown')
+    })
   })
 
   it('2,000자 편지: 한글·이모지·줄바꿈', async () => {
