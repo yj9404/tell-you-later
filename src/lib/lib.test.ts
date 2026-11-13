@@ -317,7 +317,13 @@ describe('링크 주소', () => {
     expect(themePages.map(({ id, name }) => ({ id, name }))).toEqual(THEMES.map((t) => ({ id: t.id, name: t.name })))
   })
 
-  it('OG 이미지 문구는 테마 이름 + "으로/로 도착"이다', () => {
-    for (const { name, og } of themePages) expect(og.label).toMatch(new RegExp(`^${name}(으로|로) 도착$`))
+  // OG 문구를 테마 이름과 다르게 따로 지정한 테마. 이 테마들은 "…으로/로 도착" 형식만 본다.
+  const CUSTOM_OG_LABEL = new Set(['greet'])
+
+  it('OG 이미지 문구는 테마 이름 + "으로/로 도착"이다 (따로 지정한 테마 제외)', () => {
+    for (const { id, name, og } of themePages) {
+      const subject = CUSTOM_OG_LABEL.has(id) ? '.+' : name
+      expect(og.label).toMatch(new RegExp(`^${subject}(으로|로) 도착$`))
+    }
   })
 })
