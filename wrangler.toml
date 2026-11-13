@@ -1,5 +1,5 @@
 # Cloudflare Workers 정적 자산 배포. 서버 코드 없이 dist만 올린다.
-# 라우팅이 # 해시 기반이라 SPA 폴백 설정은 필요 없다.
+# 라우팅이 # 해시 기반이라 SPA 폴백 설정은 필요 없다. /t/{테마}/는 빌드가 만든 실제 파일(dist/t/{테마}/index.html)이다.
 name = "tell-you-later"
 compatibility_date = "2026-11-01"
 

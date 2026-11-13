@@ -1,0 +1,14 @@
+[
+  { "id": "dm", "name": "DM" },
+  { "id": "msg", "name": "문자" },
+  { "id": "lock", "name": "잠금화면" },
+  { "id": "queue", "name": "대기열" },
+  { "id": "player", "name": "플레이어" },
+  { "id": "cookie", "name": "포춘쿠키" },
+  { "id": "color", "name": "책 한 권" },
+  { "id": "redact", "name": "가려진 글" },
+  { "id": "air", "name": "항공 봉투" },
+  { "id": "greet", "name": "좋은 하루" },
+  { "id": "approval", "name": "결재 공문" },
+  { "id": "report", "name": "군대 보고서" }
+]

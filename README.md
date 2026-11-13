@@ -29,6 +29,7 @@ src/screens/    쓰기, 링크 완성, 받는 사람 화면(잠김·열림 전�
 src/themes/     테마 12개. 폴더 하나가 테마 하나
 design/         디자인 원본(.dc.html). 앱은 이 파일을 불러오지 않는다
 assets/         포춘쿠키 PNG
+scripts/        빌드 후처리(테마별 미리보기 페이지), OG 이미지, 픽스처 생성
 ```
 
 ### 테마 추가
@@ -38,7 +39,11 @@ assets/         포춘쿠키 PNG
 
 ### 링크 형식과 호환성
 
-`https://<도메인>/#v1.<base64url>` — 바이트 배열은 `src/lib/codec.ts` 맨 위에 적혀 있다.
+`https://<도메인>/t/<테마id>/#v1.<base64url>` — 바이트 배열은 `src/lib/codec.ts` 맨 위에 적혀 있다.
+
+- 앱은 `#` 뒤만 읽는다. 테마도 payload에 든 값을 쓴다. `/t/<테마id>/`는 카카오톡 등의 공유 미리보기를 테마별로 고르기 위한 경로다(`src/lib/route.ts`).
+  빌드 후처리 `scripts/make-theme-pages.mjs`가 `dist/index.html`을 복사해 `dist/t/<id>/index.html` 12개를 만들고 og:title·og:url·og:image·twitter:image만 바꾼다.
+- 경로 없는 옛 링크(`/#v1.…`)도 그대로 열린다.
 
 - 이미 보낸 링크는 몇 년 뒤에 열린다. **v1 디코더는 지우거나 고치지 않는다.** 형식을 바꿀 때는 v2를 추가한다.
 - `tlock-js`와 `drand-client`는 `package.json`에 정확한 버전으로 고정되어 있다. 올릴 때는 픽스처 테스트가 통과하는지 본다.
@@ -56,7 +61,10 @@ assets/         포춘쿠키 PNG
 4. **Web Analytics는 아직 켜지 않는다.** 분석 스크립트는 코드에 없고, 대시보드의 자동 삽입도 켜지 않는다.
    편지 암호문은 주소의 `#` 뒤에 있다. 분석 요청에 `#` 뒤가 실려 나가지 않는다는 것이 확인될 때까지 넣지 않는다(아래 체크리스트).
 
-OG 이미지(`public/og.png`)는 `design/og.svg`를 그린 것이다. 문구를 바꾸려면 og.svg를 고치고 `pwsh scripts/make-og-image.ps1`로 다시 만든다(Edge 또는 Chrome 필요).
+OG 이미지는 `npm run og-images`(`scripts/make-og-image.mjs`, Edge 또는 Chrome 필요)로 만든다.
+`public/og.png`(공통)는 `design/og.svg`를 그린 것이고, `public/og/<테마id>.png`(테마별)는 왼쪽에 og.svg, 오른쪽에 그 테마의 잠김 화면을 예시 데이터로 그린 휴대폰 화면이다(`scripts/og/`).
+og.svg나 테마의 잠김 화면을 바꾸면 다시 돌린다. 눈에 띄는 차이가 없는 이미지는 덮어쓰지 않는다.
+테마를 추가하면 `scripts/themes.json`에도 더한다(테스트가 `registry.ts`와 같은지 확인한다).
 포춘쿠키 그림은 `assets/`의 PNG 원본을 가로 600px WebP로 줄인 것이다(`src/themes/cookie/*.webp`, 합계 약 180KB). 원본은 번들에 들어가지 않는다.
 다시 만들려면 `npm i --no-save sharp && node scripts/make-cookie-webp.mjs`.
 
@@ -69,8 +77,8 @@ OG 이미지(`public/og.png`)는 `design/og.svg`를 그린 것이다. 문구를 
 - [ ] 카카오톡 인앱 브라우저: 링크를 눌렀을 때 `#` 뒤가 유지되어 편지가 열린다.
 - [ ] 인스타그램 인앱 브라우저: 같은 확인(DM, 프로필 링크, 스토리 링크).
 - [ ] **카카오톡에서 링크가 잘리는 길이를 시험**하고 `src/screens/Done.tsx`의 `LINK_WARN_LENGTH`(지금은 임시값 2,000)를 정한다. 2,000자 편지의 링크는 수천 자가 된다.
-- [ ] 카카오톡·인스타그램 공유 미리보기에 제목·설명·이미지가 나온다.
-- [ ] 인앱 브라우저에서 "링크 복사", "공유하기", "캘린더에 저장(.ics)"이 동작한다. `.ics`가 캘린더 앱에서 열린다.
+- [ ] 카카오톡·인스타그램 공유 미리보기에 제목·설명·이미지가 나온다. `/t/<테마id>/` 링크마다 그 테마의 이미지와 제목이 나온다.
+- [ ] 인앱 브라우저에서 "복사", "링크만 복사", "공유하기", "캘린더에 저장(.ics)"이 동작한다. `.ics`가 캘린더 앱에서 열린다.
 - [ ] iOS Safari, Android Chrome에서 12개 테마의 잠김·열림 화면과 날짜 고르기(기기 기본 달력)가 정상이다.
 - [ ] "모션 줄이기"를 켠 기기에서 연출 없이 편지가 바로 보인다.
 - [ ] Web Analytics: 테스트용 배포에서 분석 요청(본문·헤더·주소)에 `#` 뒤가 실려 나가지 않는지 네트워크 탭으로 확인했다. **확인 전에는 켜지 않는다.** 실려 나가면 쓰지 않는다.

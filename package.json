@@ -5,10 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build",
+    "build": "tsc --noEmit && vite build && node scripts/make-theme-pages.mjs",
     "preview": "vite preview",
     "test": "node scripts/test.mjs run",
-    "timelock-check": "node scripts/timelock-roundtrip.ts"
+    "timelock-check": "node scripts/timelock-roundtrip.ts",
+    "og-images": "node scripts/make-og-image.mjs"
   },
   "dependencies": {
     "drand-client": "1.2.5",

@@ -1,0 +1,39 @@
+<!doctype html>
+<!--
+  테마별 OG 이미지(1200×630)의 틀. 왼쪽은 공통 OG(design/og.svg)의 로고와 부제,
+  오른쪽은 frame.html이 그린 잠김 화면(390×844, 2배율) 캡처를 휴대폰 모양 안에 줄여 넣는다.
+  scripts/make-og-image.mjs가 이 페이지를 열고 setScreen(캡처)을 부른 뒤 찍는다.
+-->
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; background: #fff; }
+      .logo { position: absolute; left: 0; top: 0; width: 1200px; height: 630px; transform-origin: 0 50%; transform: translateX(-8px) scale(0.86); }
+      /* 화면 390×844를 0.63배로: 246×532. 테두리 10px을 더해 266×552. */
+      .phone { position: absolute; left: 846px; top: 39px; width: 246px; height: 532px; padding: 10px; border-radius: 46px; background: #141414; box-shadow: 0 18px 40px rgba(0, 0, 0, 0.16); }
+      .screen { display: block; width: 246px; height: 532px; border-radius: 36px; background: #fff; }
+    </style>
+  </head>
+  <body>
+    <img class="logo" src="/design/og.svg" alt="" />
+    <div class="phone">
+      <canvas class="screen" id="screen" width="246" height="532"></canvas>
+    </div>
+    <script>
+      // 줄이는 일은 캔버스(소프트웨어 래스터)에 맡긴다. <img>를 CSS로 줄이면 실행마다 가장자리 픽셀이 조금씩 달라진다.
+      async function setScreen(src) {
+        const img = new Image()
+        img.src = src
+        await img.decode()
+        const ctx = document.getElementById('screen').getContext('2d')
+        ctx.imageSmoothingEnabled = true
+        ctx.imageSmoothingQuality = 'high'
+        ctx.drawImage(img, 0, 0, 246, 532)
+        await document.fonts.ready
+        await new Promise((r) => requestAnimationFrame(r))
+      }
+
+    </script>
+  </body>
+</html>

@@ -8,6 +8,9 @@ import { QUICKNET, roundForTime, timeForRound } from './drand.ts'
 import { lockLetter, openLetter } from './timelock.ts'
 import type { ChainClient } from 'drand-client'
 import v1 from './fixtures/v1.json' with { type: 'json' }
+import { fragmentOf, homePath, letterLink } from './route.ts'
+import { THEMES } from '../themes/registry.ts'
+import themePages from '../../scripts/themes.json' with { type: 'json' }
 
 const letter = (over: Partial<Letter> = {}): Letter => ({
   theme: 3,
@@ -196,9 +199,13 @@ describe('타임락 암호문', () => {
 
   // 옛 형식으로 이미 보낸 링크가 계속 열려야 한다. 픽스처는 실제 메인넷 라운드로 만든 것이고,
   // 그 라운드의 서명을 함께 저장해 두어 네트워크 없이 확인한다. 형식을 늘리면 픽스처도 추가한다.
-  it.each([['v1', v1]])('%s 픽스처 링크가 그대로 복호화된다', async (_name, fixture) => {
+  // 주소 형태: 경로 없는 옛 링크(/#v1.…)와 테마 경로가 붙은 링크(/t/dm/#v1.…) 모두 앱이 읽는 방식(fragmentOf)으로 연다.
+  it.each([
+    ['v1', '/#', v1],
+    ['v1', '/t/dm/#', v1],
+  ])('%s 픽스처 링크가 그대로 복호화된다 (%s…)', async (_name, path, fixture) => {
     const saved: ChainClient = { ...offline, get: async () => fixture.beacon }
-    const l = decodeLink(fixture.link)
+    const l = decodeLink(fragmentOf(`https://example.com${path}${fixture.link}`))
     expect(l.to).toBe(fixture.to)
     expect(l.from).toBe(fixture.from)
     expect(l.round).toBe(fixture.beacon.round)
@@ -288,5 +295,25 @@ describe('캘린더 링크', () => {
     expect(isInAppBrowser(iphone)).toBe(false)
     expect(isInAppBrowser(iphone + ' KAKAOTALK 10.8.5')).toBe(true)
     expect(isInAppBrowser(android.replace('Mobile Safari', 'Mobile Safari Instagram 350.0.0'))).toBe(true)
+  })
+})
+
+describe('링크 주소', () => {
+  it('테마 경로를 붙여 만들고, 경로와 상관없이 # 뒤만 읽는다', () => {
+    expect(letterLink('https://example.com', 'cookie', 'v1.abc')).toBe('https://example.com/t/cookie/#v1.abc')
+    expect(fragmentOf('https://example.com/t/cookie/#v1.abc')).toBe('v1.abc')
+    expect(fragmentOf('https://example.com/#v1.abc')).toBe('v1.abc')
+    expect(fragmentOf('https://example.com/t/cookie/')).toBe('')
+  })
+
+  it('쓰기 화면으로 돌아갈 때는 테마 경로를 떼어 낸다', () => {
+    expect(homePath('/t/dm/')).toBe('/')
+    expect(homePath('/t/dm')).toBe('/')
+    expect(homePath('/')).toBe('/')
+  })
+
+  // 빌드 후처리와 OG 이미지 스크립트는 TSX를 못 읽어 scripts/themes.json을 쓴다. 테마를 추가하면 거기도 더한다.
+  it('scripts/themes.json이 테마 목록과 같다', () => {
+    expect(themePages).toEqual(THEMES.map((t) => ({ id: t.id, name: t.name })))
   })
 })
