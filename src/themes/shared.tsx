@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { splitBubbles } from '../lib/bubbles.ts'
-import { callName, countdown, teaserDate } from '../lib/date.ts'
 import type { LetterInfo, LockedProps } from './types.ts'
-import { useStrings } from '../i18n/index.ts'
+import { useLang, useStrings, type Lang, type Strings } from '../i18n/index.ts'
 import './shared.css'
 
 const cache = new Map<string, CSSProperties>()
@@ -32,9 +31,14 @@ export function st(css: string): CSSProperties {
   return style
 }
 
+/** 테마 폴더의 strings.ts({ ko, en })에서 지금 언어의 문구를 고른다. */
+export function useThemeStrings<T>(strings: Record<Lang, T>): T {
+  return strings[useLang()]
+}
+
 /** 잠김 화면의 남은 시간 자리에 들어갈 글. 열쇠를 받는 중에는 테마의 말(opening)로 그 사실을 알린다. */
-export function remaining(p: Pick<LockedProps, 'letter' | 'now' | 'status'>, opening = '여는 중…'): string {
-  return p.status === 'opening' ? opening : countdown(p.letter.unlockAt.getTime() - p.now)
+export function remaining(p: Pick<LockedProps, 'letter' | 'now' | 'status'>, t: Strings, opening = t.locked.opening): string {
+  return p.status === 'opening' ? opening : t.date.countdown(p.letter.unlockAt.getTime() - p.now)
 }
 
 /** 복호화 실패 안내. 글꼴과 색은 놓인 자리(테마)의 것을 그대로 물려받는다. */
@@ -128,18 +132,21 @@ export function useBubblePlayback(text: string, autoplay: boolean, reducedMotion
  * 채팅형 테마(dm, msg)의 첫 말풍선들: "지민아" / 가운데 말 / "그게 뭐냐면…".
  * 받는 사람을 비워 둔 미리보기에서는 부르는 말을 뺀다.
  */
-export function chatIntro(letter: LetterInfo, middle: string): string[] {
-  const call = letter.toEmpty ? '' : callName(letter.to)
-  return [...(call ? [call] : []), middle, '그게 뭐냐면…']
+export function chatIntro(letter: LetterInfo, t: Strings, middle: string, last: string): string[] {
+  const call = letter.toEmpty ? '' : t.callName(letter.to)
+  return [...(call ? [call] : []), middle, last]
 }
 
 /** 예고 문구를 두 줄로: "할 말이 있는데 / 1월 1일에 할게" */
 export function TeaserLines({ unlock, now }: { unlock: Date; now: Date }) {
+  const t = useStrings()
   return (
     <>
-      할 말이 있는데
+      {t.teaserParts.line1}
       <br />
-      {teaserDate(unlock, now)}에 할게
+      {t.teaserParts.before}
+      {t.date.teaserDate(unlock, now)}
+      {t.teaserParts.after}
     </>
   )
 }

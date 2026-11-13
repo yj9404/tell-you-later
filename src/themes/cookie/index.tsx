@@ -1,5 +1,6 @@
-import { iGa, whenText } from '../../lib/date.ts'
-import { LockError, remaining, st, usePhases } from '../shared.tsx'
+import { useStrings } from '../../i18n/index.ts'
+import { LockError, remaining, st, usePhases, useThemeStrings } from '../shared.tsx'
+import { strings } from './strings.ts'
 import type { LockedProps, OpenProps, Theme } from '../types.ts'
 import whole from './fortune-cookie.webp'
 import left from './cookie-left.webp'
@@ -16,16 +17,19 @@ const SOLID = `height:56px;box-sizing:border-box;border:0;border-radius:16px;bac
 
 function Locked(p: LockedProps) {
   const { letter, now } = p
+  const g = useStrings()
+  const t = useThemeStrings(strings)
+  const title = t.breaksAt(letter.unlockAt, new Date(now))
   return (
     <div className="tyl-screen tyl-focus-light" style={st(`${SCREEN};gap:20px`)}>
       <div style={st('display:flex;flex-direction:column;gap:6px')}>
         <p className="tyl-keep" style={st('margin:0;font-size:16px;font-weight:700')}>
-          {letter.to}에게, {iGa(letter.from)} 포춘쿠키 하나 구워놨어
+          {t.bakedFor(letter.to, letter.from)}
         </p>
         <h1 className="tyl-keep" style={st(`margin:0;font-family:${DISPLAY};font-weight:400;font-size:46px;line-height:1.15;letter-spacing:-1px`)}>
-          {whenText(letter.unlockAt, new Date(now))}에
+          {title[0]}
           <br />
-          깨져
+          {title[1]}
         </h1>
       </div>
 
@@ -37,19 +41,19 @@ function Locked(p: LockedProps) {
         <LockError {...p} />
         {p.status !== 'error' && (
           <>
-            <span style={st('font-size:15px;font-weight:700')}>깨지기까지</span>
-            <span style={st(`font-family:${DISPLAY};font-size:42px;line-height:1.1`)}>{remaining(p, '깨는 중…')}</span>
+            <span style={st('font-size:15px;font-weight:700')}>{t.untilBreak}</span>
+            <span style={st(`font-family:${DISPLAY};font-size:42px;line-height:1.1`)}>{remaining(p, g, t.breaking)}</span>
           </>
         )}
-        <p style={st('margin:4px 0 0;font-size:14px;font-weight:500;line-height:1.6')}>그 전엔 누구도 못 깨. 진짜로.</p>
+        <p style={st('margin:4px 0 0;font-size:14px;font-weight:500;line-height:1.6')}>{t.promise(letter.unlockAt)}</p>
       </div>
 
       <div style={st('display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px')}>
         <button type="button" style={st(OUTLINE)} onClick={p.onSaveCalendar} disabled={p.preview}>
-          캘린더에 저장
+          {g.calendar.save}
         </button>
         <button type="button" style={st(SOLID)} onClick={p.onWrite} disabled={p.preview}>
-          나도 구워두기
+          {t.writeOwn}
         </button>
       </div>
     </div>
@@ -68,12 +72,14 @@ function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenP
   const { phase, run, done, skip, replay } = usePhases(STEPS, autoplay, reducedMotion)
   const intact = phase === 'closed' || phase === 'shake'
   const paper = phase === 'paper'
-  const when = whenText(letter.unlockAt, letter.createdAt)
+  const g = useStrings()
+  const t = useThemeStrings(strings)
+  const when = t.opening(letter.unlockAt, letter.createdAt)
 
   return (
     <div className="tyl-screen tyl-focus-light" style={st(`${SCREEN};gap:16px`)}>
       <h1 className="tyl-keep" style={st(`margin:0;font-family:${DISPLAY};font-weight:400;font-size:36px;line-height:1.2;letter-spacing:-1px`)}>
-        {paper ? `${iGa(letter.from)} 넣어둔 쪽지` : when}
+        {paper ? t.slipTitle(letter.from) : when}
       </h1>
 
       <div style={st('flex-grow:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:14px')}>
@@ -94,9 +100,9 @@ function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenP
             {text}
           </p>
           <div style={st('display:flex;justify-content:space-between;align-items:baseline;gap:10px;border-top:1px dashed #C8321F;padding-top:10px;color:#C8321F;font-size:13px;font-weight:700')}>
-            <span>{iGa(letter.from)} 구움</span>
+            <span>{t.bakedBy(letter.from)}</span>
             <span style={st('flex-shrink:0')}>
-              행운의 날짜 {letter.unlockAt.getMonth() + 1} . {letter.unlockAt.getDate()}
+              {t.lucky(letter.unlockAt)}
             </span>
           </div>
         </div>
@@ -147,10 +153,10 @@ function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenP
 
       <div style={st('display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px')}>
         <button type="button" style={st(OUTLINE)} onClick={done ? replay : skip}>
-          {done ? '다시 깨기' : '한 번에 보기'}
+          {done ? t.crackAgain : g.locked.showAll}
         </button>
         <button type="button" style={st(SOLID)} onClick={onReply} disabled={preview}>
-          나도 구워두기
+          {t.writeOwn}
         </button>
       </div>
     </div>
@@ -162,7 +168,7 @@ export const cookie: Theme = {
   code: 6,
   name: { ko: '포춘쿠키', en: 'Fortune cookie' },
   tints: null,
-  fonts: ['Bagel+Fat+One', 'Noto+Sans+KR:wght@500;700'],
+  fonts: { ko: ['Bagel+Fat+One', 'Noto+Sans+KR:wght@500;700'] },
   tile: { bg: '#C8321F', markBg: '#E8A93A', markW: '46px', markH: '32px', markRadius: '50% 50% 42% 42%' },
   preview: { bg: '#C8321F', fg: '#FFFFFF', font: `${DISPLAY.replace(',sans-serif', '')},'Noto Sans KR',sans-serif`, bubbleBg: 'transparent', bubbleFg: '#FFFFFF', radius: '0', pad: '0', size: '24px' },
   Locked,

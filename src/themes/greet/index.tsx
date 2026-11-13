@@ -1,5 +1,6 @@
 import { dateHour, whenText } from '../../lib/date.ts'
 import { LockError, remaining, st, usePhases } from '../shared.tsx'
+import { useStrings } from '../../i18n/index.ts'
 import type { LockedProps, OpenProps, Theme } from '../types.ts'
 import { Backdrop, BACKDROP_FILL } from './Backdrop.tsx'
 import './greet.css'
@@ -33,6 +34,8 @@ const Greeting = () => (
 const GREETING = `text-align:center;font-family:${BRUSH};font-weight:400;font-size:92px;line-height:1;${HALO3},5px 6px 0 rgba(0,0,0,0.25)`
 
 function Locked(p: LockedProps) {
+  // 이 테마는 한국어판 전용이다(영어 경로로 열려도 View가 한국어로 보여준다).
+  const g = useStrings()
   const { letter } = p
   return (
     <div className="tyl-screen greet-screen" style={st(`min-height:var(--screen-h, 100dvh);${SCREEN}`)}>
@@ -63,7 +66,7 @@ function Locked(p: LockedProps) {
         ) : (
           <>
             <span style={st('font-size:18px;font-weight:700')}>앞으로</span>
-            <span style={st(`font-family:${BRUSH};font-size:76px;line-height:1;color:#E3001B;white-space:nowrap;${HALO3}`)}>{remaining(p)}</span>
+            <span style={st(`font-family:${BRUSH};font-size:76px;line-height:1;color:#E3001B;white-space:nowrap;${HALO3}`)}>{remaining(p, g)}</span>
           </>
         )}
       </div>
@@ -175,7 +178,7 @@ export const greet: Theme = {
   code: 10,
   name: { ko: '좋은 하루' },
   tints: null,
-  fonts: ['Nanum+Brush+Script', 'Noto+Sans+KR:wght@500;700;900'],
+  fonts: { ko: ['Nanum+Brush+Script', 'Noto+Sans+KR:wght@500;700;900'] },
   tile: { bg: 'linear-gradient(180deg,#58B8FF,#FFD9EC)', markBg: '#E3001B', markW: '44px', markH: '14px', markRadius: '2px' },
   preview: { bg: 'linear-gradient(180deg,#58B8FF,#FFD9EC)', fg: '#000000', font: BRUSH, bubbleBg: '#FFF200', bubbleFg: '#C4001A', radius: '0', pad: '8px 12px', size: '28px' },
   Locked,

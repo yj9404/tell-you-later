@@ -3,7 +3,7 @@
 import { createRoot } from 'react-dom/client'
 import '../../src/base.css'
 import { loadFonts } from '../../src/lib/fonts.ts'
-import { THEMES } from '../../src/themes/registry.ts'
+import { THEMES, themeFonts } from '../../src/themes/registry.ts'
 import type { LetterInfo } from '../../src/themes/types.ts'
 
 const id = new URLSearchParams(location.search).get('theme')
@@ -23,7 +23,7 @@ const now = new Date(2026, 11, 7, 20, 34, 12).getTime()
 const noop = () => {}
 
 loadFonts(['Noto+Sans+KR:wght@400;700;900'])
-loadFonts(theme.fonts)
+loadFonts(themeFonts(theme, 'ko'))
 createRoot(document.getElementById('root')!).render(
   <theme.Locked letter={letter} now={now} status="waiting" onRetry={noop} onSaveCalendar={noop} onWrite={noop} />,
 )

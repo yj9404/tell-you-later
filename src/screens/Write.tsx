@@ -5,7 +5,7 @@ import { errorCode } from '../lib/errors.ts'
 import { useLang, useStrings } from '../i18n/index.ts'
 import { loadFonts } from '../lib/fonts.ts'
 import { lockLetter } from '../lib/timelock.ts'
-import { themesFor } from '../themes/registry.ts'
+import { themeFonts, themesFor } from '../themes/registry.ts'
 import { FullPreview, PreviewPair, type Draft, type Side } from './Preview.tsx'
 import { WhenSheet } from './WhenSheet.tsx'
 import { resolveWhen, type When } from './when.ts'
@@ -63,7 +63,7 @@ export function Write({ prefill, onCreated }: { prefill: Prefill | null; onCreat
   }, [])
 
   const theme = themes.find((x) => x.id === themeId) ?? themes[0]
-  useEffect(() => loadFonts(theme.fonts), [theme])
+  useEffect(() => loadFonts(themeFonts(theme, lang)), [theme, lang])
 
   const unlock = resolveWhen(when, now)
   const inPast = unlock.getTime() <= now.getTime()
@@ -201,7 +201,7 @@ export function Write({ prefill, onCreated }: { prefill: Prefill | null; onCreat
             <div className={s.tints}>
               <span className={s.note}>{t.write.color}</span>
               {theme.tints.map((c, i) => (
-                <button key={c.hex} type="button" className={s.tint} aria-label={c.name} aria-pressed={i === tint} style={{ background: c.hex }} onClick={() => setTint(i)} />
+                <button key={c.hex} type="button" className={s.tint} aria-label={c.name[lang]} aria-pressed={i === tint} style={{ background: c.hex }} onClick={() => setTint(i)} />
               ))}
             </div>
           )}

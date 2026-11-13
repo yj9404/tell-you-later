@@ -13,6 +13,7 @@ import v1 from './fixtures/v1.json' with { type: 'json' }
 import { fragmentOf, homePath, langOf, letterLink } from './route.ts'
 import { stringsFor } from '../i18n/index.ts'
 import { customStart, hourAfter } from '../screens/when.ts'
+import { strings as queueStrings } from '../themes/queue/strings.ts'
 import { enLocale, makeEnDates } from '../i18n/date-en.ts'
 import { THEMES, themeLang, themesFor } from '../themes/registry.ts'
 import themePages from '../../scripts/themes.json' with { type: 'json' }
@@ -167,6 +168,16 @@ describe('영어 날짜 표기', () => {
     const en = stringsFor('en')
     expect(en.shareText(' Alex ', jan1, now)).toMatch(/^Alex, got something to tell you\. Tell you on (Jan 1|1 Jan)\.$/)
     expect(en.shareText('', jan1, now)).toBe(en.teaser(jan1, now))
+  })
+
+  it('테마가 쓰는 표기: 큰 시계, 요일, 숫자 월·일, 시간대', () => {
+    expect(us.hm(jan1)).toBe('12:00')
+    expect(gb.hm(jan1)).toBe('00:00')
+    expect(us.hm(new Date(2027, 0, 1, 21, 5))).toBe('9:05')
+    expect([us.weekday(jan1), us.weekdayName(jan1)]).toEqual(['Fri', 'Friday'])
+    expect([us.monthDot(new Date(2027, 11, 25)), gb.monthDot(new Date(2027, 11, 25))]).toEqual(['12/25', '25/12'])
+    expect(us.zone(jan1)).toMatch(/^\S+$/)
+    expect(us.whenZone(jan1, now)).toBe(`Jan 1, 12:00 AM ${us.zone(jan1)}`)
   })
 
   it('기기 언어로 영어 로케일을 고른다', () => {
@@ -478,6 +489,13 @@ describe('링크 주소', () => {
     expect(themeLang(byId('report'), 'en')).toBe('ko')
     expect(themeLang(byId('dm'), 'en')).toBe('en')
     expect(themeLang(byId('approval'), 'ko')).toBe('ko')
+  })
+
+  it('테마 문구: 영어 대기순서는 서수, 숨긴 테마를 뺀 9개는 영어 이름이 있다', () => {
+    const suffix = queueStrings.en.suffix
+    expect([1, 2, 3, 4, 11, 12, 13, 21, 4179343].map((n) => `${n}${suffix(n)}`)).toEqual(['1st', '2nd', '3rd', '4th', '11th', '12th', '13th', '21st', '4179343rd'])
+    expect(queueStrings.ko.suffix(3)).toBe('번째')
+    expect(themesFor('en').map((t) => t.id)).toEqual(['dm', 'msg', 'lock', 'queue', 'player', 'cookie', 'color', 'redact', 'air'])
   })
 
   // 빌드 후처리와 OG 이미지 스크립트는 TSX를 못 읽어 scripts/themes.json을 쓴다. 테마를 추가하면 거기도 더한다.

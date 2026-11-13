@@ -5,6 +5,8 @@ import { enLocale, makeEnDates } from './date-en.ts'
 import type { Strings } from './ko.ts'
 
 const date = makeEnDates(enLocale(typeof navigator === 'undefined' ? [] : navigator.languages))
+/** 영어 전용 표기(복수형 등)까지 포함한 날짜·숫자 함수. 테마 문구가 쓴다. */
+export const enDates = date
 
 const teaser = (unlock: Date, now: Date) => `Got something to tell you. Tell you on ${date.teaserDate(unlock, now)}.`
 const callName = (to: string) => to.trim()
@@ -138,5 +140,7 @@ export const en: Strings = {
   locked: {
     retry: 'Try again',
     opening: 'Opening…',
+    showAll: 'Show all',
+    replay: 'Replay',
   },
 }

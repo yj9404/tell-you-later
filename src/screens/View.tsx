@@ -5,7 +5,7 @@ import { errorCode } from '../lib/errors.ts'
 import { LangContext, useLang, useStrings } from '../i18n/index.ts'
 import { loadFonts } from '../lib/fonts.ts'
 import { openLetter } from '../lib/timelock.ts'
-import { themeByCode, themeLang } from '../themes/registry.ts'
+import { themeByCode, themeFonts, themeLang } from '../themes/registry.ts'
 import type { LetterInfo, LockStatus } from '../themes/types.ts'
 import { useSaveCalendar } from './SaveCalendar.tsx'
 import type { Prefill } from './Write.tsx'
@@ -84,7 +84,8 @@ function Letter({ letter, fragment, onWrite }: Props & { letter: Letter }) {
   const [reducedMotion] = useState(() => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false)
   const [autoplay] = useState(() => !reducedMotion && !wasPlayed(hash))
 
-  useEffect(() => loadFonts(theme.fonts), [theme])
+  const lang = useLang()
+  useEffect(() => loadFonts(themeFonts(theme, lang)), [theme, lang])
 
   const open = useCallback(async () => {
     setStatus('opening')

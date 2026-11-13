@@ -1,9 +1,9 @@
 import { memo, useEffect, useMemo, useRef, useState } from 'react'
 import { loadFonts } from '../lib/fonts.ts'
-import { THEMES } from '../themes/registry.ts'
+import { THEMES, themeFonts } from '../themes/registry.ts'
 import type { LetterInfo, Theme } from '../themes/types.ts'
 import { useModal } from './useModal.ts'
-import { useStrings } from '../i18n/index.ts'
+import { useLang, useStrings } from '../i18n/index.ts'
 import s from './write.module.css'
 
 /** 미리보기에 필요한 입력값. 복호화 없이 원문을 그대로 테마에 넘긴다. */
@@ -125,7 +125,8 @@ export function FullPreview({ draft, start, onClose }: { draft: Draft; start: Si
   const [reducedMotion] = useState(() => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false)
   const close = useRef<HTMLButtonElement>(null)
 
-  useEffect(() => loadFonts(theme.fonts), [theme])
+  const lang = useLang()
+  useEffect(() => loadFonts(themeFonts(theme, lang)), [theme, lang])
 
   // 쓰기 화면은 뒤에 그대로 있다. 스크롤만 잠그고, 닫으면 열기 전 자리로 포커스를 돌려준다.
   useModal(onClose)

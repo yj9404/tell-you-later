@@ -26,6 +26,11 @@ export function themeLang(theme: Theme, lang: Lang): Lang {
   return theme.name[lang] !== undefined ? lang : 'ko'
 }
 
+/** 그 언어로 테마를 열 때 불러올 글꼴 */
+export function themeFonts(theme: Theme, lang: Lang): readonly string[] {
+  return theme.fonts[lang] ?? theme.fonts.ko
+}
+
 /** 모르는 번호(나중에 추가된 테마의 링크를 옛 페이지로 연 경우 등)는 첫 테마로 보여준다. */
 export function themeByCode(code: number): Theme {
   return THEMES.find((t) => t.code === code) ?? THEMES[0]

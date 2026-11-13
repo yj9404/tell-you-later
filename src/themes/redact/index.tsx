@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { dotDate, fullDate, hhmm } from '../../lib/date.ts'
-import { LockError, remaining, st, TeaserLines } from '../shared.tsx'
+import { useStrings } from '../../i18n/index.ts'
+import { LockError, remaining, st, TeaserLines, useThemeStrings } from '../shared.tsx'
+import { strings } from './strings.ts'
 import type { LetterInfo, LockedProps, OpenProps, Theme } from '../types.ts'
 
 // 가려진 글 테마 (디자인: E-text, E-open)
@@ -8,7 +9,7 @@ const SERIF = "'Hahmlet',serif"
 const SANS = "'Noto Sans KR',sans-serif"
 const SCREEN = `box-sizing:border-box;background:#DCDDD9;color:#141414;font-family:${SERIF};padding:26px 20px 24px;display:flex;flex-direction:column;gap:18px`
 const DOC = 'position:relative;flex-grow:1;flex-shrink:1;min-height:0;background:#FFFFFF;box-shadow:0 1px 2px rgba(0,0,0,.08),0 12px 30px rgba(0,0,0,.08);padding:22px 22px 18px;display:flex;flex-direction:column;overflow:hidden'
-const STAMP = `position:absolute;right:18px;top:96px;transform:rotate(-9deg);border:2.5px solid currentColor;border-radius:6px;padding:6px 12px;font-family:${SANS};font-size:17px;font-weight:700;letter-spacing:2px;mix-blend-mode:multiply;pointer-events:none`
+const STAMP = `position:absolute;right:18px;transform:rotate(-9deg);border:2.5px solid currentColor;border-radius:6px;padding:6px 12px;font-family:${SANS};font-size:17px;font-weight:700;letter-spacing:2px;mix-blend-mode:multiply;pointer-events:none`
 const RED = '#C8322B'
 const BLUE = '#1F4FB8'
 const OUTLINE = `height:52px;border:1px solid #9A9A95;border-radius:4px;background:transparent;color:#141414;font-family:${SANS};font-size:15px;font-weight:500;cursor:pointer`
@@ -16,20 +17,19 @@ const SOLID = `height:52px;border:0;border-radius:4px;background:#141414;color:#
 const BUTTONS = 'display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px'
 
 /** 문서 머리: 머리줄, 제목, 작성·수신 */
-function DocHead({ letter, now, state }: { letter: LetterInfo; now: Date; state: '공개' | '공개됨' }) {
+function DocHead({ letter, now, released }: { letter: LetterInfo; now: Date; released: boolean }) {
+  const t = useThemeStrings(strings)
   return (
     <>
       <div style={st(`display:flex;justify-content:space-between;gap:12px;font-family:${SANS};font-size:11.5px;color:#6B6B6B;padding-bottom:10px;border-bottom:1px solid #141414`)}>
-        <span>비공개 문서</span>
-        <span>
-          {state} {dotDate(letter.unlockAt)} {hhmm(letter.unlockAt)}
-        </span>
+        <span style={st('flex-shrink:0')}>{t.classified}</span>
+        <span style={st('text-align:right')}>{t.head(released, letter.unlockAt, now)}</span>
       </div>
       <h1 className="tyl-keep" style={st('margin:16px 0 4px;font-size:21px;font-weight:700;letter-spacing:-0.5px;line-height:1.4')}>
         <TeaserLines unlock={letter.unlockAt} now={now} />
       </h1>
       <div className="tyl-keep" style={st(`font-family:${SANS};font-size:12px;color:#6B6B6B;margin-bottom:22px`)}>
-        작성 {letter.from} / 수신 {letter.to}
+        {t.byline(letter.from, letter.to)}
       </div>
     </>
   )
@@ -47,14 +47,16 @@ const BARS: readonly (readonly (readonly [number, number])[])[] = [
 
 function Locked(p: LockedProps) {
   const { letter } = p
+  const g = useStrings()
+  const t = useThemeStrings(strings)
   return (
     <div className="tyl-screen tyl-focus-dark" style={st(`min-height:var(--screen-h, 100dvh);${SCREEN}`)}>
       <div style={st(`${DOC};min-height:420px`)}>
-        <DocHead letter={letter} now={new Date(p.now)} state="공개" />
-        <div aria-hidden="true" style={{ ...st(STAMP), color: RED }}>
-          공개 전
+        <DocHead letter={letter} now={new Date(p.now)} released={false} />
+        <div aria-hidden="true" style={{ ...st(`${STAMP};${t.stampPos}`), color: RED }}>
+          {t.stampBefore}
         </div>
-        <div role="img" aria-label="가려진 문서 본문" style={st('flex-grow:1;min-height:0;overflow:hidden')}>
+        <div role="img" aria-label={t.bodyAria} style={st('flex-grow:1;min-height:0;overflow:hidden')}>
           {BARS.map((row, r) => (
             <div key={r} style={st('display:flex;flex-wrap:wrap;gap:9px 6px;margin-bottom:12px')}>
               {row.map(([w, deg], i) => (
@@ -69,17 +71,17 @@ function Locked(p: LockedProps) {
           <LockError {...p} />
         ) : (
           <>
-            <span style={st('font-size:13px;color:#4A4A4A;line-height:1.6')}>공개 전에는 누구도 볼 수 없어요</span>
-            <span style={st('font-size:19px;font-weight:700;flex-shrink:0;font-variant-numeric:tabular-nums')}>{remaining(p, '공개하는 중…')}</span>
+            <span style={st('font-size:13px;color:#4A4A4A;line-height:1.6')}>{t.nobody}</span>
+            <span style={st('font-size:19px;font-weight:700;flex-shrink:0;font-variant-numeric:tabular-nums')}>{remaining(p, g, t.releasing)}</span>
           </>
         )}
       </div>
       <div style={st(BUTTONS)}>
         <button type="button" style={st(OUTLINE)} onClick={p.onSaveCalendar} disabled={p.preview}>
-          캘린더에 저장
+          {g.calendar.save}
         </button>
         <button type="button" style={st(SOLID)} onClick={p.onWrite} disabled={p.preview}>
-          나도 비공개 문서 만들기
+          {t.writeOwn}
         </button>
       </div>
     </div>
@@ -107,6 +109,8 @@ function tokenize(text: string): Token[] {
 }
 
 function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenProps) {
+  const g = useStrings()
+  const t = useThemeStrings(strings)
   const tokens = useMemo(() => tokenize(text), [text])
   const count = useMemo(() => tokens.filter((t) => 'word' in t).length, [tokens])
   const [shown, setShown] = useState(autoplay ? 0 : count)
@@ -170,12 +174,12 @@ function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenP
   return (
     <div className="tyl-screen tyl-focus-dark" style={st(`height:max(var(--screen-h, 100dvh), 600px);${SCREEN}`)}>
       <div style={st(DOC)}>
-        <DocHead letter={letter} now={letter.createdAt} state="공개됨" />
-        <div aria-hidden="true" style={{ ...st(STAMP), color: RED, opacity: shown > 0 ? 0 : 1, transition: animate ? 'opacity .4s,transform .4s' : undefined }}>
-          공개 전
+        <DocHead letter={letter} now={letter.createdAt} released />
+        <div aria-hidden="true" style={{ ...st(`${STAMP};${t.stampPos}`), color: RED, opacity: shown > 0 ? 0 : 1, transition: animate ? 'opacity .4s,transform .4s' : undefined }}>
+          {t.stampBefore}
         </div>
-        <div aria-hidden="true" style={{ ...st(STAMP), color: BLUE, opacity: done ? 1 : 0, transition: animate ? 'opacity .4s .1s' : undefined }}>
-          공개됨
+        <div aria-hidden="true" style={{ ...st(`${STAMP};${t.stampPos}`), color: BLUE, opacity: done ? 1 : 0, transition: animate ? 'opacity .4s .1s' : undefined }}>
+          {t.stampAfter}
         </div>
         <div ref={body} tabIndex={0} style={st('position:relative;flex-grow:1;min-height:0;overflow-y:auto;outline:none')}>
           <div style={st('display:flex;flex-wrap:wrap;align-content:flex-start;gap:9px 6px')}>
@@ -196,19 +200,19 @@ function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenP
         </div>
       </div>
       <div style={st(`display:flex;justify-content:space-between;align-items:baseline;gap:12px;font-family:${SANS}`)}>
-        <span style={st('font-size:13px;color:#4A4A4A')}>{fullDate(letter.createdAt)} 작성</span>
+        <span style={st('font-size:13px;color:#4A4A4A')}>{t.written(letter.createdAt)}</span>
         {!done && (
           <button type="button" style={st('min-height:44px;border:0;background:transparent;padding:0;color:#141414;font-family:inherit;font-size:14px;text-decoration:underline;text-underline-offset:4px;cursor:pointer')} onClick={showAll}>
-            한 번에 보기
+            {g.locked.showAll}
           </button>
         )}
       </div>
       <div style={st(BUTTONS)}>
         <button type="button" style={st(OUTLINE)} onClick={() => (reducedMotion ? showAll() : setRun((r) => r + 1))}>
-          다시 보기
+          {g.locked.replay}
         </button>
         <button type="button" style={st(SOLID)} onClick={onReply} disabled={preview}>
-          답장도 비공개로 보내기
+          {t.reply}
         </button>
       </div>
     </div>
@@ -220,7 +224,7 @@ export const redact: Theme = {
   code: 8,
   name: { ko: '가려진 글', en: 'Redacted' },
   tints: null,
-  fonts: ['Hahmlet:wght@400;500;700', 'Noto+Sans+KR:wght@400;500;700'],
+  fonts: { ko: ['Hahmlet:wght@400;500;700', 'Noto+Sans+KR:wght@400;500;700'] },
   tile: { bg: '#DCDDD9', markBg: '#141414', markW: '46px', markH: '12px', markRadius: '1.5px' },
   preview: { bg: '#DCDDD9', fg: '#141414', font: SERIF, bubbleBg: '#FFFFFF', bubbleFg: '#141414', radius: '0', pad: '14px 16px', size: '17px' },
   Locked,

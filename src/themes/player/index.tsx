@@ -1,7 +1,8 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { lyricLines } from '../../lib/bubbles.ts'
-import { monthDot, teaser, whenText } from '../../lib/date.ts'
-import { LockError, remaining, st } from '../shared.tsx'
+import { useStrings } from '../../i18n/index.ts'
+import { LockError, remaining, st, useThemeStrings } from '../shared.tsx'
+import { strings } from './strings.ts'
 import type { LetterInfo, LockedProps, OpenProps, Theme } from '../types.ts'
 import './player.css'
 
@@ -62,6 +63,7 @@ const Heart = () => (
 
 /** 상단 바. 접기·더보기 아이콘은 장식이다. */
 function TopBar({ to }: { to: string }) {
+  const t = useThemeStrings(strings)
   return (
     <div style={st('display:flex;align-items:center;justify-content:space-between;gap:8px;height:44px')}>
       <span style={st('width:32px;display:flex;flex-shrink:0')}>
@@ -70,8 +72,8 @@ function TopBar({ to }: { to: string }) {
         </svg>
       </span>
       <div style={st('display:flex;flex-direction:column;align-items:center;line-height:1.35;min-width:0')}>
-        <span style={st('font-size:11px;color:#E0E0E0')}>예약 재생목록에서 재생 중</span>
-        <span style={st('font-size:13px;font-weight:700;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap')}>{to}에게</span>
+        <span style={st('font-size:11px;color:#E0E0E0')}>{t.playingFrom}</span>
+        <span style={st('font-size:13px;font-weight:700;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap')}>{t.toName(to)}</span>
       </div>
       <span style={st('width:32px;display:flex;justify-content:flex-end;flex-shrink:0')}>
         <svg {...svg(24, '#FFFFFF', 2)}>
@@ -117,7 +119,7 @@ interface AlbumSize {
 const BIG: AlbumSize = { h: 290, jacket: 290, vinyl: 276, vtop: 6, label: 99, labelFont: 30, sideFont: 9, pad: 20, topFont: 15, big: 168, nameFont: 14 }
 const SMALL: AlbumSize = { h: 176, jacket: 176, vinyl: 166, vtop: 5, label: 60, labelFont: 18, sideFont: 6, pad: 12, topFont: 9, big: 100, nameFont: 8 }
 // 재킷 날짜 글자 폭(em). Bricolage 800 기준으로 1과 점은 좁고 나머지 숫자는 넓다. 실측보다 조금 넉넉하다.
-const GLYPH_EM: Record<string, number> = { '1': 0.32, '.': 0.2 }
+const GLYPH_EM: Record<string, number> = { '1': 0.32, '.': 0.2, '/': 0.34 }
 /** 재킷 안쪽 폭(inner, 디자인 px)에 들어가는 날짜 글자 크기. 390px보다 좁은 화면에서는 같은 비율로 줄인다. */
 function dateSize(date: string, base: number, inner: number): string {
   const em = [...date].reduce((sum, ch) => sum + (GLYPH_EM[ch] ?? 0.6), 0)
@@ -128,8 +130,10 @@ const pct = (v: number, of: number) => `${((v / of) * 100).toFixed(3)}%`
 
 function Album({ letter, size: s, left, spin, slide }: { letter: LetterInfo; size: AlbumSize; left: number; spin?: 'running' | 'paused'; slide?: boolean }) {
   const noise = `kn${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`
+  const g = useStrings()
+  const t = useThemeStrings(strings)
   const tint = letter.tint ?? DEFAULT_TINT
-  const date = monthDot(letter.unlockAt)
+  const date = g.date.monthDot(letter.unlockAt)
   const labelScale = date.length > 4 ? 0.7 : date.length > 3 ? 0.85 : 1
   return (
     <div aria-hidden="true" style={{ position: 'relative', width: '100%', maxWidth: 342, aspectRatio: `342 / ${s.h}` }}>
@@ -143,8 +147,8 @@ function Album({ letter, size: s, left, spin, slide }: { letter: LetterInfo; siz
         <div style={st('position:absolute;top:0;right:0;bottom:0;left:0;background:linear-gradient(135deg,rgba(255,255,255,.22) 0%,rgba(255,255,255,0) 38%,rgba(0,0,0,0) 60%,rgba(0,0,0,.28) 100%)')} />
         <div style={{ ...st('position:absolute;top:0;right:0;bottom:0;left:0;display:flex;flex-direction:column;justify-content:space-between;color:#FFFFFF'), padding: s.pad }}>
           <div style={{ ...st('display:flex;justify-content:space-between;gap:8px;font-weight:700;letter-spacing:-0.2px'), fontSize: s.topFont }}>
-            <span>할 말이 있는데</span>
-            <span style={st('opacity:.8')}>{letter.unlockAt.getFullYear()}</span>
+            <span style={st('min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap')}>{t.jacket}</span>
+            <span style={st('flex-shrink:0;opacity:.8')}>{letter.unlockAt.getFullYear()}</span>
           </div>
           {/* 디자인 값(-0.06em)이면 Bricolage에서 점이 양옆 1과 겹친다. 대체 글꼴까지 재 보고 모두 틈이 남는 -0.01em으로 둔다. */}
           <span style={{ ...st(`font-family:${DISPLAY};font-weight:800;line-height:.8;letter-spacing:-0.01em;margin-left:-0.03em;white-space:nowrap`), fontSize: dateSize(date, s.big, s.jacket - s.pad * 2) }}>{date}</span>
@@ -181,7 +185,10 @@ function Album({ letter, size: s, left, spin, slide }: { letter: LetterInfo; siz
 
 function Locked(p: LockedProps) {
   const { letter, now } = p
+  const g = useStrings()
+  const t = useThemeStrings(strings)
   const today = new Date(now)
+  const plays = t.plays(letter.unlockAt, today)
   return (
     <div className="tyl-screen tyl-focus-light" style={{ ...st(`min-height:var(--screen-h, 100dvh);${SCREEN};padding:14px 24px 26px`), backgroundImage: background(letter) }}>
       <div aria-hidden="true" style={st(SHADE)} />
@@ -190,15 +197,15 @@ function Locked(p: LockedProps) {
         <div style={st('margin-top:4px')}>
           <Album letter={letter} size={BIG} left={58} />
         </div>
-        <TrackTitle title={teaser(letter.unlockAt, today)} from={letter.from} />
+        <TrackTitle title={g.teaser(letter.unlockAt, today)} from={letter.from} />
 
         <div style={st('display:flex;flex-direction:column;gap:8px')}>
-          <div role="img" aria-label="아직 재생 전" style={st('height:4px;background:rgba(255,255,255,.25);border-radius:2px;position:relative')}>
+          <div role="img" aria-label={t.notPlayed} style={st('height:4px;background:rgba(255,255,255,.25);border-radius:2px;position:relative')}>
             <div style={st('position:absolute;left:-2px;top:-4px;width:12px;height:12px;border-radius:50%;background:#FFFFFF')} />
           </div>
           <div style={st('display:flex;justify-content:space-between;font-size:12px;color:#B3B3B3')}>
-            <span>오늘</span>
-            <span style={st('font-variant-numeric:tabular-nums')}>{p.status === 'waiting' ? `-${remaining(p)}` : remaining(p, '재생 준비 중…')}</span>
+            <span>{t.today}</span>
+            <span style={st('font-variant-numeric:tabular-nums')}>{p.status === 'waiting' ? `-${remaining(p, g)}` : remaining(p, g, t.preparing)}</span>
           </div>
         </div>
 
@@ -229,17 +236,18 @@ function Locked(p: LockedProps) {
             <LockError {...p} />
           ) : (
             <p className="tyl-keep" style={st('margin:0;font-size:14px;line-height:1.6;color:#D0D0D0;text-align:center')}>
-              {whenText(letter.unlockAt, today)}에 재생돼요.
-              <br />그 전에는 누구도 재생할 수 없어요.
+              {plays[0]}
+              <br />
+              {plays[1]}
             </p>
           )}
         </div>
         <div style={st('display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px')}>
           <button type="button" style={st(OUTLINE)} onClick={p.onSaveCalendar} disabled={p.preview}>
-            캘린더에 저장
+            {g.calendar.save}
           </button>
           <button type="button" style={st(SOLID)} onClick={p.onWrite} disabled={p.preview}>
-            나도 한 곡 남기기
+            {t.writeOwn}
           </button>
         </div>
       </div>
@@ -273,6 +281,8 @@ function textWidth(s: string): number {
 }
 
 function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenProps) {
+  const g = useStrings()
+  const t = useThemeStrings(strings)
   const scroller = useRef<HTMLDivElement>(null)
   const [width, setWidth] = useState(0)
   useEffect(() => {
@@ -351,10 +361,10 @@ function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenP
       <div className="k-col" style={st('position:relative;display:flex;flex-direction:column;gap:16px;height:100%')}>
         <TopBar to={letter.to} />
         <Album letter={letter} size={SMALL} left={out ? 130 : 20} spin={reducedMotion ? undefined : playing ? 'running' : 'paused'} slide={!reducedMotion} />
-        <TrackTitle title={teaser(letter.unlockAt, letter.createdAt)} from={letter.from} small />
+        <TrackTitle title={g.teaser(letter.unlockAt, letter.createdAt)} from={letter.from} small />
 
         <div style={st('display:flex;flex-direction:column;gap:7px')}>
-          <div role="img" aria-label={`재생 진행 ${cur}/${total}줄`} style={st('height:4px;background:rgba(255,255,255,.25);border-radius:2px;position:relative')}>
+          <div role="img" aria-label={t.progress(cur, total)} style={st('height:4px;background:rgba(255,255,255,.25);border-radius:2px;position:relative')}>
             <div style={{ ...st('height:4px;background:#FFFFFF;border-radius:2px'), width: `${total ? Math.round((cur / total) * 100) : 100}%`, transition: reducedMotion ? undefined : 'width 1.7s linear' }} />
           </div>
           <div style={st('display:flex;justify-content:space-between;font-size:12px;color:#B3B3B3;font-variant-numeric:tabular-nums')}>
@@ -362,7 +372,7 @@ function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenP
               {Math.floor(secs / 60)}:{String(secs % 60).padStart(2, '0')}
             </span>
             <span>
-              {cur} / {total}줄
+              {t.lines(cur, total)}
             </span>
           </div>
         </div>
@@ -371,10 +381,10 @@ function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenP
           <span aria-hidden="true" style={st('opacity:.6;display:flex')}>
             <Shuffle />
           </span>
-          <button type="button" aria-label="처음부터" style={st(ICON_BUTTON)} onClick={play}>
+          <button type="button" aria-label={t.fromStart} style={st(ICON_BUTTON)} onClick={play}>
             <Prev />
           </button>
-          <button type="button" aria-label={playing ? '일시정지' : '재생'} style={st('width:62px;height:62px;border:0;border-radius:50%;background:#FFFFFF;display:flex;align-items:center;justify-content:center;cursor:pointer')} onClick={toggle}>
+          <button type="button" aria-label={playing ? t.pause : t.play} style={st('width:62px;height:62px;border:0;border-radius:50%;background:#FFFFFF;display:flex;align-items:center;justify-content:center;cursor:pointer')} onClick={toggle}>
             {playing ? (
               <svg aria-hidden="true" width="26" height="26" viewBox="0 0 24 24">
                 <rect x="6" y="4" width="4" height="16" rx="1" fill="#121212" />
@@ -386,7 +396,7 @@ function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenP
               </svg>
             )}
           </button>
-          <button type="button" aria-label="한 번에 보기" style={st(ICON_BUTTON)} onClick={showAll}>
+          <button type="button" aria-label={g.locked.showAll} style={st(ICON_BUTTON)} onClick={showAll}>
             <Next />
           </button>
           <span aria-hidden="true" style={st('opacity:.6;display:flex')}>
@@ -396,7 +406,7 @@ function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenP
 
         <div style={{ ...st('flex-grow:1;flex-shrink:1;min-height:150px;border-radius:14px;position:relative;overflow:hidden;display:flex;flex-direction:column'), background: tint }}>
           <div aria-hidden="true" style={st('position:absolute;top:0;right:0;bottom:0;left:0;background:rgba(0,0,0,.18)')} />
-          <span style={st('position:relative;padding:14px 16px 4px;font-size:15px;font-weight:700')}>가사</span>
+          <span style={st('position:relative;padding:14px 16px 4px;font-size:15px;font-weight:700')}>{t.lyrics}</span>
           {/* 재생 중에는 줄을 따라 자동으로 넘기고, 멈추거나 끝나면 손으로 넘겨 읽는다. */}
           {/* 스크롤 막대 자리를 늘 비워 둔다. 막대가 생겼다 없어지며 폭이 바뀌면 줄 나누기가 다시 된다. */}
           <div ref={scroller} style={{ ...st('position:relative;flex-grow:1;min-height:0;overflow-x:hidden;padding:0 16px;scrollbar-gutter:stable'), overflowY: playing ? 'hidden' : 'auto' }}>
@@ -419,7 +429,7 @@ function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenP
         </div>
 
         <button type="button" style={st('height:50px;border:0;border-radius:25px;background:#FFFFFF;color:#121212;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer')} onClick={onReply} disabled={preview}>
-          나도 한 곡 남기기
+          {t.writeOwn}
         </button>
       </div>
     </div>
@@ -428,10 +438,10 @@ function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenP
 
 // 링크에는 인덱스가 들어간다. 예전 색(파랑·주황·초록·분홍)과 같은 순서로 가장 가까운 새 색을 둔다.
 const TINTS = [
-  { hex: '#3A5BD9', name: '파랑' },
-  { hex: '#E0552B', name: '주황' },
-  { hex: '#0F8A6A', name: '초록' },
-  { hex: '#C93A78', name: '분홍' },
+  { hex: '#3A5BD9', name: { ko: '파랑', en: 'Blue' } },
+  { hex: '#E0552B', name: { ko: '주황', en: 'Orange' } },
+  { hex: '#0F8A6A', name: { ko: '초록', en: 'Green' } },
+  { hex: '#C93A78', name: { ko: '분홍', en: 'Pink' } },
 ]
 
 export const player: Theme = {
@@ -439,7 +449,7 @@ export const player: Theme = {
   code: 5,
   name: { ko: '플레이어', en: 'Player' },
   tints: TINTS,
-  fonts: ['Bricolage+Grotesque:opsz,wght@12..96,800', 'Noto+Sans+KR:wght@400;500;700;900'],
+  fonts: { ko: ['Bricolage+Grotesque:opsz,wght@12..96,800', 'Noto+Sans+KR:wght@400;500;700;900'] },
   tile: { bg: '#121212', markW: '40px', markH: '40px', markRadius: '4px' },
   preview: { bg: '#121212', fg: '#FFFFFF', font: FONT, bubbleBg: 'TINT', bubbleFg: '#FFFFFF', radius: '4px', pad: '14px 16px', size: '18px' },
   Locked,

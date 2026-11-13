@@ -2,6 +2,7 @@ import { useMemo, type ReactNode } from 'react'
 import { paragraphs } from '../../lib/bubbles.ts'
 import { daysBetween, hhmm, weekday } from '../../lib/date.ts'
 import { LockError, remaining, st, usePhases } from '../shared.tsx'
+import { useStrings } from '../../i18n/index.ts'
 import type { LetterInfo, LockedProps, OpenProps, Theme } from '../types.ts'
 
 // 군대 보고서 테마 (디자인: O-military, O-open). 실제 부대명·마크는 쓰지 않는다.
@@ -71,6 +72,8 @@ function Header({ letter, rows, approval, title }: { letter: LetterInfo; rows: [
 const registerNo = (letter: LetterInfo) => `편지-${pad2(letter.createdAt.getMonth() + 1)}${pad2(letter.createdAt.getDate())}`
 
 function Locked(p: LockedProps) {
+  // 이 테마는 한국어판 전용이다(영어 경로로 열려도 View가 한국어로 보여준다).
+  const g = useStrings()
   const { letter, now } = p
   const u = letter.unlockAt
   const daysLeft = Math.max(0, daysBetween(new Date(now), u))
@@ -142,7 +145,7 @@ function Locked(p: LockedProps) {
           <div style={st('display:flex;flex-direction:column;gap:1px')}>
             <h2 style={st(H2)}>□ 행정사항</h2>
             <p style={st(`${ITEM};color:#D2161C`)}>○ 개봉 일시 최우선으로 엄수</p>
-            <p style={st(`${ITEM};font-variant-numeric:tabular-nums`)}>○ {p.status === 'waiting' ? `잔여 ${remaining(p)}, 대기할 것` : p.status === 'opening' ? '개봉 절차 진행 중' : '개봉 실패, 재시도할 것'}</p>
+            <p style={st(`${ITEM};font-variant-numeric:tabular-nums`)}>○ {p.status === 'waiting' ? `잔여 ${remaining(p, g)}, 대기할 것` : p.status === 'opening' ? '개봉 절차 진행 중' : '개봉 실패, 재시도할 것'}</p>
             <p style={st(ITEM)}>○ 새로고침으로 개봉 시각 단축 불가</p>
             <p style={st(STAR)}>* 붙임 : 편지 1부. 끝.</p>
             <div style={st('padding:4px 0 0 10px')}>
@@ -271,7 +274,7 @@ export const report: Theme = {
   code: 12,
   name: { ko: '군대 보고서' },
   tints: null,
-  fonts: ['Noto+Sans+KR:wght@500;700;900', 'Noto+Serif+KR:wght@400;600'],
+  fonts: { ko: ['Noto+Sans+KR:wght@500;700;900', 'Noto+Serif+KR:wght@400;600'] },
   tile: { bg: '#4E5740', markBg: '#FFFFFF', markW: '50px', markH: '68px', markRadius: '0' },
   preview: { bg: '#FFFFFF', fg: '#000000', font: SERIF, bubbleBg: 'transparent', bubbleFg: '#1414C8', radius: '0', pad: '0', size: '19px' },
   Locked,

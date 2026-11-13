@@ -1,5 +1,6 @@
 import { dotDate, dotDateTime } from '../../lib/date.ts'
 import { LockError, remaining, st, usePhases } from '../shared.tsx'
+import { useStrings } from '../../i18n/index.ts'
 import type { LetterInfo, LockedProps, OpenProps, Theme } from '../types.ts'
 
 // 결재 공문 테마 (디자인: N-approval, N-open). 실제 기관명·마크는 쓰지 않는다.
@@ -56,6 +57,8 @@ function Table({ letter, receiver }: { letter: LetterInfo; receiver: React.React
 const pad2 = (n: number) => String(n).padStart(2, '0')
 
 function Locked(p: LockedProps) {
+  // 이 테마는 한국어판 전용이다(영어 경로로 열려도 View가 한국어로 보여준다).
+  const g = useStrings()
   const { letter } = p
   const { createdAt: c, unlockAt: u } = letter
   return (
@@ -102,7 +105,7 @@ function Locked(p: LockedProps) {
             가. 개봉 일시: <span style={st('font-weight:900')}>{dotDateTime(u)}</span>
           </p>
           <p style={st('margin:0;padding-left:14px')}>
-            나. 남은 기간: <span style={st('font-weight:900;font-variant-numeric:tabular-nums')}>{p.status === 'error' ? '개봉 지연' : remaining(p, '개봉 진행 중')}</span>
+            나. 남은 기간: <span style={st('font-weight:900;font-variant-numeric:tabular-nums')}>{p.status === 'error' ? '개봉 지연' : remaining(p, g, '개봉 진행 중')}</span>
           </p>
           <p style={st('margin:0;padding-left:14px')}>다. 내 용: 대외비 (개봉 전 누구도 열람 불가)</p>
           <p style={st('margin:6px 0 0')}>붙임 편지 1부. 끝.</p>
@@ -227,7 +230,7 @@ export const approval: Theme = {
   code: 11,
   name: { ko: '결재 공문' },
   tints: null,
-  fonts: ['Noto+Serif+KR:wght@400;600;900'],
+  fonts: { ko: ['Noto+Serif+KR:wght@400;600;900'] },
   tile: { bg: '#DADDE1', markBg: '#FFFFFF', markW: '50px', markH: '68px', markRadius: '0' },
   preview: { bg: '#FFFFFF', fg: '#000000', font: FONT, bubbleBg: 'transparent', bubbleFg: '#000000', radius: '0', pad: '0', size: '19px' },
   Locked,

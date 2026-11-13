@@ -27,6 +27,22 @@ const date = {
   whenText: d.whenText,
   /** 한국어 화면은 받는 사람 대부분이 같은 시간대라 시간대를 붙이지 않는다 */
   dateClockZone: d.dateClock,
+  /** 잠김 화면 상세 시각: "1월 1일 0시" (영어는 시간대 약칭을 붙인다) */
+  whenZone: d.whenText,
+  /** 시간대 약칭("PST"). 한국어 화면은 쓰지 않아 빈 문자열 */
+  zone: (_at: Date) => '',
+  /** "2027년 1월 1일 0시" */
+  dateHour: d.dateHour,
+  /** 큰 시계: "0:00" (오전·오후 없이) */
+  hm: d.hm,
+  /** 요일 한 글자: "금" */
+  weekday: d.weekday,
+  /** 요일: "금요일" */
+  weekdayName: (at: Date) => `${d.weekday(at)}요일`,
+  /** 숫자 월·일: "1.1" */
+  monthDot: d.monthDot,
+  /** 문서 날짜: "2026. 11. 11." */
+  dotDate: d.dotDate,
   chatStamp: d.chatStamp,
   countdown: d.countdown,
   number: (n: number) => n.toLocaleString('ko-KR'),
@@ -157,10 +173,12 @@ export const ko = {
     icsNote: '그날 이 링크에서 열어 볼 수 있어요.',
   },
 
-  /** 잠김 화면 공통 */
+  /** 테마 화면 공통 */
   locked: {
     retry: '다시 시도',
     opening: '여는 중…',
+    showAll: '한 번에 보기',
+    replay: '다시 보기',
   },
 }
 

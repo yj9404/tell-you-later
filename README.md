@@ -37,6 +37,11 @@ scripts/        빌드 후처리(테마별 미리보기 페이지), OG 이미지
 `src/themes/<id>/index.tsx`에서 `Theme`(`src/themes/types.ts`)을 내보내고 `src/themes/registry.ts`에 한 줄을 더한다.
 `code`(링크에 들어가는 번호)와 색 팔레트의 순서는 한번 배포하면 바꾸지 않는다.
 
+화면 문구는 테마 폴더의 `strings.ts`에 `{ ko, en }`으로 둔다(`en: typeof ko`라 키가 빠지면 타입 검사가 잡는다).
+이름·날짜가 들어가는 문장은 어순이 언어마다 달라서 함수로 쓴다. 공통 문구와 날짜 표기는 `src/i18n/`(`useStrings()`)에 있다.
+`name.en`이 없는 테마는 영어판 쓰기 화면에 나오지 않고, 받은 링크는 한국어로 보여준다(지금은 approval, report, greet).
+라틴 글자가 약한 글꼴은 `fonts.en`에 영어용 글꼴을 따로 둔다(예: air).
+
 ### 링크 형식과 호환성
 
 `https://<도메인>/t/<테마id>/#v1.<base64url>` — 바이트 배열은 `src/lib/codec.ts` 맨 위에 적혀 있다.

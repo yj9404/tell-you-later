@@ -3,7 +3,8 @@ import type { Lang } from '../i18n/lang.ts'
 
 export interface Tint {
   hex: string
-  name: string
+  /** 색 버튼의 aria 이름 */
+  name: Record<Lang, string>
 }
 
 
@@ -83,8 +84,8 @@ export interface Theme {
   name: { ko: string } & Partial<Record<Exclude<Lang, 'ko'>, string>>
   /** 색을 고르는 테마만. 링크에는 인덱스가 들어가므로 한번 배포하면 순서를 바꾸지 않는다 */
   tints: readonly Tint[] | null
-  /** Google Fonts css2의 family 값. 이 테마를 열 때만 불러온다 */
-  fonts: readonly string[]
+  /** Google Fonts css2의 family 값. 이 테마를 열 때만 불러온다. 라틴 글자가 약한 글꼴은 en에 따로 둔다(없으면 ko) */
+  fonts: { ko: readonly string[] } & Partial<Record<Exclude<Lang, 'ko'>, readonly string[]>>
   tile: ThemeTile
   preview: ThemePreview
   Locked: ComponentType<LockedProps>

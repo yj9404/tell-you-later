@@ -1,5 +1,6 @@
-import { chatIntro, useBubblePlayback } from '../shared.tsx'
-import { chatStamp, countdown, dateClock, dateHour, teaserDate } from '../../lib/date.ts'
+import { chatIntro, TeaserLines, useBubblePlayback, useThemeStrings } from '../shared.tsx'
+import { useStrings } from '../../i18n/index.ts'
+import { strings } from './strings.ts'
 import type { LockedProps, OpenProps, Theme } from '../types.ts'
 import s from './dm.module.css'
 
@@ -39,23 +40,24 @@ function TypingDots({ label }: { label: string }) {
 }
 
 function Locked({ letter, now, status, error, onRetry, onSaveCalendar, onWrite, preview }: LockedProps) {
+  const g = useStrings()
+  const t = useThemeStrings(strings)
   const today = new Date(now)
-  const date = teaserDate(letter.unlockAt, today)
-  const intro = chatIntro(letter, '할 말이 있는데')
+  const date = g.date.teaserDate(letter.unlockAt, today)
+  const intro = chatIntro(letter, g, t.introMiddle, t.introLast)
+  const arrival = t.arrival(letter.unlockAt)
   return (
     <div className={`tyl-screen ${s.screen}`}>
-      <Header name={letter.from} status={`${date}까지 입력 중`} />
+      <Header name={letter.from} status={t.typingUntil(date)} />
 
       <div className={s.lockedBody}>
         <h1 className={s.teaser}>
-          할 말이 있는데
-          <br />
-          {date}에 할게
+          <TeaserLines unlock={letter.unlockAt} now={today} />
         </h1>
 
         <div className={s.lockedChat}>
           <span className={s.stamp} style={{ marginBottom: 12 }}>
-            {chatStamp(letter.createdAt, today)}
+            {g.date.chatStamp(letter.createdAt, today)}
           </span>
           {/* 말풍선 뒤에 입력 중 점이 이어지므로 마지막 말풍선도 가운데 모양이다. */}
           {intro.map((line, i) => (
@@ -65,11 +67,12 @@ function Locked({ letter, now, status, error, onRetry, onSaveCalendar, onWrite, 
           ))}
           <div className={s.row}>
             <Avatar size={28} />
-            <TypingDots label="입력 중 표시" />
+            <TypingDots label={t.typingShown} />
           </div>
           <span className={s.arrival}>
-            {dateHour(letter.unlockAt)}에 도착해요.
-            <br />그 전에는 누구도 읽을 수 없어요.
+            {arrival[0]}
+            <br />
+            {arrival[1]}
           </span>
         </div>
       </div>
@@ -79,20 +82,20 @@ function Locked({ letter, now, status, error, onRetry, onSaveCalendar, onWrite, 
           <div className={s.errorBox} role="alert">
             <span className={s.errorText}>{error}</span>
             <button type="button" className={s.plainButton} onClick={onRetry}>
-              다시 시도
+              {g.locked.retry}
             </button>
           </div>
         ) : (
           <div className={s.countdown}>
-            <span className={s.countdownLabel}>도착까지</span>
-            <span className={s.countdownValue}>{status === 'opening' ? '받는 중…' : countdown(letter.unlockAt.getTime() - now)}</span>
+            <span className={s.countdownLabel}>{t.countdownLabel}</span>
+            <span className={s.countdownValue}>{status === 'opening' ? t.receiving : g.date.countdown(letter.unlockAt.getTime() - now)}</span>
           </div>
         )}
         <div className={s.actions}>
           <button type="button" className={s.gradientButton} onClick={onWrite} disabled={preview}>
-            나도 예약 DM 보내기
+            {t.writeOwn}
           </button>
-          <button type="button" aria-label="캘린더에 저장" className={s.iconButton} onClick={onSaveCalendar} disabled={preview}>
+          <button type="button" aria-label={g.calendar.save} className={s.iconButton} onClick={onSaveCalendar} disabled={preview}>
             <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <rect x="3" y="5" width="18" height="16" rx="2" />
               <path d="M3 10h18M8 3v4M16 3v4" />
@@ -106,15 +109,17 @@ function Locked({ letter, now, status, error, onRetry, onSaveCalendar, onWrite, 
 
 function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenProps) {
   const { bubbles, shown, typing, run, done, showAll, replay, scroller: chat } = useBubblePlayback(text, autoplay, reducedMotion)
-  const intro = chatIntro(letter, '할 말이 있는데')
+  const g = useStrings()
+  const t = useThemeStrings(strings)
+  const intro = chatIntro(letter, g, t.introMiddle, t.introLast)
 
   return (
     <div className={`tyl-screen ${s.screen}`}>
-      <Header name={letter.from} status={done ? '방금 도착' : '입력 중'} />
+      <Header name={letter.from} status={done ? t.justArrived : t.typing} />
 
       <div className={s.chat} ref={chat}>
         <span className={`${s.stamp} ${s.pushDown}`} style={{ marginBottom: 10 }}>
-          {dateClock(letter.createdAt)}
+          {g.date.dateClock(letter.createdAt)}
         </span>
         {intro.map((line, i) => (
           <div key={i} className={`${s.bubble} ${i === 0 ? s.first : i === intro.length - 1 ? s.last : s.middle} ${s.indent}`}>
@@ -123,7 +128,7 @@ function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenP
         ))}
 
         <span className={s.stamp} style={{ margin: '18px 0 10px' }}>
-          {dateClock(letter.unlockAt)}
+          {g.date.dateClock(letter.unlockAt)}
         </span>
 
         {bubbles.slice(0, shown).map((b, i) => {
@@ -139,7 +144,7 @@ function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenP
         {typing && (
           <div className={`${s.row} ${s.popFast}`}>
             <Avatar size={28} />
-            <TypingDots label="입력 중" />
+            <TypingDots label={t.typing} />
           </div>
         )}
       </div>
@@ -148,9 +153,9 @@ function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenP
         {done ? (
           <div className={s.actions}>
             <button type="button" className={s.gradientButton} onClick={onReply} disabled={preview}>
-              답장도 예약해서 보내기
+              {t.reply}
             </button>
-            <button type="button" aria-label="다시 보기" className={s.iconButton} onClick={replay}>
+            <button type="button" aria-label={g.locked.replay} className={s.iconButton} onClick={replay}>
               <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M3 12a9 9 0 1 0 3-6.7" />
                 <path d="M3 4v5h5" />
@@ -159,7 +164,7 @@ function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenP
           </div>
         ) : (
           <button type="button" className={s.plainButton} onClick={showAll}>
-            한 번에 보기
+            {g.locked.showAll}
           </button>
         )}
       </div>
@@ -172,7 +177,7 @@ export const dm: Theme = {
   code: 1,
   name: { ko: 'DM', en: 'DM' },
   tints: null,
-  fonts: ['Noto+Sans+KR:wght@400;500;700;900'],
+  fonts: { ko: ['Noto+Sans+KR:wght@400;500;700;900'] },
   tile: { bg: '#FFFFFF', markBg: 'linear-gradient(90deg,#E8601C,#DD2A7B,#8134AF)', markW: '44px', markH: '16px', markRadius: '8px' },
   preview: { bg: '#FFFFFF', fg: '#000000', font: SANS, bubbleBg: '#EFEFEF', bubbleFg: '#000000', radius: '20px 20px 20px 5px', pad: '10px 14px', size: '18px' },
   Locked,

@@ -72,6 +72,29 @@ export function makeEnDates(locale: string) {
       if (d.toDateString() === now.toDateString()) return `Today ${fmt(TIME)(d)}`
       return `${d.getFullYear() === now.getFullYear() ? md(d) : ymd(d)}, ${fmt(TIME)(d)}`
     },
+    /** 잠김 화면 상세 시각, 시간대 약칭을 붙인다: "Jan 1, 12:00 AM PST" */
+    whenZone: (unlock: Date, now: Date) => `${teaserDate(unlock, now)}, ${fmt({ ...TIME, timeZoneName: 'short' })(unlock)}`,
+    /** 시간대 약칭: "PST", "GMT+9" */
+    zone: (d: Date) => new Intl.DateTimeFormat(locale, { timeZoneName: 'short' }).formatToParts(d).find((p) => p.type === 'timeZoneName')?.value ?? '',
+    /** "Jan 1, 2027, 12:00 AM" (한국어 "2027년 1월 1일 0시"에 해당) */
+    dateHour: fmt({ year: 'numeric', month: 'short', day: 'numeric', ...TIME }),
+    /** 큰 시계: 오전·오후 없이 "12:00" (24시간제 지역은 "00:00") */
+    hm: (d: Date) => {
+      const parts = new Intl.DateTimeFormat(locale, TIME).formatToParts(d)
+      return parts
+        .filter((p) => p.type !== 'dayPeriod')
+        .map((p) => p.value)
+        .join('')
+        .trim()
+    },
+    /** 요일 약칭: "Fri" */
+    weekday: fmt({ weekday: 'short' }),
+    /** 요일: "Friday" */
+    weekdayName: fmt({ weekday: 'long' }),
+    /** 숫자 월·일: "1/1" (지역에 따라 "1/1" 또는 일/월 순서) */
+    monthDot: fmt({ month: 'numeric', day: 'numeric' }),
+    /** 문서 날짜: "Nov 11, 2026" */
+    dotDate: ymd,
     countdown,
     /** 숫자: "1,234" */
     number: (n: number) => number.format(n),

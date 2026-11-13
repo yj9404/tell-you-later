@@ -1,12 +1,15 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { paragraphs } from '../../lib/bubbles.ts'
-import { fullDate, hhmm, monthDot, whenText } from '../../lib/date.ts'
-import { LockError, remaining, st, TeaserLines } from '../shared.tsx'
+import { hhmm } from '../../lib/date.ts'
+import { useStrings } from '../../i18n/index.ts'
+import { LockError, remaining, st, TeaserLines, useThemeStrings } from '../shared.tsx'
+import { strings } from './strings.ts'
 import type { LetterInfo, LockedProps, OpenProps, Theme } from '../types.ts'
 
 // 항공 봉투 테마 (디자인: F-airmail, F-open). 받는 사람 이름과 서명만 손글씨체다.
-const FONT = "'Gowun Dodum',sans-serif"
-const PEN = "'Nanum Pen Script',cursive"
+// 글꼴은 언어마다 다르다(strings.ts의 font). 화면 맨 위에서 CSS 변수로 넣는다.
+const FONT = 'var(--air-body)'
+const PEN = 'var(--air-pen)'
 const NAVY = '#1E3A7B'
 const SCREEN = `box-sizing:border-box;background:#E3E7EC;color:${NAVY};font-family:${FONT};padding:32px 24px 24px;display:flex;flex-direction:column;overflow:hidden`
 const STRIPES = 'repeating-linear-gradient(135deg,#C8322B 0 12px,transparent 12px 22px,#1E3A7B 22px 34px,transparent 34px 44px)'
@@ -16,7 +19,8 @@ const BUTTONS = 'display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:
 
 /** 톱니 테두리 우표: 여는 날짜 */
 function Stamp({ at, small }: { at: Date; small?: boolean }) {
-  const date = monthDot(at)
+  const g = useStrings()
+  const date = g.date.monthDot(at)
   const scale = date.length > 4 ? 0.7 : date.length > 3 ? 0.85 : 1
   return (
     <div
@@ -51,51 +55,59 @@ function Postmark({ at }: { at: Date }) {
   )
 }
 
-/** 받는 사람 이름 크기. 디자인은 "지민에게"가 44px이고, 긴 이름은 봉투 안에 들어가게 줄인다. */
-const nameSize = (name: string) => Math.max(24, Math.min(44, Math.floor(190 / ((name.length + 2) * 0.62))))
+/** 받는 사람 이름 크기. 디자인은 "지민에게"가 44px이고, 긴 이름은 봉투 안에 들어가게 줄인다. label은 봉투에 쓰는 그대로("지민에게", "Alex"). */
+const nameSize = (label: string) => Math.max(24, Math.min(44, Math.floor(190 / (Math.max(4, label.length) * 0.62))))
 
 function Envelope({ letter, now }: { letter: LetterInfo; now: Date }) {
-  const when = whenText(letter.unlockAt, now)
+  const t = useThemeStrings(strings)
+  const notice = t.doNotOpen(letter.unlockAt, now)
+  const toLabel = t.toName(letter.to)
   return (
     <div style={st('width:342px;max-width:100%;transform:rotate(-2.5deg)')}>
       <div
         role="img"
-        aria-label={`보내는 사람 ${letter.from}, 받는 사람 ${letter.to}. ${when} 전 개봉 금지`}
+        aria-label={t.envelope(letter.from, letter.to, notice)}
         style={{ ...st('position:relative;height:228px;box-sizing:border-box;border-radius:3px;box-shadow:0 1px 2px rgba(0,0,0,.1),0 16px 32px rgba(30,58,123,.14);padding:9px'), background: `${STRIPES},#FBFBF8` }}
       >
         <div style={st('position:relative;height:100%;padding:12px 14px;box-sizing:border-box;background:#FBFBF8')}>
           <div style={st('display:flex;justify-content:space-between;align-items:flex-start;gap:10px')}>
             <div style={st('display:flex;flex-direction:column;gap:6px;min-width:0')}>
               <span style={st('font-size:11px;line-height:1.5')}>
-                보내는 사람
+                {t.from}
                 <br />
                 <span className="tyl-keep" style={st(`font-family:${PEN};font-size:22px`)}>
                   {letter.from}
                 </span>
               </span>
-              <span style={st(`align-self:flex-start;border:1.5px solid ${NAVY};padding:2px 7px;font-size:10px;letter-spacing:1px;white-space:nowrap`)}>항공 우편 · AIR MAIL</span>
+              <span style={st(`align-self:flex-start;border:1.5px solid ${NAVY};padding:2px 7px;font-size:10px;letter-spacing:1px;white-space:nowrap`)}>{t.airmail}</span>
             </div>
             <Stamp at={letter.unlockAt} />
           </div>
           <Postmark at={letter.createdAt} />
           <div style={st('position:absolute;left:96px;right:12px;bottom:40px;display:flex;flex-direction:column')}>
-            <span style={st('font-size:11px')}>받는 사람</span>
-            <span className="tyl-keep" style={{ ...st(`font-family:${PEN};line-height:1;color:#13254F`), fontSize: nameSize(letter.to) }}>
-              {letter.to}에게
+            <span style={st('font-size:11px')}>{t.to}</span>
+            <span className="tyl-keep" style={{ ...st(`font-family:${PEN};line-height:1;color:#13254F`), fontSize: nameSize(toLabel) }}>
+              {toLabel}
             </span>
           </div>
-          <span style={st('position:absolute;right:12px;bottom:10px;font-size:11px;color:#C8322B')}>{when} 전 개봉 금지</span>
+          <span style={st('position:absolute;right:12px;bottom:10px;left:96px;text-align:right;font-size:11px;color:#C8322B;white-space:nowrap;overflow:hidden;text-overflow:ellipsis')}>{notice}</span>
         </div>
       </div>
     </div>
   )
 }
 
+/** 언어별 글꼴을 CSS 변수로 넘긴다. */
+const fontVars = (font: { body: string; pen: string }) => ({ '--air-body': font.body, '--air-pen': font.pen }) as CSSProperties
+
 function Locked(p: LockedProps) {
   const { letter } = p
   const now = new Date(p.now)
+  const g = useStrings()
+  const t = useThemeStrings(strings)
+  const opens = t.opens(letter.unlockAt, now)
   return (
-    <div className="tyl-screen tyl-focus-dark" style={st(`min-height:var(--screen-h, 100dvh);${SCREEN};gap:22px`)}>
+    <div className="tyl-screen tyl-focus-dark" style={{ ...st(`min-height:var(--screen-h, 100dvh);${SCREEN};gap:22px`), ...fontVars(t.font) }}>
       <h1 className="tyl-keep" style={st('margin:0;font-size:24px;font-weight:400;line-height:1.5;letter-spacing:-0.4px')}>
         <TeaserLines unlock={letter.unlockAt} now={now} />
       </h1>
@@ -108,19 +120,20 @@ function Locked(p: LockedProps) {
         ) : (
           <>
             <span className="tyl-keep" style={st('font-size:14px;line-height:1.6;color:#3B4A6B')}>
-              {whenText(letter.unlockAt, now)}에 열려요
-              <br />그 전에는 누구도 뜯어 볼 수 없어요
+              {opens[0]}
+              <br />
+              {opens[1]}
             </span>
-            <span style={st('font-size:24px;letter-spacing:-0.5px;flex-shrink:0;font-variant-numeric:tabular-nums')}>{remaining(p)}</span>
+            <span style={st('font-size:24px;letter-spacing:-0.5px;flex-shrink:0;font-variant-numeric:tabular-nums')}>{remaining(p, g)}</span>
           </>
         )}
       </div>
       <div style={st(BUTTONS)}>
         <button type="button" style={st(OUTLINE)} onClick={p.onSaveCalendar} disabled={p.preview}>
-          캘린더에 저장
+          {g.calendar.save}
         </button>
         <button type="button" style={st(SOLID)} onClick={p.onWrite} disabled={p.preview}>
-          나도 한 통 부치기
+          {t.writeOwn}
         </button>
       </div>
     </div>
@@ -140,6 +153,7 @@ function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenP
   const [manual, setManual] = useState(!autoplay)
   const [run, setRun] = useState(0)
   const paper = useRef<HTMLDivElement>(null)
+  const t = useThemeStrings(strings)
 
   useEffect(() => {
     if (up) return
@@ -175,9 +189,9 @@ function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenP
   }, [manual, run])
 
   return (
-    <div className="tyl-screen tyl-focus-dark" style={st(`height:max(var(--screen-h, 100dvh), 560px);${SCREEN};gap:20px`)}>
+    <div className="tyl-screen tyl-focus-dark" style={{ ...st(`height:max(var(--screen-h, 100dvh), 560px);${SCREEN};gap:20px`), ...fontVars(t.font) }}>
       <h1 className="tyl-keep" style={st('margin:0;font-size:22px;font-weight:400;line-height:1.5;letter-spacing:-0.4px')}>
-        {whenText(letter.unlockAt, letter.createdAt)}, 편지가 열렸어요
+        {t.opened(letter.unlockAt, letter.createdAt)}
       </h1>
       <div
         style={{
@@ -192,7 +206,7 @@ function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenP
             <div style={st('padding:22px 24px 40px;color:#13254F')}>
               <div style={st('display:flex;justify-content:space-between;align-items:flex-start;gap:10px;min-height:64px')}>
                 <span className="tyl-keep" style={st(`font-family:${PEN};font-size:36px;line-height:1;min-width:0`)}>
-                  {letter.to}에게
+                  {t.dear(letter.to)}
                 </span>
                 <Stamp at={letter.unlockAt} small />
               </div>
@@ -202,7 +216,7 @@ function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenP
                 </p>
               ))}
               <p className="tyl-keep" style={st(`margin:0;text-align:right;font-family:${PEN};font-size:26px;line-height:32px`)}>
-                {fullDate(letter.createdAt)}, {letter.from}
+                {t.signed(letter.from, letter.createdAt)}
               </p>
             </div>
           </div>
@@ -221,15 +235,15 @@ function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenP
               }
             }}
           >
-            처음부터 다시
+            {t.restart}
           </button>
         ) : (
           <button type="button" style={st(OUTLINE)} onClick={() => setManual(true)}>
-            직접 넘겨 읽기
+            {t.manual}
           </button>
         )}
         <button type="button" style={st(SOLID)} onClick={onReply} disabled={preview}>
-          답장 부치기
+          {t.reply}
         </button>
       </div>
     </div>
@@ -241,7 +255,7 @@ export const air: Theme = {
   code: 9,
   name: { ko: '항공 봉투', en: 'Airmail' },
   tints: null,
-  fonts: ['Gowun+Dodum', 'Nanum+Pen+Script'],
+  fonts: { ko: ['Gowun+Dodum', 'Nanum+Pen+Script'], en: ['Nunito:wght@400;600', 'Caveat:wght@500;600'] },
   tile: {
     bg: 'repeating-linear-gradient(135deg,#C8322B 0,#C8322B 7px,#FFFFFF 7px,#FFFFFF 14px,#1E3A7B 14px,#1E3A7B 21px,#FFFFFF 21px,#FFFFFF 28px)',
     markBg: '#FBFBF8',
