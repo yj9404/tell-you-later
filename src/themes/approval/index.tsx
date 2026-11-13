@@ -225,7 +225,7 @@ function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenP
 export const approval: Theme = {
   id: 'approval',
   code: 11,
-  name: '결재 공문',
+  name: { ko: '결재 공문' },
   tints: null,
   fonts: ['Noto+Serif+KR:wght@400;600;900'],
   tile: { bg: '#DADDE1', markBg: '#FFFFFF', markW: '50px', markH: '68px', markRadius: '0' },

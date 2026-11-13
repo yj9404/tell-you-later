@@ -78,17 +78,35 @@ export function chatStamp(d: Date, now: Date): string {
   return `${d.getFullYear() === now.getFullYear() ? md(d) : ymd(d)} ${clock(d)}`
 }
 
-/** 남은 시간. 큰 단위 두 개만 보여준다: "50일 12시간", "3시간 5분", "4분 12초", "9초" */
-export function countdown(ms: number): string {
+export type DurationUnit = 'd' | 'h' | 'm' | 's'
+
+/**
+ * 남은 시간을 큰 단위부터 units개로 나눈다. 0이 아닌 가장 큰 단위에서 시작한다.
+ * 50일 12시간 54분 → [[50,'d'],[12,'h']] (units 2). 0초 이하는 [[0,'s']].
+ */
+export function durationParts(ms: number, units: number): [number, DurationUnit][] {
   const total = Math.max(0, Math.ceil(ms / 1000))
-  const d = Math.floor(total / 86400)
-  const h = Math.floor((total % 86400) / 3600)
-  const m = Math.floor((total % 3600) / 60)
-  const s = total % 60
-  if (d > 0) return `${d}일 ${h}시간`
-  if (h > 0) return `${h}시간 ${m}분`
-  if (m > 0) return `${m}분 ${s}초`
-  return `${s}초`
+  const parts: [number, DurationUnit][] = [
+    [Math.floor(total / 86400), 'd'],
+    [Math.floor((total % 86400) / 3600), 'h'],
+    [Math.floor((total % 3600) / 60), 'm'],
+    [total % 60, 's'],
+  ]
+  const first = parts.findIndex(([n]) => n > 0)
+  const from = first < 0 ? parts.length - 1 : first
+  return parts.slice(from, from + units)
+}
+
+const UNIT_KO: Record<DurationUnit, string> = { d: '일', h: '시간', m: '분', s: '초' }
+
+/**
+ * 남은 시간. 큰 단위부터 units개(기본 두 개): "50일 12시간", "3시간 5분", "4분 12초", "9초".
+ * 대기열 테마는 세 개를 쓴다: "50일 12시간 54분".
+ */
+export function countdown(ms: number, units = 2): string {
+  return durationParts(ms, units)
+    .map(([n, unit]) => `${n}${UNIT_KO[unit]}`)
+    .join(' ')
 }
 
 /** "2026년 11월 12일 목요일" */

@@ -240,7 +240,7 @@ const TINTS = [
 export const color: Theme = {
   id: 'color',
   code: 7,
-  name: '책 한 권',
+  name: { ko: '책 한 권', en: 'Book' },
   tints: TINTS,
   fonts: ['Noto+Serif+KR:wght@400;600;700', 'Noto+Sans+KR:wght@400;500;700'],
   tile: { bg: '#E4E5E7', markW: '28px', markH: '40px', markRadius: '2px 4px 4px 2px' },

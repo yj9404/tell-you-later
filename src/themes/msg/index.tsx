@@ -180,7 +180,7 @@ function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenP
 export const msg: Theme = {
   id: 'msg',
   code: 2,
-  name: '문자',
+  name: { ko: '문자', en: 'Text' },
   tints: null,
   fonts: ['Noto+Sans+KR:wght@400;500;700;800'],
   tile: { bg: '#F6F6F6', markBg: '#0B6BF2', markW: '44px', markH: '16px', markRadius: '8px' },

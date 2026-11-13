@@ -12,7 +12,8 @@ import type { ChainClient } from 'drand-client'
 import v1 from './fixtures/v1.json' with { type: 'json' }
 import { fragmentOf, homePath, langOf, letterLink } from './route.ts'
 import { stringsFor } from '../i18n/index.ts'
-import { THEMES } from '../themes/registry.ts'
+import { enLocale, makeEnDates } from '../i18n/date-en.ts'
+import { THEMES, themeLang, themesFor } from '../themes/registry.ts'
 import themePages from '../../scripts/themes.json' with { type: 'json' }
 
 const letter = (over: Partial<Letter> = {}): Letter => ({
@@ -113,6 +114,66 @@ describe('예고 문구의 날짜 표기', () => {
     expect(shareText('하나 🎄', jan1, now)).toBe('하나 🎄, 할 말이 있는데 1월 1일에 할게')
     expect(shareText('', jan1, now)).toBe('할 말이 있는데 1월 1일에 할게')
     expect(shareText('  ', new Date(2030, 4, 5), now)).toBe('할 말이 있는데 2030년 5월 5일에 할게')
+  })
+})
+
+describe('영어 날짜 표기', () => {
+  const now = new Date(2026, 10, 11, 11, 6)
+  const us = makeEnDates('en-US')
+  const gb = makeEnDates('en-GB')
+  const jan1 = new Date(2027, 0, 1)
+
+  it('예고 문장: 1년 안이면 월 약칭과 일, 멀면 연도까지. 순서는 지역을 따른다', () => {
+    expect(us.teaserDate(jan1, now)).toBe('Jan 1')
+    expect(gb.teaserDate(jan1, now)).toBe('1 Jan')
+    expect(us.teaserDate(new Date(2027, 10, 11), now)).toBe('Nov 11, 2027')
+    expect(stringsFor('en').teaser(jan1, now)).toMatch(/^Got something to tell you\. Tell you on (Jan 1|1 Jan)\.$/)
+  })
+
+  it('12/24시간제는 지역을 따른다', () => {
+    expect(us.clock(jan1)).toBe('12:00 AM')
+    expect(gb.clock(jan1)).toBe('00:00')
+    expect(us.clock(new Date(2027, 0, 1, 12))).toBe('12:00 PM')
+    expect(us.longDate(new Date(2027, 0, 1, 9, 30))).toMatch(/^Friday, Jan 1, 2027,? (at )?9:30 AM$/)
+  })
+
+  it('시간대 약칭을 붙인다', () => {
+    expect(us.dateClockZone(jan1)).toMatch(/^Jan 1, 2027, 12:00 AM \S+$/)
+  })
+
+  it('채팅 시각', () => {
+    expect(us.chatStamp(new Date(2026, 10, 11, 9, 5), now)).toBe('Today 9:05 AM')
+    expect(us.chatStamp(jan1, now)).toBe('Jan 1, 2027, 12:00 AM')
+    expect(us.chatStamp(new Date(2026, 11, 24, 18), now)).toBe('Dec 24, 6:00 PM')
+  })
+
+  it('카운트다운은 "50d 12h", 단위 수를 고를 수 있다(대기열은 세 개)', () => {
+    expect(us.countdown((50 * 24 + 12) * 3600_000)).toBe('50d 12h')
+    expect(us.countdown(3 * 3600_000 + 5 * 60_000)).toBe('3h 5m')
+    expect(us.countdown(61_000)).toBe('1m 1s')
+    expect(us.countdown(-5)).toBe('0s')
+    expect(us.countdown(((50 * 24 + 12) * 60 + 54) * 60_000, 3)).toBe('50d 12h 54m')
+    expect(countdown(((50 * 24 + 12) * 60 + 54) * 60_000, 3)).toBe('50일 12시간 54분')
+    expect(countdown(4 * 60_000 + 12_000, 3)).toBe('4분 12초')
+  })
+
+  it('복수형', () => {
+    expect([us.plural(1, 'day'), us.plural(2, 'day'), us.plural(0, 'day'), us.plural(1234, 'day')]).toEqual(['1 day', '2 days', '0 days', '1,234 days'])
+    expect(stringsFor('en').when.opens('Jan 1', 1)).toBe('Opens Jan 1. 1 day to go.')
+  })
+
+  it('공유 문구', () => {
+    const en = stringsFor('en')
+    expect(en.shareText(' Alex ', jan1, now)).toMatch(/^Alex, got something to tell you\. Tell you on (Jan 1|1 Jan)\.$/)
+    expect(en.shareText('', jan1, now)).toBe(en.teaser(jan1, now))
+  })
+
+  it('기기 언어로 영어 로케일을 고른다', () => {
+    expect(enLocale(['en-GB', 'ko-KR'])).toBe('en-GB')
+    expect(enLocale(['de-DE'])).toBe('en-DE')
+    expect(enLocale(['ko'])).toBe('en-KR')
+    expect(enLocale(['ko-KR', 'en-AU'])).toBe('en-AU')
+    expect(enLocale([])).toBe('en-US')
   })
 })
 
@@ -317,7 +378,7 @@ describe('캘린더 링크', () => {
   })
 
   it('.ics: 10분 일정, 제목을 그대로 쓴다', () => {
-    const ics = buildIcs({ title: ev.title, unlockAt: ev.start, link: ev.link, uid: 'x' })
+    const ics = buildIcs({ title: ev.title, note: '그날 이 링크에서 열어 볼 수 있어요.', unlockAt: ev.start, link: ev.link, uid: 'x' })
     expect(ics).toContain('\r\nDTSTART:20261224T150000Z\r\n')
     expect(ics).toContain('\r\nDTEND:20261224T151000Z\r\n')
     expect(ics).toContain('\r\nSUMMARY:영진이 할 말이 있는 날\r\n')
@@ -383,9 +444,22 @@ describe('링크 주소', () => {
     expect(homePath('/en')).toBe('/en/')
   })
 
+  it('영어판 쓰기 화면은 approval, report를 숨기고, 숨긴 테마의 받은 링크는 한국어로 보여준다', () => {
+    const en = themesFor('en').map((t) => t.id)
+    expect(en).not.toContain('approval')
+    expect(en).not.toContain('report')
+    expect(en).toContain('dm')
+    expect(themesFor('ko')).toHaveLength(THEMES.length)
+    const byId = (id: string) => THEMES.find((t) => t.id === id)!
+    expect(themeLang(byId('approval'), 'en')).toBe('ko')
+    expect(themeLang(byId('report'), 'en')).toBe('ko')
+    expect(themeLang(byId('dm'), 'en')).toBe('en')
+    expect(themeLang(byId('approval'), 'ko')).toBe('ko')
+  })
+
   // 빌드 후처리와 OG 이미지 스크립트는 TSX를 못 읽어 scripts/themes.json을 쓴다. 테마를 추가하면 거기도 더한다.
   it('scripts/themes.json이 테마 목록과 같다', () => {
-    expect(themePages.map(({ id, name }) => ({ id, name }))).toEqual(THEMES.map((t) => ({ id: t.id, name: t.name })))
+    expect(themePages.map(({ id, name }) => ({ id, name }))).toEqual(THEMES.map((t) => ({ id: t.id, name: t.name.ko })))
   })
 
   // OG 문구를 테마 이름과 다르게 따로 지정한 테마. 이 테마들은 "…으로/로 도착" 형식만 본다.

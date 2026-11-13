@@ -1,12 +1,11 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import { encodeLink, NAME_MAX } from '../lib/codec.ts'
-import { clock, fullDate, teaserDate } from '../lib/date.ts'
 import { roundForTime, timeForRound } from '../lib/drand.ts'
 import { errorCode } from '../lib/errors.ts'
-import { useStrings } from '../i18n/index.ts'
+import { useLang, useStrings } from '../i18n/index.ts'
 import { loadFonts } from '../lib/fonts.ts'
 import { lockLetter } from '../lib/timelock.ts'
-import { THEMES } from '../themes/registry.ts'
+import { themesFor } from '../themes/registry.ts'
 import { FullPreview, PreviewPair, type Draft, type Side } from './Preview.tsx'
 import { WhenSheet } from './WhenSheet.tsx'
 import { resolveWhen, type When } from './when.ts'
@@ -41,18 +40,21 @@ const Lock = () => (
 
 /** 쓰기 화면 (디자인: Write 3차). 편지 카드 하나에 이름·여는 날·본문을 모으고, 그 아래에 받는 사람이 먼저 보는 문장을 보여준다. */
 export function Write({ prefill, onCreated }: { prefill: Prefill | null; onCreated: (c: Created) => void }) {
+  const lang = useLang()
+  const t = useStrings()
+  // 영어판에서 숨긴 테마는 칩에 나오지 않는다(src/themes/registry.ts).
+  const themes = themesFor(lang)
   const [to, setTo] = useState(prefill?.to ?? '')
   const [from, setFrom] = useState(prefill?.from ?? '')
   const [when, setWhen] = useState<When>({ kind: 'newyear' })
   const [now, setNow] = useState(() => new Date())
   const [body, setBody] = useState('')
-  const [themeId, setThemeId] = useState(THEMES[0].id)
+  const [themeId, setThemeId] = useState(themes[0].id)
   const [tint, setTint] = useState(0)
   const [sheet, setSheet] = useState(false)
   const [preview, setPreview] = useState<Side | null>(null)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
-  const t = useStrings()
 
   // 화면을 켜 둔 동안 날짜 표기가 낡지 않게 한다.
   useEffect(() => {
@@ -60,7 +62,7 @@ export function Write({ prefill, onCreated }: { prefill: Prefill | null; onCreat
     return () => clearInterval(id)
   }, [])
 
-  const theme = THEMES.find((t) => t.id === themeId) ?? THEMES[0]
+  const theme = themes.find((x) => x.id === themeId) ?? themes[0]
   useEffect(() => loadFonts(theme.fonts), [theme])
 
   const unlock = resolveWhen(when, now)
@@ -72,9 +74,9 @@ export function Write({ prefill, onCreated }: { prefill: Prefill | null; onCreat
   async function submit(e: FormEvent) {
     e.preventDefault()
     const at = resolveWhen(when, new Date())
-    if (!to.trim() || !from.trim()) return setError('받는 사람과 보내는 사람을 적어 주세요.')
-    if (!body.trim()) return setError('그날 할 말을 적어 주세요.')
-    if (at.getTime() <= Date.now()) return setError('열리는 시각은 지금보다 뒤여야 합니다. 날짜를 다시 정해 주세요.')
+    if (!to.trim() || !from.trim()) return setError(t.write.needNames)
+    if (!body.trim()) return setError(t.write.needBody)
+    if (at.getTime() <= Date.now()) return setError(t.write.needFuture)
     setError('')
     setBusy(true)
     try {
@@ -105,23 +107,29 @@ export function Write({ prefill, onCreated }: { prefill: Prefill | null; onCreat
     <>
       <form className={s.page} onSubmit={submit} noValidate>
         <header className={s.head}>
-          <img className={s.wordmark} src="/wordmark.svg" alt="할 말이 있는데 나중에 할게" width={94} height={40} />
+          <div className={s.headTop}>
+            <img className={s.wordmark} src={t.wordmark.src} alt={t.serviceName} width={t.wordmark.width} height={t.wordmark.height} />
+            {/* 다른 언어 쓰기 화면으로. 브라우저 언어로 자동 이동하지 않는다. */}
+            <a className={s.langLink} href={t.otherLang.href} hrefLang={t.otherLang.lang} lang={t.otherLang.lang}>
+              {t.otherLang.label}
+            </a>
+          </div>
           <h1 className={s.title}>
-            정한 날이 와야
+            {t.write.title[0]}
             <br />
-            열리는 편지를 써요
+            {t.write.title[1]}
           </h1>
-          <p className={s.lead}>완성된 링크를 보내면, 그날 전에는 누구도 열 수 없어요.</p>
+          <p className={s.lead}>{t.write.lead}</p>
         </header>
 
-        <section aria-label="편지" className={s.card}>
+        <section aria-label={t.write.letter} className={s.card}>
           <label className={s.row}>
-            <span className={s.rowLabel}>받는 사람</span>
-            <input className={s.rowInput} value={to} placeholder="이름이나 별명" maxLength={NAME_MAX} autoComplete="off" onChange={(e) => setTo(e.target.value)} />
+            <span className={s.rowLabel}>{t.write.to}</span>
+            <input className={s.rowInput} value={to} placeholder={t.write.toPlaceholder} maxLength={NAME_MAX} autoComplete="off" onChange={(e) => setTo(e.target.value)} />
           </label>
           <label className={s.row}>
-            <span className={s.rowLabel}>보내는 사람</span>
-            <input className={s.rowInput} value={from} placeholder="내 이름" maxLength={NAME_MAX} autoComplete="off" onChange={(e) => setFrom(e.target.value)} />
+            <span className={s.rowLabel}>{t.write.from}</span>
+            <input className={s.rowInput} value={from} placeholder={t.write.fromPlaceholder} maxLength={NAME_MAX} autoComplete="off" onChange={(e) => setFrom(e.target.value)} />
           </label>
           <button
             type="button"
@@ -133,62 +141,65 @@ export function Write({ prefill, onCreated }: { prefill: Prefill | null; onCreat
               setSheet(true)
             }}
           >
-            <span className={s.rowLabel}>여는 날</span>
+            <span className={s.rowLabel}>{t.write.when}</span>
             <span className={s.rowValue} data-past={inPast || undefined}>
-              {fullDate(unlock)} {clock(unlock)}
+              {t.write.whenValue(unlock)}
             </span>
             <Chevron />
           </button>
           <textarea
-            aria-label="편지 내용"
+            aria-label={t.write.body}
             className={s.textarea}
             value={body}
-            placeholder={'여기에 하고 싶은 말을 쓰세요.\n\n빈 줄을 넣으면 문단이 나뉘고, 테마에 따라 말풍선이나 장면이 나뉩니다.'}
+            placeholder={t.write.bodyPlaceholder}
             onChange={(e) => setBody(Array.from(e.target.value).slice(0, BODY_MAX).join(''))}
           />
           <div className={s.cardFoot}>
             <span className={s.lockNote}>
-              <Lock />이 칸만 잠겨요
+              <Lock />
+              {t.write.lockNote}
             </span>
             <span>
-              {Array.from(body).length.toLocaleString('ko-KR')} / {BODY_MAX.toLocaleString('ko-KR')}
+              {t.date.number(Array.from(body).length)} / {t.date.number(BODY_MAX)}
             </span>
           </div>
         </section>
 
         <section className={s.group12}>
-          <h2 className={s.sectionTitle}>링크를 열면 바로 보이는 문장</h2>
+          <h2 className={s.sectionTitle}>{t.write.teaserTitle}</h2>
           <div className={s.teaser}>
-            <span className={s.teaserSub}>{to.trim() || '받는 사람'}에게</span>
+            <span className={s.teaserSub}>{t.write.teaserTo(to.trim() || t.preview.to)}</span>
             <span className={s.teaserMain}>
-              할 말이 있는데
+              {t.teaserParts.line1}
               <br />
-              <mark className={s.teaserDate}>{teaserDate(unlock, now)}</mark>에 할게
+              {t.teaserParts.before}
+              <mark className={s.teaserDate}>{t.date.teaserDate(unlock, now)}</mark>
+              {t.teaserParts.after}
             </span>
             {from.trim() && <span className={s.teaserSub}>{from.trim()}</span>}
           </div>
           <p className={s.note} role={inPast ? 'alert' : undefined}>
-            {inPast ? '정한 시각이 이미 지났어요. 여는 날을 눌러 다시 정해 주세요.' : '이름과 날짜는 위 칸에서 바뀝니다. 편지 내용은 그날까지 보이지 않아요.'}
+            {inPast ? t.write.pastNote : t.write.teaserNote}
           </p>
         </section>
 
         <section className={s.look}>
           <div className={s.lookHead}>
-            <h2 className={s.sectionTitle}>어떤 모습으로 도착할까요</h2>
-            <span className={s.note}>받는 사람 화면을 미리 볼 수 있어요.</span>
+            <h2 className={s.sectionTitle}>{t.write.lookTitle}</h2>
+            <span className={s.note}>{t.write.lookNote}</span>
           </div>
 
           <div className={s.pills}>
-            {THEMES.map((t) => (
-              <button key={t.id} type="button" className={s.pill} aria-pressed={t.id === theme.id} onClick={() => setThemeId(t.id)}>
-                {t.name}
+            {themes.map((x) => (
+              <button key={x.id} type="button" className={s.pill} aria-pressed={x.id === theme.id} onClick={() => setThemeId(x.id)}>
+                {x.name[lang]}
               </button>
             ))}
           </div>
 
           {theme.tints && (
             <div className={s.tints}>
-              <span className={s.note}>색</span>
+              <span className={s.note}>{t.write.color}</span>
               {theme.tints.map((c, i) => (
                 <button key={c.hex} type="button" className={s.tint} aria-label={c.name} aria-pressed={i === tint} style={{ background: c.hex }} onClick={() => setTint(i)} />
               ))}
@@ -198,7 +209,7 @@ export function Write({ prefill, onCreated }: { prefill: Prefill | null; onCreat
           <PreviewPair draft={draft} onOpen={setPreview} />
 
           <button type="button" className={s.fullButton} onClick={(e) => (e.currentTarget.focus(), setPreview('before'))}>
-            내 편지로 전체 화면 미리보기
+            {t.write.fullPreview}
           </button>
         </section>
 
@@ -209,9 +220,9 @@ export function Write({ prefill, onCreated }: { prefill: Prefill | null; onCreat
             </span>
           )}
           <button type="submit" className={s.submit} disabled={busy}>
-            {busy ? '잠그는 중…' : '잠그고 링크 만들기'}
+            {busy ? t.write.submitting : t.write.submit}
           </button>
-          <span className={s.noteCenter}>편지는 서버에 저장되지 않아요. 링크를 잃어버리면 다시 찾을 수 없어요.</span>
+          <span className={s.noteCenter}>{t.write.bottomNote}</span>
         </div>
       </form>
 

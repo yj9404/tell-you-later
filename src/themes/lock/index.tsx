@@ -267,7 +267,7 @@ const TINTS = [
 export const lock: Theme = {
   id: 'lock',
   code: 3,
-  name: '잠금화면',
+  name: { ko: '잠금화면', en: 'Lock screen' },
   tints: TINTS,
   fonts: ['Noto+Sans+KR:wght@400;500;700;800'],
   tile: { markBg: 'rgba(255,255,255,0.75)', markW: '50px', markH: '18px', markRadius: '6px' },

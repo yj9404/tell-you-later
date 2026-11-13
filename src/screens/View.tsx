@@ -2,10 +2,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { decodeLink, linkHash, type Letter } from '../lib/codec.ts'
 import { DrandError, timeForRound } from '../lib/drand.ts'
 import { errorCode } from '../lib/errors.ts'
-import { useStrings } from '../i18n/index.ts'
+import { LangContext, useLang, useStrings } from '../i18n/index.ts'
 import { loadFonts } from '../lib/fonts.ts'
 import { openLetter } from '../lib/timelock.ts'
-import { themeByCode } from '../themes/registry.ts'
+import { themeByCode, themeLang } from '../themes/registry.ts'
 import type { LetterInfo, LockStatus } from '../themes/types.ts'
 import { useSaveCalendar } from './SaveCalendar.tsx'
 import type { Prefill } from './Write.tsx'
@@ -48,8 +48,14 @@ export function View({ fragment, onWrite }: Props) {
     }
   }, [fragment])
 
+  const lang = useLang()
   if (!letter) return <Broken onWrite={() => onWrite(null)} />
-  return <Letter letter={letter} fragment={fragment} onWrite={onWrite} />
+  // 영어판에서 숨긴 테마(결재 공문 등)는 영어 경로로 열려도 캘린더 메뉴까지 한국어로 보여준다.
+  return (
+    <LangContext.Provider value={themeLang(themeByCode(letter.theme), lang)}>
+      <Letter letter={letter} fragment={fragment} onWrite={onWrite} />
+    </LangContext.Provider>
+  )
 }
 
 function Letter({ letter, fragment, onWrite }: Props & { letter: Letter }) {
@@ -150,21 +156,20 @@ function Letter({ letter, fragment, onWrite }: Props & { letter: Letter }) {
 }
 
 function Broken({ onWrite }: { onWrite: () => void }) {
+  const t = useStrings()
   return (
     <div className={s.page}>
       <div className={s.head}>
         <h1 className={s.title}>
-          링크가 깨져서
+          {t.broken.title[0]}
           <br />
-          편지를 열 수 없어요
+          {t.broken.title[1]}
         </h1>
-        <p className={s.lead}>
-          링크가 중간에 잘렸거나 일부가 바뀐 것 같습니다. 편지는 링크 안에만 들어 있어서 여기서 되살릴 수 없어요. 보낸 사람에게 링크를 다시 받아 주세요.
-        </p>
+        <p className={s.lead}>{t.broken.lead}</p>
       </div>
       <div className={s.bottom}>
         <button type="button" className={s.primary} onClick={onWrite}>
-          새로 쓰기
+          {t.broken.write}
         </button>
       </div>
     </div>

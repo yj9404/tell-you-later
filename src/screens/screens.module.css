@@ -32,6 +32,11 @@
   word-break: keep-all;
 }
 
+/* 한글에 맞춘 좁은 자간은 라틴 글자에서 글자끼리 붙어 보인다. */
+.title:lang(en) {
+  letter-spacing: -0.9px;
+}
+
 .lead {
   margin: 0;
   font-size: 14px;

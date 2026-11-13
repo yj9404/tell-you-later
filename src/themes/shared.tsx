@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { splitBubbles } from '../lib/bubbles.ts'
 import { callName, countdown, teaserDate } from '../lib/date.ts'
 import type { LetterInfo, LockedProps } from './types.ts'
+import { useStrings } from '../i18n/index.ts'
 import './shared.css'
 
 const cache = new Map<string, CSSProperties>()
@@ -38,12 +39,13 @@ export function remaining(p: Pick<LockedProps, 'letter' | 'now' | 'status'>, ope
 
 /** 복호화 실패 안내. 글꼴과 색은 놓인 자리(테마)의 것을 그대로 물려받는다. */
 export function LockError({ status, error, onRetry }: Pick<LockedProps, 'status' | 'error' | 'onRetry'>) {
+  const t = useStrings()
   if (status !== 'error') return null
   return (
     <div role="alert" className="tyl-lock-error">
       <span>{error}</span>
       <button type="button" onClick={onRetry}>
-        다시 시도
+        {t.locked.retry}
       </button>
     </div>
   )

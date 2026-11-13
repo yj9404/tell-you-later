@@ -269,7 +269,7 @@ function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenP
 export const report: Theme = {
   id: 'report',
   code: 12,
-  name: '군대 보고서',
+  name: { ko: '군대 보고서' },
   tints: null,
   fonts: ['Noto+Sans+KR:wght@500;700;900', 'Noto+Serif+KR:wght@400;600'],
   tile: { bg: '#4E5740', markBg: '#FFFFFF', markW: '50px', markH: '68px', markRadius: '0' },

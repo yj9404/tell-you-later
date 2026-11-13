@@ -3,6 +3,7 @@ import { loadFonts } from '../lib/fonts.ts'
 import { THEMES } from '../themes/registry.ts'
 import type { LetterInfo, Theme } from '../themes/types.ts'
 import { useModal } from './useModal.ts'
+import { useStrings } from '../i18n/index.ts'
 import s from './write.module.css'
 
 /** 미리보기에 필요한 입력값. 복호화 없이 원문을 그대로 테마에 넘긴다. */
@@ -17,8 +18,6 @@ export interface Draft {
 
 export type Side = 'before' | 'after'
 
-// 편지가 비어 있을 때 "그날 이후"에 보여줄 글
-const EXAMPLE = '여기에 그날 할 말이 보입니다.\n\n지금은 예시 문장이에요. 편지를 쓰면 쓴 내용이 이 자리에 그대로 나타납니다.\n\n그날이 되기 전에는 아무도 못 봅니다.'
 // 테마 화면의 기준 크기 (디자인 아트보드)
 const W = 390
 const H = 844
@@ -37,23 +36,25 @@ function useNow(): number {
 
 function useLetter(draft: Draft): { theme: Theme; letter: LetterInfo; text: string; example: boolean } {
   const theme = themeOf(draft)
+  const t = useStrings()
   const [createdAt] = useState(() => new Date())
   const text = draft.body.trim()
   const { to, from, tint, unlockAt } = draft
   const letter = useMemo<LetterInfo>(
     () => ({
-      to: to.trim() || '받는 사람',
+      to: to.trim() || t.preview.to,
       toEmpty: !to.trim(),
-      from: from.trim() || '보내는 사람',
+      from: from.trim() || t.preview.from,
       tint: theme.tints ? (theme.tints[tint] ?? theme.tints[0]).hex : null,
       createdAt,
       unlockAt,
     }),
     // unlockAt은 매번 새 객체일 수 있으므로 시각으로 비교한다.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [to, from, tint, theme, createdAt, unlockAt.getTime()],
+    [to, from, tint, theme, createdAt, unlockAt.getTime(), t],
   )
-  return { theme, letter, text: text || EXAMPLE, example: !text }
+  // 편지가 비어 있을 때 "그날 이후"에는 예시 글을 보여준다.
+  return { theme, letter, text: text || t.preview.example, example: !text }
 }
 
 // 열림 화면은 1초마다 다시 그릴 필요가 없다.
@@ -67,6 +68,7 @@ function LockedScreen({ theme, letter, now, preview }: { theme: Theme; letter: L
 
 /** 쓰기 화면의 작은 미리보기 두 개. 실제 테마 화면을 390×844로 그린 뒤 줄여서 넣는다. */
 export function PreviewPair({ draft, onOpen }: { draft: Draft; onOpen: (side: Side) => void }) {
+  const t = useStrings()
   const { theme, letter, text, example } = useLetter(draft)
   const now = useNow()
   const box = useRef<HTMLDivElement>(null)
@@ -86,22 +88,22 @@ export function PreviewPair({ draft, onOpen }: { draft: Draft; onOpen: (side: Si
   return (
     <div className={s.previews}>
       <div className={s.previewCol}>
-        <span className={s.previewLabel}>여는 날 전</span>
+        <span className={s.previewLabel}>{t.preview.before}</span>
         <div className={s.previewBox} ref={box}>
           <div className={s.previewFrame} style={frame} inert>
             <LockedScreen theme={theme} letter={letter} now={now} />
           </div>
-          <button type="button" className={s.previewHit} aria-label="여는 날 전 화면 크게 보기" onClick={(e) => (e.currentTarget.focus(), onOpen('before'))} />
+          <button type="button" className={s.previewHit} aria-label={t.preview.enlargeBefore} onClick={(e) => (e.currentTarget.focus(), onOpen('before'))} />
         </div>
       </div>
       <div className={s.previewCol}>
-        <span className={s.previewLabel}>여는 날 이후</span>
+        <span className={s.previewLabel}>{t.preview.after}</span>
         <div className={s.previewBox}>
           {/* 연출 없이 끝 상태만 보여준다. 글이 바뀌면 새로 그린다. */}
           <div className={s.previewFrame} style={{ ...frame, opacity: example ? 0.45 : 1 }} inert>
             <OpenScreen key={`${theme.id}|${text}`} theme={theme} letter={letter} text={text} autoplay={false} reducedMotion />
           </div>
-          <button type="button" className={s.previewHit} aria-label="여는 날 이후 화면 크게 보기" onClick={(e) => (e.currentTarget.focus(), onOpen('after'))} />
+          <button type="button" className={s.previewHit} aria-label={t.preview.enlargeAfter} onClick={(e) => (e.currentTarget.focus(), onOpen('after'))} />
         </div>
       </div>
     </div>
@@ -114,6 +116,7 @@ export function PreviewPair({ draft, onOpen }: { draft: Draft; onOpen: (side: Si
  * 재생 기록(localStorage)은 남기지 않는다. 받는 사람의 "처음 한 번" 연출을 써 버리면 안 된다.
  */
 export function FullPreview({ draft, start, onClose }: { draft: Draft; start: Side; onClose: () => void }) {
+  const t = useStrings()
   const { theme, letter, text, example } = useLetter(draft)
   const now = useNow()
   const [side, setSide] = useState<Side>(start)
@@ -134,29 +137,29 @@ export function FullPreview({ draft, start, onClose }: { draft: Draft; start: Si
   }
 
   return (
-    <div className={s.full} role="dialog" aria-modal="true" aria-label="미리보기">
+    <div className={s.full} role="dialog" aria-modal="true" aria-label={t.preview.title}>
       <div className={s.band}>
         <div className={s.bandTitle}>
-          <span>미리보기</span>
-          {side === 'after' && example && <span className={s.bandNote}>예시 문장입니다</span>}
+          <span>{t.preview.title}</span>
+          {side === 'after' && example && <span className={s.bandNote}>{t.preview.exampleNote}</span>}
         </div>
-        <div role="group" aria-label="보여줄 화면" className={s.bandTabs}>
+        <div role="group" aria-label={t.preview.tabs} className={s.bandTabs}>
           <button type="button" aria-pressed={side === 'before'} onClick={() => show('before')}>
-            그날 전
+            {t.preview.tabBefore}
           </button>
           <button type="button" aria-pressed={side === 'after'} onClick={() => show('after')}>
-            그날 이후
+            {t.preview.tabAfter}
           </button>
         </div>
         {side === 'after' && (
-          <button type="button" className={s.bandIcon} aria-label="다시 보기" onClick={() => setRun((r) => r + 1)}>
+          <button type="button" className={s.bandIcon} aria-label={t.preview.replay} onClick={() => setRun((r) => r + 1)}>
             <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M3 12a9 9 0 1 0 3-6.7" />
               <path d="M3 4v5h5" />
             </svg>
           </button>
         )}
-        <button type="button" ref={close} className={s.bandIcon} aria-label="미리보기 닫기" onClick={onClose}>
+        <button type="button" ref={close} className={s.bandIcon} aria-label={t.preview.close} onClick={onClose}>
           <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
             <path d="M5 5l14 14M19 5L5 19" />
           </svg>

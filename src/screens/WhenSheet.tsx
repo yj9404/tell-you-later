@@ -1,13 +1,12 @@
 import { useEffect, useRef, useState, type PointerEvent } from 'react'
-import { clock, dayDate, daysBetween, nextNewYear, oneYearLater } from '../lib/date.ts'
+import { daysBetween, nextNewYear, oneYearLater } from '../lib/date.ts'
+import { useStrings } from '../i18n/index.ts'
 import { useModal } from './useModal.ts'
 import { resolveWhen, type When } from './when.ts'
 import s from './write.module.css'
 
 const pad = (n: number) => String(n).padStart(2, '0')
 const isoDate = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
-/** "2027년 1월 1일 금요일 오전 0:00" */
-const dayClock = (d: Date) => `${dayDate(d)} ${clock(d)}`
 // 이만큼 아래로 끌면 닫는다.
 const DRAG_CLOSE = 90
 
@@ -25,6 +24,8 @@ interface Props {
  * 날짜·시각 칸은 직접 고르기를 골랐을 때만 펼쳐진다. 아래에서 올라오고, 밖을 누르거나 아래로 내리면 닫힌다.
  */
 export function WhenSheet({ now, value, onConfirm, onClose }: Props) {
+  const t = useStrings()
+  const { dayClock } = t.when
   // 직접 고르기 칸의 처음 값. 이미 직접 고른 시각이 있으면 그것을, 아니면 오늘 지금 시각에서 시작한다.
   const start = value.kind === 'custom' ? value.at : now
   const [choice, setChoice] = useState<Choice>(value.kind)
@@ -89,6 +90,16 @@ export function WhenSheet({ now, value, onConfirm, onClose }: Props) {
     </label>
   )
 
+  const ampm = (
+    <div role="group" aria-label={t.when.ampm} className={s.ampm}>
+      {[false, true].map((isPm) => (
+        <button key={String(isPm)} type="button" aria-pressed={pm === isPm} onClick={() => setPm(isPm)}>
+          {isPm ? t.when.pm : t.when.am}
+        </button>
+      ))}
+    </div>
+  )
+
   return (
     <div className={s.backdrop} onClick={onClose}>
       <div
@@ -104,19 +115,19 @@ export function WhenSheet({ now, value, onConfirm, onClose }: Props) {
         <div className={s.grab} onPointerDown={onDragStart} onPointerMove={onDragMove} onPointerUp={onDragEnd} onPointerCancel={onDragEnd}>
           <div aria-hidden="true" className={s.grabBar} />
           <h2 id="whenTitle" className={s.sheetTitle}>
-            언제 열리게 할까요
+            {t.when.title}
           </h2>
         </div>
 
         <div role="radiogroup" aria-labelledby="whenTitle" className={s.options}>
-          {option('newyear', '새해 0시', dayClock(nextNewYear(now)))}
-          {option('year', '1년 뒤 지금', dayClock(oneYearLater(now)))}
+          {option('newyear', t.when.newyear, dayClock(nextNewYear(now)))}
+          {option('year', t.when.year, dayClock(oneYearLater(now)))}
           <div className={s.customOption}>
-            {option('custom', '직접 고르기')}
+            {option('custom', t.when.custom)}
             {choice === 'custom' && (
               <div className={s.custom}>
                 <label className={s.dateButton}>
-                  <span>{dayDate(custom)}</span>
+                  <span>{t.date.dayDate(custom)}</span>
                   <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6B6B6B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <rect x="3" y="5" width="18" height="16" rx="2" />
                     <path d="M3 10h18M8 3v4M16 3v4" />
@@ -124,7 +135,7 @@ export function WhenSheet({ now, value, onConfirm, onClose }: Props) {
                   {/* 기기 기본 달력을 쓴다. 투명한 입력칸을 버튼 위에 겹쳐 두고, 지원하는 브라우저에서는 showPicker로 연다. */}
                   <input
                     type="date"
-                    aria-label="날짜"
+                    aria-label={t.when.date}
                     className={s.dateInput}
                     value={date}
                     min={isoDate(now)}
@@ -143,15 +154,10 @@ export function WhenSheet({ now, value, onConfirm, onClose }: Props) {
                 </label>
 
                 <div className={s.time}>
-                  <div role="group" aria-label="오전 오후" className={s.ampm}>
-                    {[false, true].map((isPm) => (
-                      <button key={String(isPm)} type="button" aria-pressed={pm === isPm} onClick={() => setPm(isPm)}>
-                        {isPm ? '오후' : '오전'}
-                      </button>
-                    ))}
-                  </div>
+                  {/* 오전·오후는 한국어에서는 시각 앞, 영어에서는 시각 뒤(11:30 PM)에 둔다. */}
+                  {!t.when.ampmAfter && ampm}
                   <input
-                    aria-label="시"
+                    aria-label={t.when.hour}
                     inputMode="numeric"
                     className={s.timeInput}
                     value={hourText}
@@ -162,7 +168,7 @@ export function WhenSheet({ now, value, onConfirm, onClose }: Props) {
                   <span className={s.colon}>:</span>
                   <input
                     ref={minInput}
-                    aria-label="분"
+                    aria-label={t.when.minute}
                     inputMode="numeric"
                     className={s.timeInput}
                     value={minText}
@@ -170,6 +176,7 @@ export function WhenSheet({ now, value, onConfirm, onClose }: Props) {
                     onChange={(e) => typeMin(e.target.value)}
                     onBlur={() => setMinText(pad(Number(minText) || 0))}
                   />
+                  {t.when.ampmAfter && ampm}
                 </div>
               </div>
             )}
@@ -177,12 +184,10 @@ export function WhenSheet({ now, value, onConfirm, onClose }: Props) {
         </div>
 
         <p className={s.summary} role="status">
-          {past
-            ? `이미 지난 시각이에요(${dayClock(at)}). 지금보다 뒤로 정해 주세요.`
-            : `${dayClock(at)}에 열려요. ${days > 0 ? `앞으로 ${days}일 남았어요.` : '오늘 안에 열려요.'}`}
+          {past ? t.when.past(dayClock(at)) : t.when.opens(dayClock(at), days)}
         </p>
         <button type="button" className={s.confirmButton} disabled={past} onClick={() => onConfirm(choice === 'custom' ? { kind: 'custom', at: custom } : { kind: choice })}>
-          이때로 정하기
+          {t.when.confirm}
         </button>
       </div>
     </div>

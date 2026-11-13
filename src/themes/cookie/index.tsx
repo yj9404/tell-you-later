@@ -160,7 +160,7 @@ function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenP
 export const cookie: Theme = {
   id: 'cookie',
   code: 6,
-  name: '포춘쿠키',
+  name: { ko: '포춘쿠키', en: 'Fortune cookie' },
   tints: null,
   fonts: ['Bagel+Fat+One', 'Noto+Sans+KR:wght@500;700'],
   tile: { bg: '#C8321F', markBg: '#E8A93A', markW: '46px', markH: '32px', markRadius: '50% 50% 42% 42%' },

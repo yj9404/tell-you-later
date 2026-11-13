@@ -39,7 +39,7 @@ export function useSaveCalendar(src: Source): { onSaveCalendar: (e: MouseEvent<H
   const t = useStrings()
   const title = t.eventTitle(src.from)
   const event = (): CalendarEvent => ({ title, start: src.unlockAt, link: location.href })
-  const ics = () => buildIcs({ title, unlockAt: src.unlockAt, link: location.href, uid: src.uid })
+  const ics = () => buildIcs({ title, note: t.calendar.icsNote, unlockAt: src.unlockAt, link: location.href, uid: src.uid })
 
   /** action은 클릭 처리 안에서 동기로 불러야 팝업 차단에 걸리지 않는다. false면 바로 실패. */
   const run = (action: () => boolean) => {
@@ -78,17 +78,17 @@ export function useSaveCalendar(src: Source): { onSaveCalendar: (e: MouseEvent<H
           anchor={anchor}
           onClose={closeMenu}
           items={[
-            ['구글 캘린더', () => pick(() => openTab(googleCalendarUrl(event())))],
-            ['Outlook', () => pick(() => openTab(outlookCalendarUrl(event())))],
-            ['파일로 받기(.ics)', () => pick(() => (downloadIcs(ics()), true))],
+            [t.calendar.google, () => pick(() => openTab(googleCalendarUrl(event())))],
+            [t.calendar.outlook, () => pick(() => openTab(outlookCalendarUrl(event())))],
+            [t.calendar.ics, () => pick(() => (downloadIcs(ics()), true))],
           ]}
         />
       )}
       {blocked && (
         <div role="alert" className={c.notice}>
-          <span>Safari/Chrome에서 열면 캘린더에 저장할 수 있어요</span>
+          <span>{t.calendar.blocked}</span>
           <button type="button" className={c.noticeClose} onClick={() => setBlocked(false)}>
-            닫기
+            {t.calendar.close}
           </button>
         </div>
       )}
@@ -130,6 +130,7 @@ function leftPageWithin(ms: number): Promise<boolean> {
 }
 
 function Menu({ anchor, items, onClose }: { anchor: DOMRect; items: [string, () => void][]; onClose: () => void }) {
+  const t = useStrings()
   useModal(onClose)
   const ref = useRef<HTMLDivElement>(null)
   useEffect(() => ref.current?.querySelector('button')?.focus(), [])
@@ -153,7 +154,7 @@ function Menu({ anchor, items, onClose }: { anchor: DOMRect; items: [string, () 
       <div
         ref={ref}
         role="menu"
-        aria-label="캘린더에 저장"
+        aria-label={t.calendar.save}
         className={c.menu}
         style={{ width: MENU_W, left, ...pos }}
         onClick={(e) => e.stopPropagation()}

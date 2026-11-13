@@ -40,12 +40,38 @@
   gap: 10px;
 }
 
-/* .head가 세로 flex라 그냥 두면 가로로 늘어난다. 원본 비율(553:235)대로 높이만 맞춘다. */
+/* 로고와 다른 언어 링크 한 줄 */
+.headTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+/* 원본 비율(한국어 553:235, 영어 736:343)대로 높이만 맞춘다. */
 .wordmark {
   display: block;
-  align-self: flex-start;
   height: 40px;
   width: auto;
+}
+
+/* 영어 로고는 세 줄이라 같은 높이면 글자가 너무 작다. */
+.wordmark:lang(en) {
+  height: 52px;
+}
+
+.langLink {
+  padding: 6px 2px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #6b6b6b;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.langLink:focus-visible {
+  outline: 2px solid #111111;
+  outline-offset: 2px;
 }
 
 .title {

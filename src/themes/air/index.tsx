@@ -239,7 +239,7 @@ function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenP
 export const air: Theme = {
   id: 'air',
   code: 9,
-  name: '항공 봉투',
+  name: { ko: '항공 봉투', en: 'Airmail' },
   tints: null,
   fonts: ['Gowun+Dodum', 'Nanum+Pen+Script'],
   tile: {

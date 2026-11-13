@@ -218,7 +218,7 @@ function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenP
 export const redact: Theme = {
   id: 'redact',
   code: 8,
-  name: '가려진 글',
+  name: { ko: '가려진 글', en: 'Redacted' },
   tints: null,
   fonts: ['Hahmlet:wght@400;500;700', 'Noto+Sans+KR:wght@400;500;700'],
   tile: { bg: '#DCDDD9', markBg: '#141414', markW: '46px', markH: '12px', markRadius: '1.5px' },

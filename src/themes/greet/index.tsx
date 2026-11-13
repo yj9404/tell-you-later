@@ -173,7 +173,7 @@ function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenP
 export const greet: Theme = {
   id: 'greet',
   code: 10,
-  name: '좋은 하루',
+  name: { ko: '좋은 하루' },
   tints: null,
   fonts: ['Nanum+Brush+Script', 'Noto+Sans+KR:wght@500;700;900'],
   tile: { bg: 'linear-gradient(180deg,#58B8FF,#FFD9EC)', markBg: '#E3001B', markW: '44px', markH: '14px', markRadius: '2px' },

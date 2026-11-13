@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { paragraphs } from '../../lib/bubbles.ts'
-import { clock, daysBetween, fullDate, iGa } from '../../lib/date.ts'
+import { clock, countdown, daysBetween, fullDate, iGa } from '../../lib/date.ts'
 import { LockError, st, TeaserLines, usePhases } from '../shared.tsx'
 import type { LetterInfo, LockedProps, OpenProps, Theme } from '../types.ts'
 import './queue.css'
@@ -15,16 +15,7 @@ const SOLID = 'height:54px;border:0;border-radius:12px;background:#2F54EB;color:
 const BUTTONS = 'display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px'
 
 /** 남은 시간을 세 단위까지: "50일 12시간 54분", "3시간 5분 12초", "4분 12초", "9초" */
-function waitText(sec: number): string {
-  const d = Math.floor(sec / 86400)
-  const h = Math.floor((sec % 86400) / 3600)
-  const m = Math.floor((sec % 3600) / 60)
-  const s = sec % 60
-  if (d > 0) return `${d}일 ${h}시간 ${m}분`
-  if (h > 0) return `${h}시간 ${m}분 ${s}초`
-  if (m > 0) return `${m}분 ${s}초`
-  return `${s}초`
-}
+const waitText = (sec: number) => countdown(sec * 1000, 3)
 
 /** 쓴 시각부터 여는 시각까지의 초. 처음 받은 대기순서다. */
 const totalWait = (letter: LetterInfo) => Math.max(1, Math.round((letter.unlockAt.getTime() - letter.createdAt.getTime()) / 1000))
@@ -217,7 +208,7 @@ function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenP
 export const queue: Theme = {
   id: 'queue',
   code: 4,
-  name: '대기열',
+  name: { ko: '대기열', en: 'Queue' },
   tints: null,
   fonts: ['Noto+Sans+KR:wght@400;500;600;700;800'],
   tile: { bg: '#F2F3F5', markBg: '#2F54EB', markW: '48px', markH: '6px', markRadius: '3px' },

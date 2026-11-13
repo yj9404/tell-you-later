@@ -1,7 +1,6 @@
 import { useCallback, useState } from 'react'
-import { longDate, shareText } from '../lib/date.ts'
 import { letterLink } from '../lib/route.ts'
-import { useLang } from '../i18n/index.ts'
+import { useLang, useStrings } from '../i18n/index.ts'
 import { FullPreview } from './Preview.tsx'
 import type { Created } from './Write.tsx'
 import s from './screens.module.css'
@@ -33,9 +32,10 @@ export function Done({ created, onPreview, onNew }: { created: Created; onPrevie
   const [watching, setWatching] = useState(false)
   const stopWatching = useCallback(() => setWatching(false), [])
   const lang = useLang()
+  const t = useStrings()
   const link = letterLink(location.origin, lang, created.draft.themeId, created.fragment)
   const canShare = typeof navigator.share === 'function'
-  const message = () => shareText(created.draft.to, created.unlockAt, new Date())
+  const message = () => t.shareText(created.draft.to, created.unlockAt, new Date())
 
   async function copy(what: 'link' | 'text') {
     const text = what === 'link' ? link : `${message()}\n${link}`
@@ -54,24 +54,24 @@ export function Done({ created, onPreview, onNew }: { created: Created; onPrevie
     <div className={s.page}>
       <div className={s.head}>
         <h1 className={s.title}>
-          잠갔어요.
+          {t.done.title[0]}
           <br />
-          이제 링크를 보내세요
+          {t.done.title[1]}
         </h1>
-        <p className={s.lead}>{longDate(created.unlockAt)}에 열립니다. 그 전에는 누구도 열 수 없습니다.</p>
+        <p className={s.lead}>{t.done.lead(created.unlockAt)}</p>
       </div>
 
       <div className={s.field}>
         <div className={s.sectionHead}>
           <label htmlFor="dLink" className={s.label}>
-            편지 링크
+            {t.done.link}
           </label>
-          <span className={s.count}>{link.length.toLocaleString('ko-KR')}자</span>
+          <span className={s.count}>{t.done.length(t.date.number(link.length))}</span>
         </div>
         <textarea id="dLink" className={s.link} readOnly value={link} onFocus={(e) => e.target.select()} />
         {link.length > LINK_WARN_LENGTH && (
           <span className={s.error} role="alert">
-            링크가 길어서 메신저에 따라 중간에 잘릴 수 있습니다. 보낸 뒤 링크가 열리는지 확인하거나, 편지를 줄여 다시 만들어 주세요.
+            {t.done.tooLong}
           </span>
         )}
       </div>
@@ -80,42 +80,42 @@ export function Done({ created, onPreview, onNew }: { created: Created; onPrevie
         <div className={s.row}>
           {/* 기본은 문구와 링크를 함께 복사한다. 붙여 넣기만 하면 무슨 링크인지 알 수 있게. */}
           <button type="button" className={s.primary} onClick={() => copy('text')}>
-            {copied === 'text' ? '복사했어요' : '복사'}
+            {copied === 'text' ? t.done.copied : t.done.copy}
           </button>
           <button type="button" className={s.secondary} onClick={() => copy('link')}>
-            {copied === 'link' ? '복사했어요' : '링크만 복사'}
+            {copied === 'link' ? t.done.copied : t.done.copyLink}
           </button>
         </div>
         {copied === 'fail' && (
           <span className={s.error} role="alert">
-            복사하지 못했습니다. 위 링크를 길게 눌러 직접 복사해 주세요.
+            {t.done.copyFailed}
           </span>
         )}
         {canShare && (
           <button type="button" className={s.secondary} onClick={share}>
-            공유하기
+            {t.done.share}
           </button>
         )}
         <button type="button" className={s.secondary} onClick={onPreview}>
-          받는 사람 화면 보기
+          {t.done.view}
         </button>
       </div>
 
       <div className={s.group10}>
         <button type="button" className={s.secondary} onClick={(e) => (e.currentTarget.focus(), setWatching(true))}>
-          열리는 모습 마지막으로 보기
+          {t.done.watch}
         </button>
-        <span className={s.noteCenter}>이 화면을 떠나면 그날까지 누구도 볼 수 없습니다</span>
+        <span className={s.noteCenter}>{t.done.watchNote}</span>
       </div>
 
       <div className={s.bottom}>
         <span className={s.noteCenter}>
-          편지는 서버에 저장되지 않습니다. 이 링크가 편지 그 자체예요.
+          {t.done.bottomNote[0]}
           <br />
-          링크를 잃어버리면 다시 찾을 수 없어요.
+          {t.done.bottomNote[1]}
         </span>
         <button type="button" className={s.textButton} onClick={onNew}>
-          새 편지 쓰기
+          {t.done.again}
         </button>
       </div>
 

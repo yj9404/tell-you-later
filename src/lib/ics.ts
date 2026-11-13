@@ -19,7 +19,8 @@ function fold(line: string): string {
   return out
 }
 
-export function buildIcs(opts: { title: string; unlockAt: Date; link: string; uid: string }): string {
+/** note는 일정 설명의 첫 줄(화면 언어)이고, 다음 줄에 링크가 붙는다. */
+export function buildIcs(opts: { title: string; note: string; unlockAt: Date; link: string; uid: string }): string {
   return [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
@@ -30,7 +31,7 @@ export function buildIcs(opts: { title: string; unlockAt: Date; link: string; ui
     `DTSTART:${stamp(opts.unlockAt)}`,
     `DTEND:${stamp(new Date(opts.unlockAt.getTime() + EVENT_MINUTES * 60_000))}`,
     `SUMMARY:${escape(opts.title)}`,
-    `DESCRIPTION:${escape(`그날 이 링크에서 열어 볼 수 있어요.\n${opts.link}`)}`,
+    `DESCRIPTION:${escape(`${opts.note}\n${opts.link}`)}`,
     'END:VEVENT',
     'END:VCALENDAR',
   ]

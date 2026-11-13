@@ -437,7 +437,7 @@ const TINTS = [
 export const player: Theme = {
   id: 'player',
   code: 5,
-  name: '플레이어',
+  name: { ko: '플레이어', en: 'Player' },
   tints: TINTS,
   fonts: ['Bricolage+Grotesque:opsz,wght@12..96,800', 'Noto+Sans+KR:wght@400;500;700;900'],
   tile: { bg: '#121212', markW: '40px', markH: '40px', markRadius: '4px' },

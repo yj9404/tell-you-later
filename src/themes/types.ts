@@ -1,4 +1,5 @@
 import type { ComponentType, MouseEvent } from 'react'
+import type { Lang } from '../i18n/lang.ts'
 
 export interface Tint {
   hex: string
@@ -78,7 +79,8 @@ export interface Theme {
   id: string
   /** 링크에 들어가는 번호. 한번 배포하면 바꾸지 않는다 */
   code: number
-  name: string
+  /** 쓰기 화면 칩의 이름. en이 없으면 영어판 쓰기 화면에서 숨기고, 받은 링크는 한국어로 보여준다 */
+  name: { ko: string } & Partial<Record<Exclude<Lang, 'ko'>, string>>
   /** 색을 고르는 테마만. 링크에는 인덱스가 들어가므로 한번 배포하면 순서를 바꾸지 않는다 */
   tints: readonly Tint[] | null
   /** Google Fonts css2의 family 값. 이 테마를 열 때만 불러온다 */

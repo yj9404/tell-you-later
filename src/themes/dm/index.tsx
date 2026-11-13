@@ -170,7 +170,7 @@ function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenP
 export const dm: Theme = {
   id: 'dm',
   code: 1,
-  name: 'DM',
+  name: { ko: 'DM', en: 'DM' },
   tints: null,
   fonts: ['Noto+Sans+KR:wght@400;500;700;900'],
   tile: { bg: '#FFFFFF', markBg: 'linear-gradient(90deg,#E8601C,#DD2A7B,#8134AF)', markW: '44px', markH: '16px', markRadius: '8px' },
