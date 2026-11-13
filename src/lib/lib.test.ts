@@ -261,6 +261,18 @@ describe('가사 줄 나누기', () => {
     expect(lines.join(' ')).toBe('가나다라 '.repeat(30).trim())
     expect(lyricLines('가'.repeat(100), upTo(24)).join('')).toBe('가'.repeat(100))
   })
+  it('문단의 마지막 줄에 단어 하나만 남으면 앞 줄 끝 단어를 옮겨 두 단어로 만든다', () => {
+    const en = "Hey, it's me. Writing this in November, while you're still figuring things out."
+    expect(lyricLines(en, upTo(60))).toEqual(["Hey, it's me.", "Writing this in November, while you're still figuring", 'things out.'])
+    // 한국어도 어절 하나만 남는 경우 같은 규칙
+    expect(lyricLines('이걸 쓰는 지금은 벌써 11월이야', upTo(15))).toEqual(['이걸 쓰는 지금은', '벌써 11월이야'])
+    expect(lyricLines('하나 둘 셋 넷 다섯 여섯', upTo(13))).toEqual(['하나 둘 셋 넷', '다섯 여섯'])
+  })
+  it('옮기면 넘치거나, 글자 단위로 자른 자리면 그대로 둔다', () => {
+    expect(lyricLines('가나다 라마바사아자차', upTo(9))).toEqual(['가나다', '라마바사아자차'])
+    expect(lyricLines(`a ${'b'.repeat(30)}`, upTo(24))).toEqual(['a', 'b'.repeat(24), 'b'.repeat(6)])
+    expect(lyricLines('aaaa bbbb cccc dddd', upTo(14))).toEqual(['aaaa bbbb', 'cccc dddd'])
+  })
 })
 
 describe('라운드 ↔ 시각', () => {

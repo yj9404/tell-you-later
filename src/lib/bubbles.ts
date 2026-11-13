@@ -51,6 +51,7 @@ export function splitBubbles(text: string): string[] {
  * 빈 줄로 구분된 문단이 한 줄이다. 문단이 fits를 넘으면 문장(줄바꿈 포함) 단위로 들어가는 만큼
  * 묶고, 문장 하나가 넘치면 단어, 단어 하나가 넘치면 글자 단위로 자른다.
  * fits는 화면에서 두 줄 안에 들어가는지 재는 함수다(글자 폭은 화면이 안다).
+ * 문단의 마지막 줄에 단어(어절) 하나만 남으면 앞 줄 끝 단어를 옮겨 붙인다(avoidOrphan).
  */
 export function lyricLines(text: string, fits: (line: string) => boolean): string[] {
   const out: string[] = []
@@ -60,6 +61,7 @@ export function lyricLines(text: string, fits: (line: string) => boolean): strin
       out.push(flat)
       continue
     }
+    const start = out.length
     let cur = ''
     const push = () => {
       if (cur) out.push(cur)
@@ -81,8 +83,28 @@ export function lyricLines(text: string, fits: (line: string) => boolean): strin
       }
     }
     push()
+    avoidOrphan(out, start, flat, fits)
   }
   return out
+}
+
+/**
+ * 문단의 마지막 줄이 단어 하나뿐이면 앞 줄의 끝 단어를 옮겨 두 단어로 만든다.
+ * 옮긴 줄이 fits를 넘거나, 앞 줄이 단어 하나뿐이거나, 두 줄 사이가 단어 중간(글자 단위로 자른 곳)이면 그대로 둔다.
+ * lines[start..]는 flat(공백을 하나로 줄인 문단)을 순서대로 자른 것이라 마지막 줄은 flat의 끝부분이다.
+ */
+function avoidOrphan(lines: string[], start: number, flat: string, fits: (line: string) => boolean): void {
+  const n = lines.length
+  if (n - start < 2) return
+  const last = lines[n - 1]
+  if (last.includes(' ') || flat[flat.length - last.length - 1] !== ' ') return
+  const prev = lines[n - 2]
+  const cut = prev.lastIndexOf(' ')
+  if (cut <= 0) return
+  const next = `${prev.slice(cut + 1)} ${last}`
+  if (!fits(next)) return
+  lines[n - 2] = prev.slice(0, cut)
+  lines[n - 1] = next
 }
 
 /** 빈 줄로 구분된 문단. 문단 안의 줄바꿈은 그대로 둔다. */

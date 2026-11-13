@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
 import { useStrings } from '../../i18n/index.ts'
 import { LockError, remaining, st, TeaserLines, useThemeStrings } from '../shared.tsx'
 import { strings } from './strings.ts'
@@ -112,7 +112,7 @@ function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenP
   const g = useStrings()
   const t = useThemeStrings(strings)
   const tokens = useMemo(() => tokenize(text), [text])
-  const count = useMemo(() => tokens.filter((t) => 'word' in t).length, [tokens])
+  const count = useMemo(() => tokens.filter((tok) => 'word' in tok).length, [tokens])
   const [shown, setShown] = useState(autoplay ? 0 : count)
   const [run, setRun] = useState(autoplay ? 1 : 0)
   const timer = useRef(0)
@@ -182,18 +182,25 @@ function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenP
           {t.stampAfter}
         </div>
         <div ref={body} tabIndex={0} style={st('position:relative;flex-grow:1;min-height:0;overflow-y:auto;outline:none')}>
-          <div style={st('display:flex;flex-wrap:wrap;align-content:flex-start;gap:9px 6px')}>
-            {tokens.map((t, i) => {
-              if ('gap' in t) return <span key={i} style={{ flexBasis: '100%', height: t.gap }} />
+          <div style={st(t.inlineWords ? 'text-align:left;line-height:1.45' : 'display:flex;flex-wrap:wrap;align-content:flex-start;gap:9px 6px')}>
+            {tokens.map((tok, i) => {
+              if ('gap' in tok) {
+                // 인라인: 줄바꿈은 <br>, 빈 줄은 그 높이만큼의 블록. 칸 배치: 한 줄을 다 차지하는 빈 칸.
+                if (!t.inlineWords) return <span key={i} style={{ flexBasis: '100%', height: tok.gap }} />
+                return tok.gap ? <span key={i} style={{ display: 'block', height: tok.gap }} /> : <br key={i} />
+              }
               const open = k++ < shown
               return (
-                <span key={i} data-word="" style={st('position:relative;max-width:100%;font-size:17px;line-height:1.45;padding:0 1px;overflow-wrap:anywhere')}>
-                  <span style={{ color: open ? '#141414' : 'transparent', transition: animate ? 'color .3s ease' : undefined }}>{t.word}</span>
+                <Fragment key={i}>
+                  <span data-word="" style={st(`position:relative;max-width:100%;font-size:17px;line-height:1.45;padding:0 1px;overflow-wrap:anywhere${t.inlineWords ? ';display:inline-block;margin-bottom:9px' : ''}`)}>
+                  <span style={{ color: open ? '#141414' : 'transparent', transition: animate ? 'color .3s ease' : undefined }}>{tok.word}</span>
                   <span
                     aria-hidden="true"
                     style={{ ...st('position:absolute;left:0;top:2px;bottom:2px;background:#141414;border-radius:1.5px'), width: open ? '0%' : '100%', transition: animate ? 'width .35s cubic-bezier(.6,0,.4,1)' : undefined }}
                   />
-                </span>
+                  </span>
+                  {t.inlineWords && ' '}
+                </Fragment>
               )
             })}
           </div>

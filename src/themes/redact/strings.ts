@@ -18,6 +18,11 @@ const ko = {
   writeOwn: '나도 비공개 문서 만들기',
   written: (at: Date) => `${d.fullDate(at)} 작성`,
   reply: '답장도 비공개로 보내기',
+  /**
+   * 열림 화면 본문을 글줄처럼(인라인) 놓을지. false면 단어마다 칸을 두고 6px씩 띄운다(한국어 디자인).
+   * 영어는 칸 간격이 낱말 사이 공백보다 넓어 글이 벌어져 보여서 보통 공백으로 띄우고 왼쪽 정렬한다.
+   */
+  inlineWords: false,
 }
 
 const en: typeof ko = {
@@ -34,6 +39,7 @@ const en: typeof ko = {
   writeOwn: 'Make a private doc',
   written: (at) => `Written ${g.date.fullDate(at)}`,
   reply: 'Reply privately',
+  inlineWords: true,
 }
 
 export const strings = { ko, en }
