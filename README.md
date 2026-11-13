@@ -62,7 +62,7 @@ scripts/        빌드 후처리(테마별 미리보기 페이지), OG 이미지
    편지 암호문은 주소의 `#` 뒤에 있다. 분석 요청에 `#` 뒤가 실려 나가지 않는다는 것이 확인될 때까지 넣지 않는다(아래 체크리스트).
 
 OG 이미지는 `npm run og-images`(`scripts/make-og-image.mjs`, Edge 또는 Chrome 필요)로 만든다.
-`public/og.png`(공통)는 `design/og.svg`를 그린 것이고, `public/og/<테마id>.png`(테마별)는 왼쪽에 og.svg, 오른쪽에 그 테마의 잠김 화면을 예시 데이터로 그린 휴대폰 화면이다(`scripts/og/`).
+`public/og.png`(공통)는 `design/og.svg`를 그린 것이고, `public/og/<테마id>.png`(테마별)는 테마 대표색 바탕에 왼쪽은 로고와 "{테마}로 도착", 오른쪽은 그 테마의 잠김 화면을 예시 데이터로 그린 휴대폰 화면이다(`scripts/og/`). 바탕색과 문구는 `scripts/themes.json`의 `og` 값이다.
 og.svg나 테마의 잠김 화면을 바꾸면 다시 돌린다. 눈에 띄는 차이가 없는 이미지는 덮어쓰지 않는다.
 테마를 추가하면 `scripts/themes.json`에도 더한다(테스트가 `registry.ts`와 같은지 확인한다).
 포춘쿠키 그림은 `assets/`의 PNG 원본을 가로 600px WebP로 줄인 것이다(`src/themes/cookie/*.webp`, 합계 약 180KB). 원본은 번들에 들어가지 않는다.

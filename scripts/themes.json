@@ -1,14 +1,14 @@
 [
-  { "id": "dm", "name": "DM" },
-  { "id": "msg", "name": "문자" },
-  { "id": "lock", "name": "잠금화면" },
-  { "id": "queue", "name": "대기열" },
-  { "id": "player", "name": "플레이어" },
-  { "id": "cookie", "name": "포춘쿠키" },
-  { "id": "color", "name": "책 한 권" },
-  { "id": "redact", "name": "가려진 글" },
-  { "id": "air", "name": "항공 봉투" },
-  { "id": "greet", "name": "좋은 하루" },
-  { "id": "approval", "name": "결재 공문" },
-  { "id": "report", "name": "군대 보고서" }
+  { "id": "dm", "name": "DM", "og": { "bg": "#F6E3EC", "label": "DM으로 도착" } },
+  { "id": "msg", "name": "문자", "og": { "bg": "#E3ECFB", "label": "문자로 도착" } },
+  { "id": "lock", "name": "잠금화면", "og": { "bg": "#DCE3F7", "label": "잠금화면으로 도착" } },
+  { "id": "queue", "name": "대기열", "og": { "bg": "#E4E9FB", "label": "대기열로 도착" } },
+  { "id": "player", "name": "플레이어", "og": { "bg": "#1E2A55", "label": "플레이어로 도착" } },
+  { "id": "cookie", "name": "포춘쿠키", "og": { "bg": "#F7DCD6", "label": "포춘쿠키로 도착" } },
+  { "id": "color", "name": "책 한 권", "og": { "bg": "#DDE7E0", "label": "책 한 권으로 도착" } },
+  { "id": "redact", "name": "가려진 글", "og": { "bg": "#E2E2DE", "label": "가려진 글로 도착" } },
+  { "id": "air", "name": "항공 봉투", "og": { "bg": "#E1E6EE", "label": "항공 봉투로 도착" } },
+  { "id": "greet", "name": "좋은 하루", "og": { "bg": "#FBE3EA", "label": "좋은 하루로 도착" } },
+  { "id": "approval", "name": "결재 공문", "og": { "bg": "#E6EBF2", "label": "결재 공문으로 도착" } },
+  { "id": "report", "name": "군대 보고서", "og": { "bg": "#3F4636", "label": "군대 보고서로 도착" } }
 ]

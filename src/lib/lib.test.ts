@@ -314,6 +314,10 @@ describe('링크 주소', () => {
 
   // 빌드 후처리와 OG 이미지 스크립트는 TSX를 못 읽어 scripts/themes.json을 쓴다. 테마를 추가하면 거기도 더한다.
   it('scripts/themes.json이 테마 목록과 같다', () => {
-    expect(themePages).toEqual(THEMES.map((t) => ({ id: t.id, name: t.name })))
+    expect(themePages.map(({ id, name }) => ({ id, name }))).toEqual(THEMES.map((t) => ({ id: t.id, name: t.name })))
+  })
+
+  it('OG 이미지 문구는 테마 이름 + "으로/로 도착"이다', () => {
+    for (const { name, og } of themePages) expect(og.label).toMatch(new RegExp(`^${name}(으로|로) 도착$`))
   })
 })

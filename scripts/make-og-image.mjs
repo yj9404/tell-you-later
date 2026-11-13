@@ -1,7 +1,8 @@
 // 공유 미리보기 이미지(1200×630)를 만든다.
 // - public/og.png: 사이트 공통. design/og.svg를 그대로 그린다(글자를 도형으로 바꿔 둔 원본이라 글꼴과 무관).
-// - public/og/{테마id}.png: 테마별. 왼쪽에 og.svg의 로고·부제, 오른쪽에 그 테마의 잠김 화면을 예시 데이터로
-//   그린 휴대폰 화면(scripts/og/compose.html, frame.tsx). 시각·이름·색이 고정이고 움직임을 멈춰 다시 돌려도 같은 그림이 나온다.
+// - public/og/{테마id}.png: 테마별. 테마 대표색 바탕에 왼쪽은 로고와 "{테마}로 도착", 오른쪽은 그 테마의 잠김 화면을
+//   예시 데이터로 그린 휴대폰 화면(scripts/og/compose.html, frame.tsx). 색·문구는 scripts/themes.json의 og 값.
+//   시각·이름이 고정이고 움직임을 멈춰 다시 돌려도 같은 그림이 나온다.
 // 문구나 테마 화면을 바꾸면 다시 돌린다.
 // 실행: npm run og-images   (Microsoft Edge 또는 Chrome 필요. 다른 위치면 BROWSER 환경 변수로 지정)
 //
@@ -102,11 +103,12 @@ async function launch() {
 
 const dataUrl = (png) => `data:image/png;base64,${png.toString('base64')}`
 
-// 같은 화면이어도 한글 글자의 안티앨리어싱이 드물게 몇백 픽셀, 밝기 20 안팎으로 다르게 나온다(실행마다 달라짐).
-// 그 정도 차이는 그림이 바뀐 것이 아니므로 기존 파일을 그대로 둔다. 글자·색이 바뀌면 255에 가까운 차이가 난다.
-const SAME_DELTA = 48
-// 두 PNG에서 가장 크게 다른 채널 값(0–255). 크기가 다르면 255. 지금 열린 페이지에서 평가한다.
-const maxDelta = (a, b) => `(async () => {
+// 같은 화면이어도 한글 글자의 안티앨리어싱이 실행마다 드물게 다르게 나온다(지금까지 본 것은 0.4% 이하의 픽셀, 밝기 차 66 이하).
+// 그 정도는 그림이 바뀐 것이 아니므로 기존 파일을 그대로 둔다. 글자가 바뀌면 밝기 차가 200을 넘고,
+// 바탕색이 바뀌면 대부분의 픽셀이 달라지므로 둘 중 하나라도 넘으면 새로 쓴다.
+const SAME = { maxDelta: 96, changedRatio: 0.01 }
+// 두 PNG를 비교해 { max: 가장 큰 채널 차(0–255), ratio: 달라진 픽셀 비율 }. 크기가 다르면 완전히 다른 것으로 본다.
+const compare = (a, b) => `(async () => {
   const pixels = async (src) => {
     const img = new Image()
     img.src = src
@@ -116,17 +118,25 @@ const maxDelta = (a, b) => `(async () => {
     return ctx.getImageData(0, 0, img.width, img.height).data
   }
   const [p, q] = await Promise.all([pixels(${JSON.stringify(dataUrl(a))}), pixels(${JSON.stringify(dataUrl(b))})])
-  if (p.length !== q.length) return 255
+  if (p.length !== q.length) return { max: 255, ratio: 1 }
   let max = 0
-  for (let i = 0; i < p.length; i++) max = Math.max(max, Math.abs(p[i] - q[i]))
-  return max
+  let changed = 0
+  for (let i = 0; i < p.length; i += 4) {
+    const d = Math.max(Math.abs(p[i] - q[i]), Math.abs(p[i + 1] - q[i + 1]), Math.abs(p[i + 2] - q[i + 2]), Math.abs(p[i + 3] - q[i + 3]))
+    if (d) changed++
+    if (d > max) max = d
+  }
+  return { max, ratio: changed / (p.length / 4) }
 })()`
 
 /** 기존 파일과 눈에 띄게 다를 때만 쓴다. 다시 돌려도 파일이 바뀌지 않게 한다. */
 async function save(out, png) {
-  if (existsSync(out) && (await browser.evaluate(maxDelta(readFileSync(out), png))) <= SAME_DELTA) {
-    console.log(`same  ${out}`)
-    return
+  if (existsSync(out)) {
+    const { max, ratio } = await browser.evaluate(compare(readFileSync(out), png))
+    if (max <= SAME.maxDelta && ratio < SAME.changedRatio) {
+      console.log(`same  ${out}`)
+      return
+    }
   }
   writeFileSync(out, png)
   console.log(`saved ${out}`)
@@ -155,10 +165,10 @@ try {
   await server.listen()
   const base = server.resolvedUrls.local[0].replace(/\/$/, '')
   mkdirSync(join(root, 'public', 'og'), { recursive: true })
-  for (const { id } of themes) {
+  for (const { id, og } of themes) {
     const screen = await browser.capture(`${base}/scripts/og/frame.html?theme=${id}`, PHONE, FRAME_READY)
     const src = dataUrl(screen)
-    await save(join(root, 'public', 'og', `${id}.png`), await browser.capture(`${base}/scripts/og/compose.html`, OG, `setScreen(${JSON.stringify(src)})`))
+    await save(join(root, 'public', 'og', `${id}.png`), await browser.capture(`${base}/scripts/og/compose.html`, OG, `compose(${JSON.stringify(src)}, ${JSON.stringify(og)})`))
   }
 } finally {
   await server.close()
