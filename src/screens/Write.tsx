@@ -8,7 +8,7 @@ import { lockLetter } from '../lib/timelock.ts'
 import { themeFonts, themesFor } from '../themes/registry.ts'
 import { FullPreview, PreviewPair, type Draft, type Side } from './Preview.tsx'
 import { WhenSheet } from './WhenSheet.tsx'
-import { resolveWhen, type When } from './when.ts'
+import { resolveWhen, tomorrowSameTime, type When } from './when.ts'
 import s from './write.module.css'
 
 export interface Prefill {
@@ -46,7 +46,8 @@ export function Write({ prefill, onCreated }: { prefill: Prefill | null; onCreat
   const themes = themesFor(lang)
   const [to, setTo] = useState(prefill?.to ?? '')
   const [from, setFrom] = useState(prefill?.from ?? '')
-  const [when, setWhen] = useState<When>({ kind: 'newyear' })
+  // 여는 날 기본값은 내일 이 시각(직접 고르기). 시트를 열면 그 값이 직접 고르기 칸에 들어 있다.
+  const [when, setWhen] = useState<When>(() => ({ kind: 'custom', at: tomorrowSameTime(new Date()) }))
   const [now, setNow] = useState(() => new Date())
   const [body, setBody] = useState('')
   const [themeId, setThemeId] = useState(themes[0].id)

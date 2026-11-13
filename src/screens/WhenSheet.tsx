@@ -20,31 +20,21 @@ interface Props {
 }
 
 /**
- * 여는 날 시트 (디자인: Write-when 3차). 새해 0시 / 1년 뒤 지금 / 직접 고르기 중 하나를 고르고 "이때로 정하기"로 확정한다.
+ * 여는 날 시트 (디자인: Write-when 3차). 직접 고르기 / 새해 0시 / 1년 뒤 지금 중 하나를 고르고 "이때로 정하기"로 확정한다.
+ * 직접 고르기가 기본값(내일 이 시각)이라 맨 위에 둔다.
  * 날짜·시각 칸은 직접 고르기를 골랐을 때만 펼쳐진다. 아래에서 올라오고, 밖을 누르거나 아래로 내리면 닫힌다.
  */
 export function WhenSheet({ now, value, onConfirm, onClose }: Props) {
   const t = useStrings()
   const { dayClock } = t.when
-  // 직접 고르기 칸의 처음 값은 지금 고른 것의 시각이다(customStart). 프리셋을 고른 상태에서 직접 고르기로 바꾸면
-  // 그 프리셋의 시각으로 다시 채운다. 칸을 한 번이라도 고치면 그 뒤로는 프리셋을 오가도 적어 둔 값을 그대로 둔다.
+  // 직접 고르기 칸의 처음 값: 이미 직접 고른 시각이 있으면 그것, 아니면 내일 이 시각(customStart).
+  // 프리셋을 오가도 적어 둔 값은 그대로 둔다.
   const start = customStart(value, now)
   const [choice, setChoice] = useState<Choice>(value.kind)
   const [date, setDate] = useState(isoDate(start))
   const [pm, setPm] = useState(start.getHours() >= 12)
   const [hourText, setHourText] = useState(String(start.getHours() % 12 || 12))
   const [minText, setMinText] = useState(pad(start.getMinutes()))
-  const edited = useRef(value.kind === 'custom')
-  const fill = (at: Date) => {
-    setDate(isoDate(at))
-    setPm(at.getHours() >= 12)
-    setHourText(String(at.getHours() % 12 || 12))
-    setMinText(pad(at.getMinutes()))
-  }
-  const choose = (next: Choice) => {
-    if (next === 'custom' && choice !== 'custom' && !edited.current) fill(customStart({ kind: choice }, now))
-    setChoice(next)
-  }
   const [drag, setDrag] = useState(0)
   const dragFrom = useRef<number | null>(null)
   const sheet = useRef<HTMLDivElement>(null)
@@ -61,7 +51,6 @@ export function WhenSheet({ now, value, onConfirm, onClose }: Props) {
   const days = daysBetween(now, at)
 
   const typeHour = (raw: string) => {
-    edited.current = true
     let t = raw.replace(/[^0-9]/g, '').slice(0, 2)
     if (t.length === 2 && Number(t) === 0) t = '12'
     else if (Number(t) > 12) t = '12'
@@ -73,7 +62,6 @@ export function WhenSheet({ now, value, onConfirm, onClose }: Props) {
     }
   }
   const typeMin = (raw: string) => {
-    edited.current = true
     const t = raw.replace(/[^0-9]/g, '').slice(0, 2)
     setMinText(Number(t) > 59 ? '59' : t)
   }
@@ -94,7 +82,7 @@ export function WhenSheet({ now, value, onConfirm, onClose }: Props) {
 
   const option = (kind: Choice, name: string, sub?: string) => (
     <label className={s.option}>
-      <input type="radio" name="when" className={s.radio} checked={choice === kind} onChange={() => choose(kind)} />
+      <input type="radio" name="when" className={s.radio} checked={choice === kind} onChange={() => setChoice(kind)} />
       <span aria-hidden="true" className={s.radioDot} />
       <span className={s.optionText}>
         <span className={s.optionName}>{name}</span>
@@ -106,7 +94,7 @@ export function WhenSheet({ now, value, onConfirm, onClose }: Props) {
   const ampm = (
     <div role="group" aria-label={t.when.ampm} className={s.ampm}>
       {[false, true].map((isPm) => (
-        <button key={String(isPm)} type="button" aria-pressed={pm === isPm} onClick={() => ((edited.current = true), setPm(isPm))}>
+        <button key={String(isPm)} type="button" aria-pressed={pm === isPm} onClick={() => setPm(isPm)}>
           {isPm ? t.when.pm : t.when.am}
         </button>
       ))}
@@ -133,8 +121,6 @@ export function WhenSheet({ now, value, onConfirm, onClose }: Props) {
         </div>
 
         <div role="radiogroup" aria-labelledby="whenTitle" className={s.options}>
-          {option('newyear', t.when.newyear, dayClock(nextNewYear(now)))}
-          {option('year', t.when.year, dayClock(oneYearLater(now)))}
           <div className={s.customOption}>
             {option('custom', t.when.custom)}
             {choice === 'custom' && (
@@ -154,8 +140,7 @@ export function WhenSheet({ now, value, onConfirm, onClose }: Props) {
                     min={isoDate(now)}
                     onChange={(e) => {
                       if (!e.target.value || e.target.value < isoDate(now)) return
-                      edited.current = true
-                      setDate(e.target.value)
+                                        setDate(e.target.value)
                     }}
                     onClick={(e) => {
                       try {
@@ -195,6 +180,8 @@ export function WhenSheet({ now, value, onConfirm, onClose }: Props) {
               </div>
             )}
           </div>
+          {option('newyear', t.when.newyear, dayClock(nextNewYear(now)))}
+          {option('year', t.when.year, dayClock(oneYearLater(now)))}
         </div>
 
         <p className={s.summary} role="status">

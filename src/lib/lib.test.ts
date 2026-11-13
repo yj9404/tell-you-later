@@ -12,7 +12,7 @@ import type { ChainClient } from 'drand-client'
 import v1 from './fixtures/v1.json' with { type: 'json' }
 import { fragmentOf, homePath, langOf, letterLink } from './route.ts'
 import { stringsFor } from '../i18n/index.ts'
-import { customStart, hourAfter } from '../screens/when.ts'
+import { customStart, tomorrowSameTime } from '../screens/when.ts'
 import { strings as queueStrings } from '../themes/queue/strings.ts'
 import { enLocale, makeEnDates } from '../i18n/date-en.ts'
 import { THEMES, themeLang, themesFor } from '../themes/registry.ts'
@@ -192,22 +192,22 @@ describe('영어 날짜 표기', () => {
 describe('여는 날 시트: 직접 고르기의 처음 값', () => {
   const now = new Date(2026, 10, 13, 14, 19, 30)
 
-  it('직전에 고른 프리셋의 시각으로 채운다', () => {
-    expect(customStart({ kind: 'newyear' }, now)).toEqual(new Date(2027, 0, 1))
-    expect(customStart({ kind: 'year' }, now)).toEqual(new Date(2027, 10, 13, 14, 19))
+  it('기본값은 내일 이 시각(분 단위)이다. 프리셋을 골라 두었어도 같다', () => {
+    const tomorrow = new Date(2026, 10, 14, 14, 19)
+    expect(customStart(null, now)).toEqual(tomorrow)
+    expect(customStart({ kind: 'newyear' }, now)).toEqual(tomorrow)
+    expect(customStart({ kind: 'year' }, now)).toEqual(tomorrow)
   })
 
-  it('직접 고른 값이 아직 안 지났으면 그대로, 지났거나 고른 게 없으면 1시간 뒤 정각', () => {
+  it('이미 직접 고른 시각이 아직 안 지났으면 그대로, 지났으면 내일 이 시각', () => {
     const later = new Date(2026, 11, 24, 18, 30)
     expect(customStart({ kind: 'custom', at: later }, now)).toEqual(later)
-    expect(customStart({ kind: 'custom', at: new Date(2026, 10, 13, 9) }, now)).toEqual(new Date(2026, 10, 13, 16))
-    expect(customStart(null, now)).toEqual(new Date(2026, 10, 13, 16))
+    expect(customStart({ kind: 'custom', at: new Date(2026, 10, 13, 9) }, now)).toEqual(new Date(2026, 10, 14, 14, 19))
   })
 
-  it('1시간 뒤 정각은 늘 1시간 이상 남는다', () => {
-    expect(hourAfter(new Date(2026, 10, 13, 14, 0))).toEqual(new Date(2026, 10, 13, 15, 0))
-    expect(hourAfter(new Date(2026, 10, 13, 14, 59))).toEqual(new Date(2026, 10, 13, 16, 0))
-    expect(hourAfter(new Date(2026, 11, 31, 23, 30))).toEqual(new Date(2027, 0, 1, 1, 0))
+  it('월말·연말에는 다음 달·다음 해로 넘어간다', () => {
+    expect(tomorrowSameTime(new Date(2026, 10, 30, 23, 59))).toEqual(new Date(2026, 11, 1, 23, 59))
+    expect(tomorrowSameTime(new Date(2026, 11, 31, 8, 5))).toEqual(new Date(2027, 0, 1, 8, 5))
   })
 })
 

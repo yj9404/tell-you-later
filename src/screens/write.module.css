@@ -500,7 +500,13 @@
   cursor: pointer;
 }
 
-.customOption .option {
+/* 직접 고르기는 맨 위다. 펼친 날짜·시각 칸 아래에 구분선을 긋고, 맨 아래 선택지는 선을 뺀다. */
+.customOption {
+  border-bottom: 1px solid #ededed;
+}
+
+.customOption .option,
+.options > .option:last-child {
   border-bottom: 0;
 }
 
