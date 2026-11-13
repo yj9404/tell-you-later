@@ -44,10 +44,14 @@ scripts/        빌드 후처리(테마별 미리보기 페이지), OG 이미지
 
 ### 링크 형식과 호환성
 
-`https://<도메인>/t/<테마id>/#v1.<base64url>` — 바이트 배열은 `src/lib/codec.ts` 맨 위에 적혀 있다.
+`https://<도메인>[/en]/t/<테마id>/#v1.<base64url>` — 바이트 배열은 `src/lib/codec.ts` 맨 위에 적혀 있다.
 
-- 앱은 `#` 뒤만 읽는다. 테마도 payload에 든 값을 쓴다. `/t/<테마id>/`는 카카오톡 등의 공유 미리보기를 테마별로 고르기 위한 경로다(`src/lib/route.ts`).
-  빌드 후처리 `scripts/make-theme-pages.mjs`가 `dist/index.html`을 복사해 `dist/t/<id>/index.html` 12개를 만들고 og:title·og:url·og:image·twitter:image만 바꾼다.
+- 편지와 테마는 `#` 뒤만 읽는다. `/t/<테마id>/`는 카카오톡 등의 공유 미리보기를 테마별로 고르기 위한 경로다(`src/lib/route.ts`).
+- 경로 맨 앞의 `/en`은 화면 언어다. 보낸 사람이 영어판(`/en/`)에서 쓰면 링크도 `/en/t/<id>/`가 되고 받는 사람 화면도 영어다.
+  언어는 payload에 넣지 않는다(v1 그대로). `/en`이 아닌 경로와 경로 없는 옛 링크는 한국어다.
+- 빌드 후처리 `scripts/make-theme-pages.mjs`가 `dist/index.html`을 복사해 미리보기 페이지를 만든다.
+  한국어 `dist/t/<id>/` 12개, 영어 `dist/en/`과 `dist/en/t/<id>/`(`scripts/themes.json`에 `en`이 있는 테마만).
+  영어 페이지는 `lang`, 제목, 설명도 영어로 바꾼다. SPA 폴백이 없으므로 열릴 수 있는 경로는 모두 이 파일들이어야 한다.
 - 경로 없는 옛 링크(`/#v1.…`)도 그대로 열린다.
 
 - 이미 보낸 링크는 몇 년 뒤에 열린다. **v1 디코더는 지우거나 고치지 않는다.** 형식을 바꿀 때는 v2를 추가한다.
@@ -67,7 +71,8 @@ scripts/        빌드 후처리(테마별 미리보기 페이지), OG 이미지
    편지 암호문은 주소의 `#` 뒤에 있다. 분석 요청에 `#` 뒤가 실려 나가지 않는다는 것이 확인될 때까지 넣지 않는다(아래 체크리스트).
 
 OG 이미지는 `npm run og-images`(`scripts/make-og-image.mjs`, Edge 또는 Chrome 필요)로 만든다.
-`public/og.png`(공통)는 `design/og.svg`를 그린 것이고, `public/og/<테마id>.png`(테마별)는 테마 대표색 바탕에 왼쪽은 로고와 "{테마}로 도착", 오른쪽은 그 테마의 잠김 화면을 예시 데이터로 그린 휴대폰 화면이다(`scripts/og/`). 바탕색과 문구는 `scripts/themes.json`의 `og` 값이다.
+`public/og.png`·`og-en.png`(공통)는 `design/og.svg`·`og-en.svg`를 그린 것이고, `public/og/<테마id>.png`·`public/og/en/<테마id>.png`(테마별)는 테마 대표색 바탕에 왼쪽은 로고와 "{테마}로 도착"("Arrives as a DM"), 오른쪽은 그 테마의 잠김 화면을 예시 데이터로 그린 휴대폰 화면이다(`scripts/og/`). 바탕색과 한국어 문구는 `scripts/themes.json`의 `og`, 영어 문구는 `en.label`(두 줄을 직접 나눠 적는다)이다.
+영어 잠김 화면에는 시간대 약칭이 나오므로 미국 서부 시간으로 고정해 그린다.
 og.svg나 테마의 잠김 화면을 바꾸면 다시 돌린다. 눈에 띄는 차이가 없는 이미지는 덮어쓰지 않는다.
 테마를 추가하면 `scripts/themes.json`에도 더한다(테스트가 `registry.ts`와 같은지 확인한다).
 포춘쿠키 그림은 `assets/`의 PNG 원본을 가로 600px WebP로 줄인 것이다(`src/themes/cookie/*.webp`, 합계 약 180KB). 원본은 번들에 들어가지 않는다.
@@ -83,6 +88,7 @@ og.svg나 테마의 잠김 화면을 바꾸면 다시 돌린다. 눈에 띄는 �
 - [ ] 인스타그램 인앱 브라우저: 같은 확인(DM, 프로필 링크, 스토리 링크).
 - [ ] **카카오톡에서 링크가 잘리는 길이를 시험**하고 `src/screens/Done.tsx`의 `LINK_WARN_LENGTH`(지금은 임시값 2,000)를 정한다. 2,000자 편지의 링크는 수천 자가 된다.
 - [ ] 카카오톡·인스타그램 공유 미리보기에 제목·설명·이미지가 나온다. `/t/<테마id>/` 링크마다 그 테마의 이미지와 제목이 나온다.
+- [ ] 영어: `/en/`, `/en/t/<테마id>/`가 열리고(404가 아님) 화면이 영어다. iMessage·WhatsApp·X 미리보기에 영어 제목과 이미지가 나온다.
 - [ ] 인앱 브라우저에서 "복사", "링크만 복사", "공유하기", "캘린더에 저장(.ics)"이 동작한다. `.ics`가 캘린더 앱에서 열린다.
 - [ ] iOS Safari, Android Chrome에서 12개 테마의 잠김·열림 화면과 날짜 고르기(기기 기본 달력)가 정상이다.
 - [ ] "모션 줄이기"를 켠 기기에서 연출 없이 편지가 바로 보인다.

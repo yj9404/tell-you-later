@@ -1,6 +1,7 @@
 // 공유 미리보기 이미지(1200×630)를 만든다.
-// - public/og.png: 사이트 공통. design/og.svg를 그대로 그린다(글자를 도형으로 바꿔 둔 원본이라 글꼴과 무관).
-// - public/og/{테마id}.png: 테마별. 테마 대표색 바탕에 왼쪽은 로고와 "{테마}로 도착", 오른쪽은 그 테마의 잠김 화면을
+// - public/og.png, public/og-en.png: 사이트 공통. design/og.svg, og-en.svg를 그대로 그린다(글자를 도형으로 바꿔 둔 원본이라 글꼴과 무관).
+// - public/og/{테마id}.png, public/og/en/{테마id}.png: 테마별. 영어는 scripts/themes.json에 en이 있는 테마만.
+//   테마 대표색 바탕에 왼쪽은 로고와 "{테마}로 도착"("Arrives as a DM"), 오른쪽은 그 테마의 잠김 화면을
 //   예시 데이터로 그린 휴대폰 화면(scripts/og/compose.html, frame.tsx). 색·문구는 scripts/themes.json의 og 값.
 //   시각·이름이 고정이고 움직임을 멈춰 다시 돌려도 같은 그림이 나온다.
 // 문구나 테마 화면을 바꾸면 다시 돌린다.
@@ -92,6 +93,10 @@ async function launch() {
       if (r.exceptionDetails) throw new Error(r.exceptionDetails.exception?.description ?? r.exceptionDetails.text)
       return r.result.value
     },
+    /** 시간대를 고정한다. 영어 잠김 화면에는 시간대 약칭이 나오므로 어느 컴퓨터에서 돌려도 같은 글이 나오게 한다. */
+    async timezone(timezoneId) {
+      await send('Emulation.setTimezoneOverride', { timezoneId })
+    },
     async close() {
       await send('Browser.close').catch(() => {})
       ws.close()
@@ -161,6 +166,7 @@ const browser = await launch()
 const server = await createServer({ root, logLevel: 'warn', server: { port: 5199, hmr: false } })
 try {
   await save(join(root, 'public', 'og.png'), await browser.capture(pathToFileURL(join(root, 'design', 'og.svg')).href, OG))
+  await save(join(root, 'public', 'og-en.png'), await browser.capture(pathToFileURL(join(root, 'design', 'og-en.svg')).href, OG))
 
   await server.listen()
   const base = server.resolvedUrls.local[0].replace(/\/$/, '')
@@ -169,6 +175,15 @@ try {
     const screen = await browser.capture(`${base}/scripts/og/frame.html?theme=${id}`, PHONE, FRAME_READY)
     const src = dataUrl(screen)
     await save(join(root, 'public', 'og', `${id}.png`), await browser.capture(`${base}/scripts/og/compose.html`, OG, `compose(${JSON.stringify(src)}, ${JSON.stringify(og)})`))
+  }
+
+  // 영어: 미국 서부 시간으로 그린다(잠김 화면의 "12:00 AM PST").
+  await browser.timezone('America/Los_Angeles')
+  mkdirSync(join(root, 'public', 'og', 'en'), { recursive: true })
+  for (const { id, og, en } of themes.filter((t) => t.en)) {
+    const screen = await browser.capture(`${base}/scripts/og/frame.html?theme=${id}&lang=en`, PHONE, FRAME_READY)
+    const theme = { bg: og.bg, label: en.label, lang: 'en' }
+    await save(join(root, 'public', 'og', 'en', `${id}.png`), await browser.capture(`${base}/scripts/og/compose.html`, OG, `compose(${JSON.stringify(dataUrl(screen))}, ${JSON.stringify(theme)})`))
   }
 } finally {
   await server.close()

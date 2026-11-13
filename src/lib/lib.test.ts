@@ -515,6 +515,17 @@ describe('링크 주소', () => {
     expect(themePages.map(({ id, name }) => ({ id, name }))).toEqual(THEMES.map((t) => ({ id: t.id, name: t.name.ko })))
   })
 
+  // 영어 미리보기 페이지(/en/t/{id}/)와 OG 이미지는 themes.json의 en으로 만든다. 영어판에 나오는 테마와 같아야 한다.
+  it('scripts/themes.json의 en이 영어판 테마 목록·이름과 같고, OG 문구는 두 줄의 "Arrives …"다', () => {
+    const en = themePages.flatMap((p) => ('en' in p && p.en ? [{ id: p.id, name: p.en.name }] : []))
+    expect(en).toEqual(themesFor('en').map((t) => ({ id: t.id, name: t.name.en })))
+    for (const p of themePages) {
+      if (!('en' in p) || !p.en) continue
+      expect(p.en.label).toHaveLength(2)
+      expect(p.en.label.join(' ')).toMatch(/^Arrives /)
+    }
+  })
+
   // OG 문구를 테마 이름과 다르게 따로 지정한 테마. 이 테마들은 "…으로/로 도착" 형식만 본다.
   const CUSTOM_OG_LABEL = new Set(['greet'])
 

@@ -2,7 +2,8 @@
 <!--
   테마별 OG 이미지(1200×630)의 틀. 카카오톡에서는 폭 300px 정도로 줄어 보이므로 테마가 한눈에 구분되게 짠다.
   - 바탕: 테마 대표색(scripts/themes.json의 og.bg). 어두운 바탕이면 왼쪽 글자를 흰색으로.
-  - 왼쪽: design/og.svg의 로고(부제 제외)를 60% 크기로, 그 아래 "{테마 이름}으로/로 도착"을 크게.
+  - 왼쪽: design/og.svg(영어는 og-en.svg)의 로고(부제 제외)를 60% 크기로, 그 아래 "{테마 이름}으로/로 도착"(영어 "Arrives as a DM")을 크게.
+    한국어 문구는 마지막 공백에서 두 줄로 나누고, 영어는 scripts/themes.json에 적은 두 줄 그대로 쓴다. 왼쪽 칸보다 넓으면 글자를 줄인다.
   - 오른쪽 60%: frame.html이 그린 잠김 화면(390×844, 2배율) 캡처를 약 1.05배로 키워 휴대폰 모양에 넣고
     -4도 기울인다. 화면 높이가 이미지보다 커서 위쪽부터 보이고 아래는 잘린다.
   scripts/make-og-image.mjs가 이 페이지를 열고 compose(캡처, 테마)를 부른 뒤 찍는다.
@@ -10,13 +11,15 @@
 <html lang="ko">
   <head>
     <meta charset="utf-8" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@900&display=swap" />
+    <!-- 한국어는 Noto Sans KR, 영어는 로고 글자와 같은 계열의 Inter -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@900&family=Inter:wght@800&display=swap" />
     <style>
       html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; }
       body { background: var(--bg, #fff); color: var(--ink, #111); font-family: 'Noto Sans KR', sans-serif; }
+      body.en { font-family: 'Inter', sans-serif; }
       .left { position: absolute; left: 68px; top: 0; bottom: 0; width: 600px; display: flex; flex-direction: column; justify-content: center; gap: 40px; }
       .logo { display: block; }
-      .label { margin: 0; font-size: 80px; font-weight: 900; line-height: 1.12; letter-spacing: -0.03em; white-space: nowrap; }
+      .label { align-self: flex-start; margin: 0; font-size: 80px; font-weight: 900; line-height: 1.12; letter-spacing: -0.03em; white-space: nowrap; }
       canvas { position: absolute; left: 0; top: 0; }
     </style>
   </head>
@@ -40,8 +43,8 @@
       }
 
       // og.svg에서 바탕과 부제를 빼고 제목 부분만 잘라 60% 크기로 넣는다. 제목 글자색은 바탕에 맞춘다.
-      async function placeLogo() {
-        const svg = new DOMParser().parseFromString(await (await fetch('/design/og.svg')).text(), 'image/svg+xml').documentElement
+      async function placeLogo(file) {
+        const svg = new DOMParser().parseFromString(await (await fetch(file)).text(), 'image/svg+xml').documentElement
         svg.querySelector('rect:not([rx])').remove()
         svg.querySelector('path[fill="#6B6B6B"]').remove()
         svg.querySelector('path[fill="#111111"]').setAttribute('fill', 'currentColor')
@@ -82,15 +85,24 @@
         ctx.drawImage(img, BEZEL, BEZEL, SCREEN.w, SCREEN.h)
       }
 
-      async function compose(src, { bg, label }) {
+      // 문구가 이 폭을 넘으면 글자를 줄인다(휴대폰과 겹치지 않게).
+      const LABEL_MAX = 560
+
+      // label: 한국어는 문자열, 영어는 두 줄 배열.
+      async function compose(src, { bg, label, lang = 'ko' }) {
         document.body.style.setProperty('--bg', bg)
         document.body.style.setProperty('--ink', isDark(bg) ? '#FFFFFF' : '#111111')
+        document.body.classList.toggle('en', lang === 'en')
+        document.documentElement.lang = lang
         // "결재 공문으로 도착" → "결재 공문으로" / "도착" 두 줄
-        const cut = label.lastIndexOf(' ')
+        const cut = typeof label === 'string' ? label.lastIndexOf(' ') : -1
+        const lines = typeof label === 'string' ? [label.slice(0, cut), label.slice(cut + 1)] : label
         const el = document.getElementById('label')
-        el.append(label.slice(0, cut), document.createElement('br'), label.slice(cut + 1))
-        await Promise.all([placeLogo(), drawPhone(src), document.fonts.load('900 80px "Noto Sans KR"', label)])
+        el.append(lines[0], document.createElement('br'), lines[1])
+        const font = lang === 'en' ? '800 80px "Inter"' : '900 80px "Noto Sans KR"'
+        await Promise.all([placeLogo(lang === 'en' ? '/design/og-en.svg' : '/design/og.svg'), drawPhone(src), document.fonts.load(font, lines.join(' '))])
         await document.fonts.ready
+        if (el.scrollWidth > LABEL_MAX) el.style.fontSize = `${Math.floor((80 * LABEL_MAX) / el.scrollWidth)}px`
         await new Promise((r) => requestAnimationFrame(r))
       }
     </script>

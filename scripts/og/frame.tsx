@@ -1,20 +1,26 @@
-// OG 이미지용 잠김 화면. ?theme={id}의 Locked를 고정된 예시 데이터와 고정된 "지금"으로 그린다.
-// 시각은 모두 현지 시간 기준으로 만들어 어느 시간대에서 돌려도 같은 글이 나온다.
+// OG 이미지용 잠김 화면. ?theme={id}&lang={ko|en}의 Locked를 고정된 예시 데이터와 고정된 "지금"으로 그린다.
+// 시각은 모두 현지 시간 기준으로 만들어 어느 시간대에서 돌려도 같은 글이 나온다
+// (영어 화면의 시간대 약칭은 make-og-image.mjs가 시간대를 고정해 같게 만든다).
 import { createRoot } from 'react-dom/client'
 import '../../src/base.css'
+import { LangContext, stringsFor, type Lang } from '../../src/i18n/index.ts'
 import { loadFonts } from '../../src/lib/fonts.ts'
 import { THEMES, themeFonts } from '../../src/themes/registry.ts'
 import type { LetterInfo } from '../../src/themes/types.ts'
 
-const id = new URLSearchParams(location.search).get('theme')
+const params = new URLSearchParams(location.search)
+const id = params.get('theme')
+const lang: Lang = params.get('lang') === 'en' ? 'en' : 'ko'
 const theme = THEMES.find((t) => t.id === id)
 if (!theme) throw new Error(`모르는 테마: ${id}`)
+document.documentElement.lang = lang
 
-// 실제 사람 이름처럼 보이지 않게 쓰기 화면의 자리표시 글을 그대로 쓴다. 부르는 말("○○아")은 뺀다.
+// 실제 사람 이름처럼 보이지 않게 쓰기 화면의 자리표시 글을 그대로 쓴다("받는 사람"/"Recipient"). 부르는 말("○○아")은 뺀다.
+const t = stringsFor(lang)
 const letter: LetterInfo = {
-  to: '받는 사람',
+  to: t.preview.to,
   toEmpty: true,
-  from: '보내는 사람',
+  from: t.preview.from,
   tint: theme.tints ? theme.tints[0].hex : null,
   createdAt: new Date(2026, 10, 13, 21, 40),
   unlockAt: new Date(2027, 0, 1, 0, 0),
@@ -23,9 +29,11 @@ const now = new Date(2026, 11, 7, 20, 34, 12).getTime()
 const noop = () => {}
 
 loadFonts(['Noto+Sans+KR:wght@400;700;900'])
-loadFonts(themeFonts(theme, 'ko'))
+loadFonts(themeFonts(theme, lang))
 createRoot(document.getElementById('root')!).render(
-  <theme.Locked letter={letter} now={now} status="waiting" onRetry={noop} onSaveCalendar={noop} onWrite={noop} />,
+  <LangContext.Provider value={lang}>
+    <theme.Locked letter={letter} now={now} status="waiting" onRetry={noop} onSaveCalendar={noop} onWrite={noop} />
+  </LangContext.Provider>,
 )
 
 // 글꼴과 그림을 다 받은 뒤에 표시를 남긴다. make-og-image.mjs가 이 표시를 기다렸다가 찍는다.
