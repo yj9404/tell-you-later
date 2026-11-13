@@ -122,7 +122,7 @@ export const en: Strings = {
   broken: {
     title: ['This link is broken,', "so the letter won't open"],
     lead: "Looks like the link got cut off or changed. The letter lives only inside the link, so it can't be recovered here. Ask the sender for the link again.",
-    write: 'Write one',
+    write: 'Write your own letter',
   },
 
   calendar: {

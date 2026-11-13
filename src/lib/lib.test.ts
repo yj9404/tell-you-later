@@ -12,6 +12,7 @@ import type { ChainClient } from 'drand-client'
 import v1 from './fixtures/v1.json' with { type: 'json' }
 import { fragmentOf, homePath, langOf, letterLink } from './route.ts'
 import { stringsFor } from '../i18n/index.ts'
+import { customStart, hourAfter } from '../screens/when.ts'
 import { enLocale, makeEnDates } from '../i18n/date-en.ts'
 import { THEMES, themeLang, themesFor } from '../themes/registry.ts'
 import themePages from '../../scripts/themes.json' with { type: 'json' }
@@ -174,6 +175,28 @@ describe('영어 날짜 표기', () => {
     expect(enLocale(['ko'])).toBe('en-KR')
     expect(enLocale(['ko-KR', 'en-AU'])).toBe('en-AU')
     expect(enLocale([])).toBe('en-US')
+  })
+})
+
+describe('여는 날 시트: 직접 고르기의 처음 값', () => {
+  const now = new Date(2026, 10, 13, 14, 19, 30)
+
+  it('직전에 고른 프리셋의 시각으로 채운다', () => {
+    expect(customStart({ kind: 'newyear' }, now)).toEqual(new Date(2027, 0, 1))
+    expect(customStart({ kind: 'year' }, now)).toEqual(new Date(2027, 10, 13, 14, 19))
+  })
+
+  it('직접 고른 값이 아직 안 지났으면 그대로, 지났거나 고른 게 없으면 1시간 뒤 정각', () => {
+    const later = new Date(2026, 11, 24, 18, 30)
+    expect(customStart({ kind: 'custom', at: later }, now)).toEqual(later)
+    expect(customStart({ kind: 'custom', at: new Date(2026, 10, 13, 9) }, now)).toEqual(new Date(2026, 10, 13, 16))
+    expect(customStart(null, now)).toEqual(new Date(2026, 10, 13, 16))
+  })
+
+  it('1시간 뒤 정각은 늘 1시간 이상 남는다', () => {
+    expect(hourAfter(new Date(2026, 10, 13, 14, 0))).toEqual(new Date(2026, 10, 13, 15, 0))
+    expect(hourAfter(new Date(2026, 10, 13, 14, 59))).toEqual(new Date(2026, 10, 13, 16, 0))
+    expect(hourAfter(new Date(2026, 11, 31, 23, 30))).toEqual(new Date(2027, 0, 1, 1, 0))
   })
 })
 

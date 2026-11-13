@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type PointerEvent } from 'react'
 import { daysBetween, nextNewYear, oneYearLater } from '../lib/date.ts'
 import { useStrings } from '../i18n/index.ts'
 import { useModal } from './useModal.ts'
-import { resolveWhen, type When } from './when.ts'
+import { customStart, resolveWhen, type When } from './when.ts'
 import s from './write.module.css'
 
 const pad = (n: number) => String(n).padStart(2, '0')
@@ -26,14 +26,25 @@ interface Props {
 export function WhenSheet({ now, value, onConfirm, onClose }: Props) {
   const t = useStrings()
   const { dayClock } = t.when
-  // 직접 고르기 칸의 처음 값. 이미 직접 고른 시각이 있으면 그것을, 아니면 오늘 지금 시각에서 시작한다.
-  const start = value.kind === 'custom' ? value.at : now
+  // 직접 고르기 칸의 처음 값은 지금 고른 것의 시각이다(customStart). 프리셋을 고른 상태에서 직접 고르기로 바꾸면
+  // 그 프리셋의 시각으로 다시 채운다. 칸을 한 번이라도 고치면 그 뒤로는 프리셋을 오가도 적어 둔 값을 그대로 둔다.
+  const start = customStart(value, now)
   const [choice, setChoice] = useState<Choice>(value.kind)
-  // 프리셋을 오가도 적어 둔 값은 그대로 둔다.
   const [date, setDate] = useState(isoDate(start))
   const [pm, setPm] = useState(start.getHours() >= 12)
   const [hourText, setHourText] = useState(String(start.getHours() % 12 || 12))
   const [minText, setMinText] = useState(pad(start.getMinutes()))
+  const edited = useRef(value.kind === 'custom')
+  const fill = (at: Date) => {
+    setDate(isoDate(at))
+    setPm(at.getHours() >= 12)
+    setHourText(String(at.getHours() % 12 || 12))
+    setMinText(pad(at.getMinutes()))
+  }
+  const choose = (next: Choice) => {
+    if (next === 'custom' && choice !== 'custom' && !edited.current) fill(customStart({ kind: choice }, now))
+    setChoice(next)
+  }
   const [drag, setDrag] = useState(0)
   const dragFrom = useRef<number | null>(null)
   const sheet = useRef<HTMLDivElement>(null)
@@ -50,6 +61,7 @@ export function WhenSheet({ now, value, onConfirm, onClose }: Props) {
   const days = daysBetween(now, at)
 
   const typeHour = (raw: string) => {
+    edited.current = true
     let t = raw.replace(/[^0-9]/g, '').slice(0, 2)
     if (t.length === 2 && Number(t) === 0) t = '12'
     else if (Number(t) > 12) t = '12'
@@ -61,6 +73,7 @@ export function WhenSheet({ now, value, onConfirm, onClose }: Props) {
     }
   }
   const typeMin = (raw: string) => {
+    edited.current = true
     const t = raw.replace(/[^0-9]/g, '').slice(0, 2)
     setMinText(Number(t) > 59 ? '59' : t)
   }
@@ -81,7 +94,7 @@ export function WhenSheet({ now, value, onConfirm, onClose }: Props) {
 
   const option = (kind: Choice, name: string, sub?: string) => (
     <label className={s.option}>
-      <input type="radio" name="when" className={s.radio} checked={choice === kind} onChange={() => setChoice(kind)} />
+      <input type="radio" name="when" className={s.radio} checked={choice === kind} onChange={() => choose(kind)} />
       <span aria-hidden="true" className={s.radioDot} />
       <span className={s.optionText}>
         <span className={s.optionName}>{name}</span>
@@ -93,7 +106,7 @@ export function WhenSheet({ now, value, onConfirm, onClose }: Props) {
   const ampm = (
     <div role="group" aria-label={t.when.ampm} className={s.ampm}>
       {[false, true].map((isPm) => (
-        <button key={String(isPm)} type="button" aria-pressed={pm === isPm} onClick={() => setPm(isPm)}>
+        <button key={String(isPm)} type="button" aria-pressed={pm === isPm} onClick={() => ((edited.current = true), setPm(isPm))}>
           {isPm ? t.when.pm : t.when.am}
         </button>
       ))}
@@ -141,6 +154,7 @@ export function WhenSheet({ now, value, onConfirm, onClose }: Props) {
                     min={isoDate(now)}
                     onChange={(e) => {
                       if (!e.target.value || e.target.value < isoDate(now)) return
+                      edited.current = true
                       setDate(e.target.value)
                     }}
                     onClick={(e) => {

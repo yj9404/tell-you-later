@@ -10,6 +10,16 @@ body {
   color: #000000;
 }
 
+/* 제목 자간 배율. 한글에 맞춘 좁은 자간은 라틴 글자에서 글자끼리 붙어 보여 영어는 절반만 좁힌다.
+   제목 규칙은 letter-spacing: calc(<한글 자간> * var(--title-track))로 쓴다. */
+:root {
+  --title-track: 1;
+}
+
+:root:lang(en) {
+  --title-track: 0.5;
+}
+
 button,
 input,
 textarea {

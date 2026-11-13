@@ -78,7 +78,7 @@
   margin: 0;
   font-size: 26px;
   font-weight: 700;
-  letter-spacing: -0.8px;
+  letter-spacing: calc(-0.8px * var(--title-track));
   line-height: 1.4;
   word-break: keep-all;
 }
@@ -103,7 +103,7 @@
   margin: 0;
   font-size: 17px;
   font-weight: 700;
-  letter-spacing: -0.3px;
+  letter-spacing: calc(-0.3px * var(--title-track));
 }
 
 .group12 {
@@ -232,7 +232,7 @@
 .teaserMain {
   font-size: 22px;
   font-weight: 700;
-  letter-spacing: -0.6px;
+  letter-spacing: calc(-0.6px * var(--title-track));
   line-height: 1.4;
 }
 
@@ -480,7 +480,7 @@
   margin: 0;
   font-size: 20px;
   font-weight: 700;
-  letter-spacing: -0.5px;
+  letter-spacing: calc(-0.5px * var(--title-track));
 }
 
 .options {
