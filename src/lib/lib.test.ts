@@ -261,12 +261,46 @@ describe('가사 줄 나누기', () => {
     expect(lines.join(' ')).toBe('가나다라 '.repeat(30).trim())
     expect(lyricLines('가'.repeat(100), upTo(24)).join('')).toBe('가'.repeat(100))
   })
-  it('문단의 마지막 줄에 단어 하나만 남으면 앞 줄 끝 단어를 옮겨 두 단어로 만든다', () => {
+  it('두 줄 폭 안에서 구두점(쉼표·마침표·물음표·느낌표) 뒤에서 끊을 수 있으면 그 자리를 우선한다', () => {
+    // 채울 만큼 채우면 "…this year, you"에서 끊기지만, 쉼표 뒤에서 끊는다.
+    expect(lyricLines('Thank you for everything this year, you were always there for me', upTo(40))).toEqual([
+      'Thank you for everything this year,',
+      'you were always there for me',
+    ])
+    // 들어가는 만큼 구절을 묶는다(마침표 뒤도 끊는 자리).
     const en = "Hey, it's me. Writing this in November, while you're still figuring things out."
-    expect(lyricLines(en, upTo(60))).toEqual(["Hey, it's me.", "Writing this in November, while you're still figuring", 'things out.'])
+    expect(lyricLines(en, upTo(60))).toEqual(["Hey, it's me. Writing this in November,", "while you're still figuring things out."])
+    expect(lyricLines('Are you okay? I miss you so much! Call me when you can', upTo(25))).toEqual(['Are you okay?', 'I miss you so much!', 'Call me when you can'])
+    // 한국어: 채우면 "…많았어, 내일은"까지 들어가지만 쉼표 뒤에서 끊는다.
+    expect(lyricLines('지민아 오늘 하루도 정말 고생 많았어, 내일은 더 좋은 일만 있을 거야', upTo(26))).toEqual([
+      '지민아 오늘 하루도 정말 고생 많았어,',
+      '내일은 더 좋은 일만 있을 거야',
+    ])
+    expect(lyricLines('보고 싶었어. 진짜로! 새해 복 많이 받아', upTo(12))).toEqual(['보고 싶었어. 진짜로!', '새해 복 많이 받아'])
+    // 닫는 따옴표·괄호는 앞 구절에 붙고, 공백 없는 구두점(3.5, 1,000)에서는 끊지 않는다.
+    expect(lyricLines('She said "hi." Then 3.5 hours and 1,000 words later we talked', upTo(30))).toEqual(['She said "hi."', 'Then 3.5 hours and 1,000 words', 'later we talked'])
+  })
+  it('구두점 자리에서 끊은 줄은 단어 하나여도 그대로 둔다(구두점 우선)', () => {
+    expect(lyricLines('We finally did it, finally', upTo(18))).toEqual(['We finally did it,', 'finally'])
+  })
+  it('다음 구절이 두 줄보다 길어도 구두점 자리에서 먼저 끊고, 긴 구절은 새 줄부터 단어 단위로 채운다', () => {
+    expect(lyricLines('Hi, I have been thinking about what you said the other night at dinner', upTo(30))).toEqual([
+      'Hi,',
+      'I have been thinking about',
+      'what you said the other night',
+      'at dinner',
+    ])
+  })
+  it('구두점이 없을 때 채우다 마지막에 단어 하나만 남으면 앞 줄 끝 단어를 옮겨 두 단어로 만든다', () => {
+    expect(lyricLines('Writing this in November while you are still figuring things out', upTo(56))).toEqual([
+      'Writing this in November while you are still figuring',
+      'things out',
+    ])
     // 한국어도 어절 하나만 남는 경우 같은 규칙
     expect(lyricLines('이걸 쓰는 지금은 벌써 11월이야', upTo(15))).toEqual(['이걸 쓰는 지금은', '벌써 11월이야'])
     expect(lyricLines('하나 둘 셋 넷 다섯 여섯', upTo(13))).toEqual(['하나 둘 셋 넷', '다섯 여섯'])
+    // 긴 구절 중간에서 단어 하나가 다음 구절과 못 붙고 혼자 남는 경우도 같다.
+    expect(lyricLines('aaaa bbbb cccc dddd, eeeeeeeeeeeeee', upTo(14))).toEqual(['aaaa bbbb', 'cccc dddd,', 'eeeeeeeeeeeeee'])
   })
   it('옮기면 넘치거나, 글자 단위로 자른 자리면 그대로 둔다', () => {
     expect(lyricLines('가나다 라마바사아자차', upTo(9))).toEqual(['가나다', '라마바사아자차'])

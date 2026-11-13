@@ -48,10 +48,12 @@ export function splitBubbles(text: string): string[] {
 
 /**
  * 가사처럼 한 줄씩 보여줄 때 쓰는 나누기 (player 테마).
- * 빈 줄로 구분된 문단이 한 줄이다. 문단이 fits를 넘으면 문장(줄바꿈 포함) 단위로 들어가는 만큼
- * 묶고, 문장 하나가 넘치면 단어, 단어 하나가 넘치면 글자 단위로 자른다.
- * fits는 화면에서 두 줄 안에 들어가는지 재는 함수다(글자 폭은 화면이 안다).
- * 문단의 마지막 줄에 단어(어절) 하나만 남으면 앞 줄 끝 단어를 옮겨 붙인다(avoidOrphan).
+ * 빈 줄로 구분된 문단이 한 줄이다. 문단이 fits(화면에서 두 줄 안에 들어가는지)를 넘으면 이렇게 나눈다.
+ * 1. 구두점(쉼표·마침표·물음표·느낌표 등) 뒤와 줄바꿈에서 끊은 구절을 들어가는 만큼 한 줄에 묶는다.
+ *    다음 구절이 더 들어가지 않으면 구두점 자리에서 끊는다(단어를 더 채울 수 있어도).
+ * 2. 구절 하나가 두 줄보다 길 때만(그 안에 끊을 구두점이 없을 때만) 단어 단위로 채울 만큼 채우고, 단어 하나가 넘치면 글자 단위로 자른다.
+ *    이렇게 채운 끝에 단어(어절) 하나만 남으면 앞 줄 끝 단어를 옮겨 붙인다(avoidOrphan).
+ * fits는 글자 폭을 아는 화면이 준다.
  */
 export function lyricLines(text: string, fits: (line: string) => boolean): string[] {
   const out: string[] = []
@@ -61,43 +63,79 @@ export function lyricLines(text: string, fits: (line: string) => boolean): strin
       out.push(flat)
       continue
     }
-    const start = out.length
+    // lines[i] 앞에서 어떻게 끊었는지: 구절 경계 / 단어 사이(채우다 넘침) / 단어 중간(글자 단위)
+    const lines: string[] = []
+    const breaks: Break[] = []
     let cur = ''
-    const push = () => {
-      if (cur) out.push(cur)
+    let curBreak: Break = 'clause'
+    const finish = (next: Break) => {
+      if (cur) {
+        lines.push(cur)
+        breaks.push(curBreak)
+        avoidOrphan(lines, breaks, fits)
+      }
       cur = ''
+      curBreak = next
     }
-    // cur에 이어 붙여 보고, 넘치면 cur를 내보낸 뒤 새로 시작한다. 새로 시작해도 넘치면 false.
-    const add = (piece: string, sep: string) => {
+    const tryAdd = (piece: string, sep: string) => {
       const joined = cur ? `${cur}${sep}${piece}` : piece
-      if (fits(joined)) return ((cur = joined), true)
-      push()
-      return fits(piece) && ((cur = piece), true)
+      return fits(joined) && ((cur = joined), true)
     }
-    for (const s of sentences(para)) {
-      const sentence = s.replace(/\s+/g, ' ').trim()
-      if (!sentence || add(sentence, ' ')) continue
-      for (const word of sentence.split(' ')) {
-        if (add(word, ' ')) continue
-        for (const ch of word) if (!add(ch, '')) cur = ch
+    for (const clause of clauses(para)) {
+      if (tryAdd(clause, ' ')) continue
+      // 구두점 자리에서 끊는다. 다음 구절이 한 줄에 들어가면 그대로 새 줄이 된다.
+      finish('clause')
+      if (fits(clause)) {
+        cur = clause
+        continue
+      }
+      // 구두점 없이 두 줄보다 긴 구절: 새 줄부터 단어 단위로 채운다.
+      for (const word of clause.split(' ')) {
+        if (tryAdd(word, ' ')) continue
+        if (fits(word)) {
+          finish('space')
+          cur = word
+          continue
+        }
+        // 단어 하나가 두 줄보다 길다: 새 줄에서 글자 단위로 자른다.
+        finish('space')
+        for (const ch of word) {
+          if (tryAdd(ch, '')) continue
+          finish('char')
+          cur = ch
+        }
       }
     }
-    push()
-    avoidOrphan(out, start, flat, fits)
+    finish('clause')
+    out.push(...lines)
   }
   return out
 }
 
+type Break = 'clause' | 'space' | 'char'
+
+// 구절을 끊는 구두점과 뒤따르는 닫는 따옴표·괄호, 그 뒤의 공백.
+// 정규식 뒤보기((?<=…))는 iOS 16.3 이하 Safari에서 문법 오류라 쓰지 않고, 끊을 자리를 줄바꿈으로 바꿔 나눈다.
+const CLAUSE_END = /([,.!?…;:、。，！？]["')\]”’]*)[ \t]+/g
+
+/** 줄바꿈과, 공백이 뒤따르는 구두점에서 끊은 구절. 공백은 하나로 줄인다. */
+function clauses(paragraph: string): string[] {
+  return paragraph
+    .replace(CLAUSE_END, '$1\n')
+    .split('\n')
+    .map((c) => c.replace(/\s+/g, ' ').trim())
+    .filter((c) => c.length > 0)
+}
+
 /**
- * 문단의 마지막 줄이 단어 하나뿐이면 앞 줄의 끝 단어를 옮겨 두 단어로 만든다.
- * 옮긴 줄이 fits를 넘거나, 앞 줄이 단어 하나뿐이거나, 두 줄 사이가 단어 중간(글자 단위로 자른 곳)이면 그대로 둔다.
- * lines[start..]는 flat(공백을 하나로 줄인 문단)을 순서대로 자른 것이라 마지막 줄은 flat의 끝부분이다.
+ * 방금 끝낸 줄이 단어 하나뿐이고 단어 단위로 채우다 넘어온 줄이면, 앞 줄의 끝 단어를 옮겨 두 단어로 만든다.
+ * 구두점 자리에서 끊은 줄(우선 규칙)이나 글자 단위로 자른 자리, 옮기면 넘치는 경우, 앞 줄이 단어 하나뿐이면 그대로 둔다.
  */
-function avoidOrphan(lines: string[], start: number, flat: string, fits: (line: string) => boolean): void {
+function avoidOrphan(lines: string[], breaks: Break[], fits: (line: string) => boolean): void {
   const n = lines.length
-  if (n - start < 2) return
+  if (n < 2 || breaks[n - 1] !== 'space') return
   const last = lines[n - 1]
-  if (last.includes(' ') || flat[flat.length - last.length - 1] !== ' ') return
+  if (last.includes(' ')) return
   const prev = lines[n - 2]
   const cut = prev.lastIndexOf(' ')
   if (cut <= 0) return
