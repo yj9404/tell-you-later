@@ -11,3 +11,43 @@
   outline: 4px solid #000000;
   outline-offset: 2px;
 }
+
+/* 영어판 Blessings: 무지개 필기체와 반짝이. 모션 줄이기에서는 base.css가 움직임을 멈춘다. */
+.blessings-rainbow {
+  background-image: linear-gradient(90deg, #ff3b3b, #ff9f1c, #ffe14d, #3ddc84, #3fa9ff, #8b5cf6, #ff4fd8, #ff3b3b);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  /* 글자 둘레 흰 테두리 + 그림자. text-shadow는 투명 글자 위에 비쳐 보여 filter로 그린다. */
+  filter: drop-shadow(2px 0 0 #ffffff) drop-shadow(-2px 0 0 #ffffff) drop-shadow(0 2px 0 #ffffff) drop-shadow(0 -2px 0 #ffffff)
+    drop-shadow(3px 4px 0 rgba(42, 6, 64, 0.45));
+  animation: bShine 5s linear infinite;
+}
+
+@keyframes bShine {
+  from {
+    background-position: 0% 50%;
+  }
+  to {
+    background-position: 200% 50%;
+  }
+}
+
+.blessings-twinkle {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: bTwinkle 1.8s ease-in-out infinite both;
+}
+
+@keyframes bTwinkle {
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: scale(0.6);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}

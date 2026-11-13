@@ -1,11 +1,12 @@
-import { dateHour, whenText } from '../../lib/date.ts'
-import { LockError, remaining, st, usePhases } from '../shared.tsx'
-import { useStrings } from '../../i18n/index.ts'
+import { LockError, remaining, st, usePhases, useThemeStrings } from '../shared.tsx'
+import { useLang, useStrings } from '../../i18n/index.ts'
 import type { LockedProps, OpenProps, Theme } from '../types.ts'
 import { Backdrop, BACKDROP_FILL } from './Backdrop.tsx'
+import { BlessingsLocked, BlessingsOpen } from './Blessings.tsx'
+import { strings } from './strings.ts'
 import './greet.css'
 
-// 좋은 하루 테마 (디자인: M-greeting, M-open)
+// 좋은 하루 테마 (디자인: M-greeting, M-open). 영어판은 같은 구조의 "Blessings" 카드다(Blessings.tsx).
 const FONT = "'Noto Sans KR',sans-serif"
 const BRUSH = "'Nanum Brush Script',cursive"
 const SCREEN = `box-sizing:border-box;${BACKDROP_FILL};color:#000000;font-family:${FONT};padding:26px 20px 24px;display:flex;flex-direction:column;gap:14px;position:relative;overflow:hidden`
@@ -16,27 +17,45 @@ const PRIMARY =
 const SECOND = `height:58px;border:3px solid #0A3FD6;border-radius:10px;background:#FFFFFF;color:#0A3FD6;font-family:${FONT};font-size:20px;font-weight:900;cursor:pointer`
 const NOTICE = 'background:#FFF200;border:4px solid #E3001B;padding:12px 10px;text-align:center;font-size:19px;font-weight:900;line-height:1.5'
 
-const To = ({ name }: { name: string }) => (
-  <p className="tyl-keep" style={st(`margin:0;text-align:center;font-family:${BRUSH};font-size:44px;line-height:1.1;color:#C4004F;${HALO2};position:relative`)}>
-    {name} 님
-  </p>
-)
+const To = ({ name }: { name: string }) => {
+  const t = useThemeStrings(strings)
+  return (
+    <p className="tyl-keep" style={st(`margin:0;text-align:center;font-family:${BRUSH};font-size:44px;line-height:1.1;color:#C4004F;${HALO2};position:relative`)}>
+      {t.to(name)}
+    </p>
+  )
+}
 
-const Greeting = () => (
-  <>
-    <span style={st('color:#E3001B')}>오늘도</span>
-    <br />
-    <span style={st('color:#0A3FD6')}>좋은 하루</span>
-    <br />
-    <span style={st('color:#0A7A2F')}>되세요</span>
-  </>
-)
+const GREETING_COLORS = ['#E3001B', '#0A3FD6', '#0A7A2F']
+const Greeting = () => {
+  const t = useThemeStrings(strings)
+  return (
+    <>
+      {t.greeting.map((line, i) => (
+        <span key={i}>
+          {i > 0 && <br />}
+          <span style={{ color: GREETING_COLORS[i % GREETING_COLORS.length] }}>{line}</span>
+        </span>
+      ))}
+    </>
+  )
+}
 const GREETING = `text-align:center;font-family:${BRUSH};font-weight:400;font-size:92px;line-height:1;${HALO3},5px 6px 0 rgba(0,0,0,0.25)`
 
+/** 화면 언어로 고른다: 한국어 "좋은 하루", 영어 "Blessings" */
 function Locked(p: LockedProps) {
-  // 이 테마는 한국어판 전용이다(영어 경로로 열려도 View가 한국어로 보여준다).
+  return useLang() === 'en' ? <BlessingsLocked {...p} /> : <GreetLocked {...p} />
+}
+
+function Open(p: OpenProps) {
+  return useLang() === 'en' ? <BlessingsOpen {...p} /> : <GreetOpen {...p} />
+}
+
+function GreetLocked(p: LockedProps) {
   const g = useStrings()
+  const t = useThemeStrings(strings)
   const { letter } = p
+  const notice = t.notice(letter.from, letter.unlockAt)
   return (
     <div className="tyl-screen greet-screen" style={st(`min-height:var(--screen-h, 100dvh);${SCREEN}`)}>
       <Backdrop variant="full" />
@@ -47,15 +66,15 @@ function Locked(p: LockedProps) {
       </h1>
 
       <div className="tyl-keep" style={st(`position:relative;${NOTICE};margin-top:6px`)}>
-        {letter.from} 님의 카드는
+        {notice[0]}
         <br />
-        {dateHour(letter.unlockAt)}에 열립니다
+        {notice[1]}
       </div>
 
       <p style={st('margin:0;text-align:center;font-size:17px;font-weight:700;line-height:1.6;position:relative')}>
-        그 전에는 누구도 열어 볼 수 없습니다.
+        {t.lines[0]}
         <br />
-        건강이 최고입니다.
+        {t.lines[1]}
       </p>
 
       <div style={st('flex-grow:1;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative')}>
@@ -65,7 +84,7 @@ function Locked(p: LockedProps) {
           </div>
         ) : (
           <>
-            <span style={st('font-size:18px;font-weight:700')}>앞으로</span>
+            <span style={st('font-size:18px;font-weight:700')}>{t.before}</span>
             <span style={st(`font-family:${BRUSH};font-size:76px;line-height:1;color:#E3001B;white-space:nowrap;${HALO3}`)}>{remaining(p, g)}</span>
           </>
         )}
@@ -73,10 +92,10 @@ function Locked(p: LockedProps) {
 
       <div style={st('display:flex;flex-direction:column;gap:10px;position:relative')}>
         <button type="button" style={st(PRIMARY)} onClick={p.onWrite} disabled={p.preview}>
-          나도 카드 보내기
+          {t.writeOwn}
         </button>
         <button type="button" style={st(SECOND)} onClick={p.onSaveCalendar} disabled={p.preview}>
-          달력에 적어두기
+          {t.save}
         </button>
       </div>
     </div>
@@ -97,8 +116,10 @@ const PETALS = Array.from({ length: 40 }, (_, i) => ({
   color: PETAL_COLORS[i % PETAL_COLORS.length],
 }))
 
-function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenProps) {
+function GreetOpen({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenProps) {
   const { phase, run, done, skip, replay } = usePhases(STEPS, autoplay, reducedMotion)
+  const g = useStrings()
+  const t = useThemeStrings(strings)
   const open = phase === 'open'
   return (
     <div className="tyl-screen greet-screen" style={st(`height:var(--screen-h, 100dvh);${SCREEN}`)}>
@@ -118,7 +139,7 @@ function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenP
             <Greeting />
           </span>
           <div className="tyl-keep" style={st(NOTICE)}>
-            드디어 {whenText(letter.unlockAt, letter.createdAt)}입니다
+            {t.finally(letter.unlockAt, letter.createdAt)}
           </div>
         </div>
 
@@ -132,13 +153,13 @@ function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenP
           }}
         >
           <div style={st('margin:auto 0;display:flex;flex-direction:column;gap:12px;padding:4px 0')}>
-            <h1 style={st(`margin:0;text-align:center;font-family:${BRUSH};font-weight:400;font-size:54px;line-height:1.05;color:#E3001B;${HALO3}`)}>카드가 열렸습니다</h1>
+            <h1 style={st(`margin:0;text-align:center;font-family:${BRUSH};font-weight:400;font-size:54px;line-height:1.05;color:#E3001B;${HALO3}`)}>{t.opened}</h1>
             <div style={st('background:#FFFFFF;border:4px solid #E3001B;padding:16px 16px 12px;display:flex;flex-direction:column;gap:8px')}>
               <p className="tyl-text" style={st('margin:0;font-size:18px;font-weight:700;line-height:1.75')}>
                 {text}
               </p>
               <span className="tyl-keep" style={st(`text-align:right;font-family:${BRUSH};font-size:36px;line-height:1;color:#0A3FD6`)}>
-                {letter.from} 드림
+                {t.signed(letter.from)}
               </span>
             </div>
           </div>
@@ -147,10 +168,10 @@ function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenP
 
       <div style={st('display:flex;flex-direction:column;gap:10px;position:relative')}>
         <button type="button" style={st(PRIMARY)} onClick={onReply} disabled={preview}>
-          답장 카드 보내기
+          {t.reply}
         </button>
         <button type="button" style={st(SECOND)} onClick={done ? replay : skip}>
-          {done ? '다시 보기' : '한 번에 보기'}
+          {done ? g.locked.replay : g.locked.showAll}
         </button>
       </div>
 
@@ -176,9 +197,9 @@ function Open({ letter, text, autoplay, reducedMotion, onReply, preview }: OpenP
 export const greet: Theme = {
   id: 'greet',
   code: 10,
-  name: { ko: '좋은 하루' },
+  name: { ko: '좋은 하루', en: 'Blessings' },
   tints: null,
-  fonts: { ko: ['Nanum+Brush+Script', 'Noto+Sans+KR:wght@500;700;900'] },
+  fonts: { ko: ['Nanum+Brush+Script', 'Noto+Sans+KR:wght@500;700;900'], en: ['Pacifico', 'Nunito:wght@700;800;900'] },
   tile: { bg: 'linear-gradient(180deg,#58B8FF,#FFD9EC)', markBg: '#E3001B', markW: '44px', markH: '14px', markRadius: '2px' },
   preview: { bg: 'linear-gradient(180deg,#58B8FF,#FFD9EC)', fg: '#000000', font: BRUSH, bubbleBg: '#FFF200', bubbleFg: '#C4001A', radius: '0', pad: '8px 12px', size: '28px' },
   Locked,

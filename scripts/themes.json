@@ -8,7 +8,7 @@
   { "id": "color", "name": "책 한 권", "og": { "bg": "#DDE7E0", "label": "책 한 권으로 도착" }, "en": { "name": "Book", "label": ["Arrives as", "a book"] } },
   { "id": "redact", "name": "가려진 글", "og": { "bg": "#E2E2DE", "label": "가려진 글로 도착" }, "en": { "name": "Redacted", "label": ["Arrives", "redacted"] } },
   { "id": "air", "name": "항공 봉투", "og": { "bg": "#E1E6EE", "label": "항공 봉투로 도착" }, "en": { "name": "Airmail", "label": ["Arrives by", "airmail"] } },
-  { "id": "greet", "name": "좋은 하루", "og": { "bg": "#FBE3EA", "label": "좋은 글귀로 도착" } },
+  { "id": "greet", "name": "좋은 하루", "og": { "bg": "#FBE3EA", "label": "좋은 글귀로 도착" }, "en": { "name": "Blessings", "bg": "#EBD9F7", "label": ["Arrives as", "a blessing"] } },
   { "id": "approval", "name": "결재 공문", "og": { "bg": "#E6EBF2", "label": "결재 공문으로 도착" } },
   { "id": "report", "name": "군대 보고서", "og": { "bg": "#3F4636", "label": "군대 보고서로 도착" } }
 ]

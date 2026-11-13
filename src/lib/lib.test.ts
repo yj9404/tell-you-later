@@ -503,11 +503,11 @@ describe('링크 주소', () => {
     expect(themeLang(byId('approval'), 'ko')).toBe('ko')
   })
 
-  it('테마 문구: 영어 대기순서는 서수, 숨긴 테마를 뺀 9개는 영어 이름이 있다', () => {
+  it('테마 문구: 영어 대기순서는 서수, 숨긴 테마(approval, report)를 뺀 10개는 영어 이름이 있다', () => {
     const suffix = queueStrings.en.suffix
     expect([1, 2, 3, 4, 11, 12, 13, 21, 4179343].map((n) => `${n}${suffix(n)}`)).toEqual(['1st', '2nd', '3rd', '4th', '11th', '12th', '13th', '21st', '4179343rd'])
     expect(queueStrings.ko.suffix(3)).toBe('번째')
-    expect(themesFor('en').map((t) => t.id)).toEqual(['dm', 'msg', 'lock', 'queue', 'player', 'cookie', 'color', 'redact', 'air'])
+    expect(themesFor('en').map((t) => t.id)).toEqual(['dm', 'msg', 'lock', 'queue', 'player', 'cookie', 'color', 'redact', 'air', 'greet'])
   })
 
   // 빌드 후처리와 OG 이미지 스크립트는 TSX를 못 읽어 scripts/themes.json을 쓴다. 테마를 추가하면 거기도 더한다.

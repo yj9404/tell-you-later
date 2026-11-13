@@ -182,7 +182,8 @@ try {
   mkdirSync(join(root, 'public', 'og', 'en'), { recursive: true })
   for (const { id, og, en } of themes.filter((t) => t.en)) {
     const screen = await browser.capture(`${base}/scripts/og/frame.html?theme=${id}&lang=en`, PHONE, FRAME_READY)
-    const theme = { bg: og.bg, label: en.label, lang: 'en' }
+    // 영어판 그림이 다른 테마(greet)는 en.bg로 바탕색을 따로 정할 수 있다.
+    const theme = { bg: en.bg ?? og.bg, label: en.label, lang: 'en' }
     await save(join(root, 'public', 'og', 'en', `${id}.png`), await browser.capture(`${base}/scripts/og/compose.html`, OG, `compose(${JSON.stringify(dataUrl(screen))}, ${JSON.stringify(theme)})`))
   }
 } finally {
