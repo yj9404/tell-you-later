@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react'
 import { longDate, shareText } from '../lib/date.ts'
+import { letterLink } from '../lib/route.ts'
 import { FullPreview } from './Preview.tsx'
 import type { Created } from './Write.tsx'
 import s from './screens.module.css'
@@ -30,7 +31,7 @@ export function Done({ created, onPreview, onNew }: { created: Created; onPrevie
   const [copied, setCopied] = useState<'' | 'link' | 'text' | 'fail'>('')
   const [watching, setWatching] = useState(false)
   const stopWatching = useCallback(() => setWatching(false), [])
-  const link = `${location.origin}${location.pathname}#${created.fragment}`
+  const link = letterLink(location.origin, created.draft.themeId, created.fragment)
   const canShare = typeof navigator.share === 'function'
   const message = () => shareText(created.draft.to, created.unlockAt, new Date())
 
@@ -75,11 +76,12 @@ export function Done({ created, onPreview, onNew }: { created: Created; onPrevie
 
       <div className={s.group10}>
         <div className={s.row}>
-          <button type="button" className={s.primary} onClick={() => copy('link')}>
-            {copied === 'link' ? '복사했어요' : '링크 복사'}
+          {/* 기본은 문구와 링크를 함께 복사한다. 붙여 넣기만 하면 무슨 링크인지 알 수 있게. */}
+          <button type="button" className={s.primary} onClick={() => copy('text')}>
+            {copied === 'text' ? '복사했어요' : '복사'}
           </button>
-          <button type="button" className={s.secondary} onClick={() => copy('text')}>
-            {copied === 'text' ? '복사했어요' : '문구와 함께 복사'}
+          <button type="button" className={s.secondary} onClick={() => copy('link')}>
+            {copied === 'link' ? '복사했어요' : '링크만 복사'}
           </button>
         </div>
         {copied === 'fail' && (
