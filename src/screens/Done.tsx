@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react'
 import { longDate, shareText } from '../lib/date.ts'
 import { letterLink } from '../lib/route.ts'
+import { useLang } from '../i18n/index.ts'
 import { FullPreview } from './Preview.tsx'
 import type { Created } from './Write.tsx'
 import s from './screens.module.css'
@@ -31,7 +32,8 @@ export function Done({ created, onPreview, onNew }: { created: Created; onPrevie
   const [copied, setCopied] = useState<'' | 'link' | 'text' | 'fail'>('')
   const [watching, setWatching] = useState(false)
   const stopWatching = useCallback(() => setWatching(false), [])
-  const link = letterLink(location.origin, created.draft.themeId, created.fragment)
+  const lang = useLang()
+  const link = letterLink(location.origin, lang, created.draft.themeId, created.fragment)
   const canShare = typeof navigator.share === 'function'
   const message = () => shareText(created.draft.to, created.unlockAt, new Date())
 

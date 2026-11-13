@@ -1,3 +1,5 @@
+import { iGa } from './date.ts'
+
 /** 보낸 사람을 모를 때(서버로 이름을 보내지 않는 경로)의 제목 */
 export const EVENT_TITLE = '할 말이 있는 날'
 
@@ -7,13 +9,9 @@ export const EVENT_MINUTES = 10
 /** UTC 기준 YYYYMMDDTHHmmssZ. iCalendar와 구글 캘린더 링크가 같은 형식을 쓴다. */
 export const stamp = (d: Date) => d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '')
 
-/** "{보낸 사람}{이/가} 할 말이 있는 날". 조사는 마지막 글자의 받침으로, 한글이 아니면 "가". */
+/** "{보낸 사람}{이/가} 할 말이 있는 날". 조사는 iGa와 같은 규칙(한글로 끝나지 않으면 "(이)가"). */
 export function eventTitle(from: string): string {
-  const name = from.trim()
-  const last = [...name].at(-1)?.codePointAt(0) ?? 0
-  const isSyllable = last >= 0xac00 && last <= 0xd7a3
-  const josa = isSyllable && (last - 0xac00) % 28 !== 0 ? '이' : '가'
-  return `${name}${josa} ${EVENT_TITLE}`
+  return `${iGa(from.trim())} ${EVENT_TITLE}`
 }
 
 export interface CalendarEvent {

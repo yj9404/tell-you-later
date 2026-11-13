@@ -3,6 +3,7 @@ import { encodeLink, NAME_MAX } from '../lib/codec.ts'
 import { clock, fullDate, teaserDate } from '../lib/date.ts'
 import { roundForTime, timeForRound } from '../lib/drand.ts'
 import { errorCode } from '../lib/errors.ts'
+import { useStrings } from '../i18n/index.ts'
 import { loadFonts } from '../lib/fonts.ts'
 import { lockLetter } from '../lib/timelock.ts'
 import { THEMES } from '../themes/registry.ts'
@@ -51,6 +52,7 @@ export function Write({ prefill, onCreated }: { prefill: Prefill | null; onCreat
   const [preview, setPreview] = useState<Side | null>(null)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
+  const t = useStrings()
 
   // 화면을 켜 둔 동안 날짜 표기가 낡지 않게 한다.
   useEffect(() => {
@@ -93,7 +95,7 @@ export function Write({ prefill, onCreated }: { prefill: Prefill | null; onCreat
     } catch (err) {
       // 잠그기는 네트워크를 쓰지 않는다. 여기서 나는 오류는 코드와 상관없이 같은 안내를 보여주고 원인은 console에만 남긴다.
       console.error(errorCode(err), err)
-      setError('링크를 만들지 못했습니다. 다시 시도해 주세요.')
+      setError(t.lockError)
     } finally {
       setBusy(false)
     }

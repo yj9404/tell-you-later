@@ -2,7 +2,6 @@ import { useCallback, useEffect, useRef, useState, type KeyboardEvent, type Mous
 import {
   androidIntentUrl,
   detectPlatform,
-  eventTitle,
   googleCalendarUrl,
   icsDataUrl,
   isInAppBrowser,
@@ -11,6 +10,7 @@ import {
 } from '../lib/calendar.ts'
 import { buildIcs, downloadIcs } from '../lib/ics.ts'
 import { useModal } from './useModal.ts'
+import { useStrings } from '../i18n/index.ts'
 import c from './calendar.module.css'
 
 // 이 시간 안에 페이지가 가려지지(새 탭·다른 앱·시스템 시트) 않으면 인앱 브라우저가 막은 것으로 본다.
@@ -36,7 +36,8 @@ export function useSaveCalendar(src: Source): { onSaveCalendar: (e: MouseEvent<H
   const [blocked, setBlocked] = useState(false)
 
   // 링크는 누른 순간의 주소를 쓴다.
-  const title = eventTitle(src.from)
+  const t = useStrings()
+  const title = t.eventTitle(src.from)
   const event = (): CalendarEvent => ({ title, start: src.unlockAt, link: location.href })
   const ics = () => buildIcs({ title, unlockAt: src.unlockAt, link: location.href, uid: src.uid })
 

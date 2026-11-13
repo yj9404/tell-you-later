@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { decodeLink, encodeLink, LinkError, linkHash, type Letter } from './codec.ts'
 import { androidIntentUrl, detectPlatform, eventTitle, googleCalendarUrl, icsDataUrl, isInAppBrowser, outlookCalendarUrl } from './calendar.ts'
 import { buildIcs } from './ics.ts'
-import { callName, chatStamp, clock, countdown, dateClock, longDate, shareText, teaserDate } from './date.ts'
+import { callName, chatStamp, clock, countdown, dateClock, iGa, longDate, shareText, teaserDate } from './date.ts'
 import { lyricLines, splitBubbles } from './bubbles.ts'
 import { QUICKNET, roundForTime, timeForRound } from './drand.ts'
 import { lockLetter, openLetter } from './timelock.ts'
@@ -10,7 +10,8 @@ import { AppError, errorCode } from './errors.ts'
 import { DrandError } from './drand.ts'
 import type { ChainClient } from 'drand-client'
 import v1 from './fixtures/v1.json' with { type: 'json' }
-import { fragmentOf, homePath, letterLink } from './route.ts'
+import { fragmentOf, homePath, langOf, letterLink } from './route.ts'
+import { stringsFor } from '../i18n/index.ts'
 import { THEMES } from '../themes/registry.ts'
 import themePages from '../../scripts/themes.json' with { type: 'json' }
 
@@ -205,6 +206,7 @@ describe('타임락 암호문', () => {
   it.each([
     ['v1', '/#', v1],
     ['v1', '/t/dm/#', v1],
+    ['v1', '/en/t/dm/#', v1],
   ])('%s 픽스처 링크가 그대로 복호화된다 (%s…)', async (_name, path, fixture) => {
     const saved: ChainClient = { ...offline, get: async () => fixture.beacon }
     const l = decodeLink(fragmentOf(`https://example.com${path}${fixture.link}`))
@@ -257,14 +259,27 @@ describe('타임락 암호문', () => {
 describe('캘린더 링크', () => {
   const ev = { title: '영진이 할 말이 있는 날', start: new Date('2026-12-24T15:00:00Z'), link: 'https://example.com/#abc&d=1' }
 
-  it('제목 조사: 받침 있으면 "이", 없거나 한글이 아니면 "가"', () => {
+  it('제목 조사: 받침 있으면 "이", 없으면 "가", 한글로 끝나지 않으면 "(이)가"', () => {
     expect(eventTitle('영진')).toBe('영진이 할 말이 있는 날')
     expect(eventTitle('지민 ')).toBe('지민이 할 말이 있는 날')
     expect(eventTitle('하나')).toBe('하나가 할 말이 있는 날')
     expect(eventTitle('엄마')).toBe('엄마가 할 말이 있는 날')
-    expect(eventTitle('Alex')).toBe('Alex가 할 말이 있는 날')
-    expect(eventTitle('영진 🎄')).toBe('영진 🎄가 할 말이 있는 날')
-    expect(eventTitle('ㄱ')).toBe('ㄱ가 할 말이 있는 날')
+    expect(eventTitle('Alex')).toBe('Alex(이)가 할 말이 있는 날')
+    expect(eventTitle('영진 🎄')).toBe('영진 🎄(이)가 할 말이 있는 날')
+    expect(eventTitle('ㄱ')).toBe('ㄱ(이)가 할 말이 있는 날')
+  })
+
+  it('조사 규칙은 부르는 말·주격 조사·일정 제목이 같은 판정을 쓴다', () => {
+    // 받침 있음 / 없음 / 한글로 끝나지 않음(라틴, 이모지, 자모)
+    expect(['영진', '하나', 'Alex', '하나 🎄', 'ㄱ'].map(callName)).toEqual(['영진아', '하나야', 'Alex', '하나 🎄', 'ㄱ'])
+    expect(['영진', '하나', 'Alex', '하나 🎄', 'ㄱ'].map(iGa)).toEqual(['영진이', '하나가', 'Alex(이)가', '하나 🎄(이)가', 'ㄱ(이)가'])
+  })
+
+  it('영어: 조사 없이 이름 그대로, 일정 제목은 "{from} has something to tell you"', () => {
+    const en = stringsFor('en')
+    expect([en.callName(' Alex '), en.callName('지민'), en.callName('  ')]).toEqual(['Alex', '지민', ''])
+    expect(en.eventTitle(' Alex ')).toBe('Alex has something to tell you')
+    expect(stringsFor('ko').eventTitle('영진')).toBe('영진이 할 말이 있는 날')
   })
 
   it('Android 인텐트: 값은 인코딩, 시각은 ms, 구글 캘린더 웹 링크로 대체', () => {
@@ -331,7 +346,9 @@ describe('캘린더 링크', () => {
 
 describe('링크 주소', () => {
   it('테마 경로를 붙여 만들고, 경로와 상관없이 # 뒤만 읽는다', () => {
-    expect(letterLink('https://example.com', 'cookie', 'v1.abc')).toBe('https://example.com/t/cookie/#v1.abc')
+    expect(letterLink('https://example.com', 'ko', 'cookie', 'v1.abc')).toBe('https://example.com/t/cookie/#v1.abc')
+    expect(letterLink('https://example.com', 'en', 'cookie', 'v1.abc')).toBe('https://example.com/en/t/cookie/#v1.abc')
+    expect(fragmentOf('https://example.com/en/t/cookie/#v1.abc')).toBe('v1.abc')
     expect(fragmentOf('https://example.com/t/cookie/#v1.abc')).toBe('v1.abc')
     expect(fragmentOf('https://example.com/#v1.abc')).toBe('v1.abc')
     expect(fragmentOf('https://example.com/t/cookie/')).toBe('')
@@ -341,6 +358,29 @@ describe('링크 주소', () => {
     expect(homePath('/t/dm/')).toBe('/')
     expect(homePath('/t/dm')).toBe('/')
     expect(homePath('/')).toBe('/')
+  })
+
+  it('언어는 경로 맨 앞의 /en으로 정하고, 그 밖(옛 링크 포함)은 한국어', () => {
+    const cases: [string, string][] = [
+      ['/', 'ko'],
+      ['/t/dm/', 'ko'],
+      ['/index.html', 'ko'],
+      ['/en', 'en'],
+      ['/en/', 'en'],
+      ['/en/t/dm/', 'en'],
+      ['/en/index.html', 'en'],
+      ['/english/', 'ko'],
+      ['/t/en/', 'ko'],
+      ['/EN/', 'ko'],
+    ]
+    for (const [path, lang] of cases) expect(langOf(path), path).toBe(lang)
+  })
+
+  it('쓰기 화면으로 돌아갈 때(새로 쓰기·답장) 언어 경로는 남긴다', () => {
+    expect(homePath('/en/t/dm/')).toBe('/en/')
+    expect(homePath('/en/t/dm')).toBe('/en/')
+    expect(homePath('/en/')).toBe('/en/')
+    expect(homePath('/en')).toBe('/en/')
   })
 
   // 빌드 후처리와 OG 이미지 스크립트는 TSX를 못 읽어 scripts/themes.json을 쓴다. 테마를 추가하면 거기도 더한다.

@@ -20,15 +20,24 @@ export function teaser(unlock: Date, now: Date): string {
 }
 
 /**
- * 부르는 말: "지민아", "하나야". 받침 있으면 "아", 없으면 "야", 한글로 끝나지 않으면 조사 없이 "Alex".
+ * 이름 끝 글자의 받침 여부. 끝 글자가 한글 음절이 아니면(Alex, 이모지, 자모 등) 알 수 없으므로 null.
+ * 조사를 붙이는 함수(callName, iGa, eventTitle)가 모두 이 판정을 쓴다.
+ */
+function batchim(name: string): boolean | null {
+  const last = [...name].at(-1)?.codePointAt(0) ?? 0
+  if (last < 0xac00 || last > 0xd7a3) return null
+  return (last - 0xac00) % 28 !== 0
+}
+
+/**
+ * 부르는 말: "지민아", "하나야". 받침을 알 수 없으면(한글로 끝나지 않으면) 조사 없이 "Alex".
  * 이름이 비어 있으면 빈 문자열.
  */
 export function callName(to: string): string {
   const name = to.trim()
   if (!name) return ''
-  const last = [...name].at(-1)?.codePointAt(0) ?? 0
-  const josa = last >= 0xac00 && last <= 0xd7a3 ? ((last - 0xac00) % 28 ? '아' : '야') : ''
-  return name + josa
+  const b = batchim(name)
+  return name + (b === null ? '' : b ? '아' : '야')
 }
 
 /** 공유·복사에 붙이는 문구: "지민아, 할 말이 있는데 1월 1일에 할게". 이름이 없으면 예고 문구만. */
@@ -142,11 +151,10 @@ export function weekday(d: Date): string {
   return WEEKDAYS[d.getDay()]
 }
 
-/** 주격 조사를 붙인다: 영진 → "영진이", 민지 → "민지가". 한글로 끝나지 않으면 "Kim(이)가". */
+/** 주격 조사를 붙인다: 영진 → "영진이", 민지 → "민지가". 받침을 알 수 없으면(한글로 끝나지 않으면) "Kim(이)가". */
 export function iGa(name: string): string {
-  const code = name.charCodeAt(name.length - 1)
-  if (!(code >= 0xac00 && code <= 0xd7a3)) return `${name}(이)가`
-  return name + ((code - 0xac00) % 28 ? '이' : '가')
+  const b = batchim(name)
+  return name + (b === null ? '(이)가' : b ? '이' : '가')
 }
 
 /** 두 시각 사이의 날 수(달력 기준) */

@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { decodeLink, linkHash, type Letter } from '../lib/codec.ts'
 import { DrandError, timeForRound } from '../lib/drand.ts'
-import { errorCode, type ErrorCode } from '../lib/errors.ts'
+import { errorCode } from '../lib/errors.ts'
+import { useStrings } from '../i18n/index.ts'
 import { loadFonts } from '../lib/fonts.ts'
 import { openLetter } from '../lib/timelock.ts'
 import { themeByCode } from '../themes/registry.ts'
@@ -33,17 +34,6 @@ function markPlayed(hash: string): void {
   }
 }
 
-// 오류 코드별 화면 문구. 원인(Error.message)은 console에만 남긴다.
-const OPEN_ERRORS: Record<ErrorCode, string> = {
-  'not-yet': '아직 열쇠가 나오지 않았어요. 기기 시계가 맞는지 확인하고 잠시 뒤 다시 시도해 주세요.',
-  network: '열쇠를 받아오지 못했어요. 인터넷 연결을 확인하고 다시 시도해 주세요.',
-  unsupported: '이 브라우저에서는 편지를 풀 수 없어요. 다른 브라우저에서 열어 주세요.',
-  corrupt: '편지를 풀지 못했어요. 링크가 일부 잘렸을 수 있어요.',
-  'broken-link': '링크가 깨져서 편지를 열 수 없어요.',
-  'lock-failed': '편지를 열지 못했어요.',
-  unknown: '편지를 열지 못했어요.',
-}
-
 interface Props {
   fragment: string
   onWrite: (prefill: Prefill | null) => void
@@ -70,6 +60,7 @@ function Letter({ letter, fragment, onWrite }: Props & { letter: Letter }) {
   const [error, setError] = useState('')
   const [text, setText] = useState<string | null>(null)
   const started = useRef(false)
+  const t = useStrings()
 
   const hash = useMemo(() => linkHash(fragment), [fragment])
   const info: LetterInfo = useMemo(
@@ -106,10 +97,10 @@ function Letter({ letter, fragment, onWrite }: Props & { letter: Letter }) {
       }
     } catch (e) {
       console.error(e)
-      setError(OPEN_ERRORS[errorCode(e)])
+      setError(t.openError[errorCode(e)])
       setStatus('error')
     }
-  }, [letter, hash])
+  }, [letter, hash, t])
 
   // 개봉 시각 전에는 복호화를 시도하지 않는다. 시각이 되면 새로고침 없이 연다.
   useEffect(() => {
