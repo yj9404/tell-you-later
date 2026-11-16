@@ -1,0 +1,12 @@
+/* 앱의 src/base.css 중 화면 모양에 필요한 것만 휴대폰 화면 안으로 좁혀 둔다(Studio 화면에 번지지 않게). */
+.tyl-video-screen {
+  font-family: -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+  color: #000000;
+  --title-track: 1;
+}
+
+.tyl-video-screen button,
+.tyl-video-screen input,
+.tyl-video-screen textarea {
+  font-family: inherit;
+}

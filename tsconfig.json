@@ -17,5 +17,5 @@
     "allowImportingTsExtensions": true,
     "types": ["vite/client"]
   },
-  "include": ["src", "scripts", "vite.config.ts"]
+  "include": ["src", "scripts", "video", "vite.config.ts"]
 }

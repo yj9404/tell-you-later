@@ -9,7 +9,9 @@
     "preview": "vite preview",
     "test": "node scripts/test.mjs run",
     "timelock-check": "node scripts/timelock-roundtrip.ts",
-    "og-images": "node scripts/make-og-image.mjs"
+    "og-images": "node scripts/make-og-image.mjs",
+    "video": "remotion studio video/index.ts",
+    "video:render": "remotion render video/index.ts Promo out/promo.mp4 --concurrency=1"
   },
   "dependencies": {
     "drand-client": "1.2.5",
@@ -18,10 +20,12 @@
     "tlock-js": "0.9.0"
   },
   "devDependencies": {
+    "@remotion/cli": "4.0.543",
     "@types/node": "^26.6.6",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.3.0",
+    "remotion": "4.0.543",
     "typescript": "^7.0.2",
     "vite": "^8.3.8",
     "vitest": "^5.1.0"
