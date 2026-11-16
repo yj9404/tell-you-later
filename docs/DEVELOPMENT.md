@@ -1,0 +1,119 @@
+# 개발 문서
+
+서비스 소개는 [README](../README.md)를 보세요.
+
+- 서버·DB·로그인이 없는 정적 사이트다. 편지는 브라우저에서 암호화되어 링크의 `#` 뒤에 들어간다.
+- 암호화는 [drand](https://drand.love) 메인넷 quicknet의 타임락(`tlock-js`)을 쓴다. 개봉 시각의 라운드 서명이 나오기 전에는 누구도 풀 수 없다.
+
+## 로컬 실행
+
+Node 24 이상이 필요하다(스크립트가 TypeScript 파일을 바로 실행한다).
+
+```sh
+npm install
+npm run dev              # 개발 서버
+npm test                 # 단위 테스트
+npm run build            # 타입 검사 + dist/ 빌드
+npm run timelock-check   # 메인넷으로 1분 뒤 개봉 편지를 잠갔다 여는 확인(약 1분)
+```
+
+잠김 → 열림 전환은 쓰기 화면의 날짜를 눌러 1~2분 뒤에 열리는 편지를 만들어 확인한다.
+쓰기 화면의 미리보기는 복호화 없이 입력한 원문을 테마 화면에 그대로 넘긴 것이다.
+개봉 시각을 건너뛰는 개발용 스위치는 없다. 암호 구조상 우회가 안 되는 것이 이 서비스의 핵심이다.
+
+## 구조
+
+```
+src/lib/        drand 클라이언트, 타임락, 링크 코덱, 날짜 표기, 말풍선 나누기, .ics
+src/screens/    쓰기, 링크 완성, 받는 사람 화면(잠김·열림 전환, 오류)
+src/themes/     테마 12개. 폴더 하나가 테마 하나
+design/         디자인 원본(.dc.html). 앱은 이 파일을 불러오지 않는다
+assets/         포춘쿠키 PNG
+scripts/        빌드 후처리(테마별 미리보기 페이지), OG 이미지, 픽스처 생성
+```
+
+### 테마 추가
+
+`src/themes/<id>/index.tsx`에서 `Theme`(`src/themes/types.ts`)을 내보내고 `src/themes/registry.ts`에 한 줄을 더한다.
+`code`(링크에 들어가는 번호)와 색 팔레트의 순서는 한번 배포하면 바꾸지 않는다.
+
+화면 문구는 테마 폴더의 `strings.ts`에 `{ ko, en }`으로 둔다(`en: typeof ko`라 키가 빠지면 타입 검사가 잡는다).
+이름·날짜가 들어가는 문장은 어순이 언어마다 달라서 함수로 쓴다. 공통 문구와 날짜 표기는 `src/i18n/`(`useStrings()`)에 있다.
+`name.en`이 없는 테마는 영어판 쓰기 화면에 나오지 않고, 받은 링크는 한국어로 보여준다(지금은 approval, report). greet는 영어판에서 그림까지 다른 "Blessings" 카드다(`src/themes/greet/Blessings.tsx`).
+라틴 글자가 약한 글꼴은 `fonts.en`에 영어용 글꼴을 따로 둔다(예: air).
+
+### 링크 형식과 호환성
+
+`https://<도메인>[/en]/t/<테마id>/#v1.<base64url>` — 바이트 배열은 `src/lib/codec.ts` 맨 위에 적혀 있다.
+
+- 편지와 테마는 `#` 뒤만 읽는다. `/t/<테마id>/`는 카카오톡 등의 공유 미리보기를 테마별로 고르기 위한 경로다(`src/lib/route.ts`).
+- 경로 맨 앞의 `/en`은 화면 언어다. 보낸 사람이 영어판(`/en/`)에서 쓰면 링크도 `/en/t/<id>/`가 되고 받는 사람 화면도 영어다.
+  언어는 payload에 넣지 않는다(v1 그대로). `/en`이 아닌 경로와 경로 없는 옛 링크는 한국어다.
+- 빌드 후처리 `scripts/make-theme-pages.mjs`가 `dist/index.html`을 복사해 미리보기 페이지를 만든다.
+  한국어 `dist/t/<id>/` 12개, 영어 `dist/en/`과 `dist/en/t/<id>/`(`scripts/themes.json`에 `en`이 있는 테마만).
+  영어 페이지는 `lang`, 제목, 설명도 영어로 바꾼다. SPA 폴백이 없으므로 열릴 수 있는 경로는 모두 이 파일들이어야 한다.
+- 경로 없는 옛 링크(`/#v1.…`)도 그대로 열린다.
+
+- 이미 보낸 링크는 몇 년 뒤에 열린다. **v1 디코더는 지우거나 고치지 않는다.** 형식을 바꿀 때는 v2를 추가한다.
+- `tlock-js`와 `drand-client`는 `package.json`에 정확한 버전으로 고정되어 있다. 올릴 때는 픽스처 테스트가 통과하는지 본다.
+- `src/lib/fixtures/v1.json`은 실제 메인넷 라운드로 잠근 편지와 그 라운드의 서명이다. 테스트가 이 링크를 네트워크 없이 복호화한다.
+  형식을 추가하면 `node scripts/make-fixture.ts v2`로 픽스처도 추가한다(기존 픽스처는 덮어쓰지 않는다).
+
+## 홍보 영상 (Remotion)
+
+`video/`는 12초 1080×1080 홍보 영상이다. 앱의 실제 화면(`Write`, `Done`, DM 테마의 `Locked`·`Open`)을 그대로 불러와 휴대폰 틀 안에 그린다.
+
+```sh
+npm run video          # Remotion Studio에서 미리보기
+npm run video:render   # out/promo.mp4로 렌더
+```
+
+README의 `docs/demo.gif`는 같은 영상을 반 크기·15fps로 줄인 것이다. 영상을 바꾸면 다시 만든다.
+
+```sh
+npx remotion render video/index.ts Promo docs/demo.gif --codec=gif --scale=0.5 --every-nth-frame=2 --concurrency=1
+```
+
+- 앱 컴포넌트는 고치지 않는다. `video/useScreenFrame.ts`가 프레임마다 DOM을 조작해 상태를 맞추고(본문 입력, 여는 날 시트 열고 고르기),
+  화면 안의 CSS 애니메이션을 멈춘 뒤 그 프레임의 시점으로 옮긴다. Remotion은 CSS 애니메이션을 프레임에 맞춰 주지 않기 때문이다.
+- 애니메이션의 시작 프레임을 처음 본 프레임으로 기록하므로 렌더는 `--concurrency=1`로 앞에서부터 차례로 그린다.
+- 테마의 말풍선 연출은 `setTimeout`으로 움직여 프레임에 맞출 수 없다. 연출을 끈 상태로 그리고 문단을 하나씩 늘려 넘긴다.
+- 날짜는 렌더하는 날 기준이다("새해 0시"를 고르므로 다음 해 1월 1일에 열리는 편지가 된다).
+- Remotion은 회사 규모에 따라 유료 라이선스가 필요할 수 있다(https://www.remotion.dev/docs/license).
+
+## 배포 (Cloudflare Pages)
+
+1. `.env`의 `VITE_SITE_URL`을 실제 주소로 바꾼다(공유 미리보기 이미지의 절대 주소에 쓰인다).
+2. 둘 중 하나로 배포한다.
+   - Git 연동: Cloudflare 대시보드 → Workers & Pages → Pages 프로젝트 생성 → 저장소 연결.
+     빌드 명령 `npm run build`, 출력 폴더 `dist`, 환경 변수 `NODE_VERSION=24`.
+   - 직접 올리기: `npm run build && npx wrangler pages deploy dist`
+3. 응답 헤더는 `public/_headers`, 프로젝트 설정은 `wrangler.toml`에 있다.
+4. **Web Analytics는 아직 켜지 않는다.** 분석 스크립트는 코드에 없고, 대시보드의 자동 삽입도 켜지 않는다.
+   편지 암호문은 주소의 `#` 뒤에 있다. 분석 요청에 `#` 뒤가 실려 나가지 않는다는 것이 확인될 때까지 넣지 않는다(아래 체크리스트).
+
+OG 이미지는 `npm run og-images`(`scripts/make-og-image.mjs`, Edge 또는 Chrome 필요)로 만든다.
+`public/og.png`·`og-en.png`(공통)는 `design/og.svg`·`og-en.svg`를 그린 것이고, `public/og/<테마id>.png`·`public/og/en/<테마id>.png`(테마별)는 테마 대표색 바탕에 왼쪽은 로고와 "{테마}로 도착"("Arrives as a DM"), 오른쪽은 그 테마의 잠김 화면을 예시 데이터로 그린 휴대폰 화면이다(`scripts/og/`). 바탕색과 한국어 문구는 `scripts/themes.json`의 `og`, 영어 문구는 `en.label`(두 줄을 직접 나눠 적는다)이다.
+영어 잠김 화면에는 시간대 약칭이 나오므로 미국 서부 시간으로 고정해 그린다.
+og.svg나 테마의 잠김 화면을 바꾸면 다시 돌린다. 눈에 띄는 차이가 없는 이미지는 덮어쓰지 않는다.
+테마를 추가하면 `scripts/themes.json`에도 더한다(테스트가 `registry.ts`와 같은지 확인한다).
+포춘쿠키 그림은 `assets/`의 PNG 원본을 가로 600px WebP로 줄인 것이다(`src/themes/cookie/*.webp`, 합계 약 180KB). 원본은 번들에 들어가지 않는다.
+다시 만들려면 `npm i --no-save sharp && node scripts/make-cookie-webp.mjs`.
+
+## 출시 체크리스트
+
+실기기에서 확인하지 못한 항목이다. 출시 전에 직접 확인한다.
+
+- [ ] **결제 수단 등록.** 바이럴 트래픽은 첫 1~2일에 몰린다. 무료 한도를 넘으면 사이트가 멈출 수 있으므로, 출시 전에 Cloudflare 계정에 결제 수단을 등록해 둔다.
+- [ ] `.env`의 `VITE_SITE_URL`을 실제 도메인으로 바꾸고 다시 빌드했다.
+- [ ] 카카오톡 인앱 브라우저: 링크를 눌렀을 때 `#` 뒤가 유지되어 편지가 열린다.
+- [ ] 인스타그램 인앱 브라우저: 같은 확인(DM, 프로필 링크, 스토리 링크).
+- [ ] **카카오톡에서 링크가 잘리는 길이를 시험**하고 `src/screens/Done.tsx`의 `LINK_WARN_LENGTH`(지금은 임시값 2,000)를 정한다. 2,000자 편지의 링크는 수천 자가 된다.
+- [ ] 카카오톡·인스타그램 공유 미리보기에 제목·설명·이미지가 나온다. `/t/<테마id>/` 링크마다 그 테마의 이미지와 제목이 나온다.
+- [ ] 영어: `/en/`, `/en/t/<테마id>/`가 열리고(404가 아님) 화면이 영어다. iMessage·WhatsApp·X 미리보기에 영어 제목과 이미지가 나온다.
+- [ ] 인앱 브라우저에서 "복사", "링크만 복사", "공유하기", "캘린더에 저장(.ics)"이 동작한다. `.ics`가 캘린더 앱에서 열린다.
+- [ ] iOS Safari, Android Chrome에서 12개 테마의 잠김·열림 화면과 날짜 고르기(기기 기본 달력)가 정상이다.
+- [ ] "모션 줄이기"를 켠 기기에서 연출 없이 편지가 바로 보인다.
+- [ ] Web Analytics: 테스트용 배포에서 분석 요청(본문·헤더·주소)에 `#` 뒤가 실려 나가지 않는지 네트워크 탭으로 확인했다. **확인 전에는 켜지 않는다.** 실려 나가면 쓰지 않는다.
+- [ ] drand 엔드포인트 4곳(`src/lib/drand.ts`)이 응답하는지 `npm run timelock-check`로 확인했다.
+- [ ] 쓰기 화면: 예고 문장 실시간 반영, 여는 날 시트(라디오 선택, 기기 달력, 숫자 키패드, 아래로 내려 닫기), 미리보기 두 개와 전체 화면 미리보기가 실기기에서 정상이다.
