@@ -3,3 +3,8 @@ dist
 .wrangler
 *.local
 out
+
+# 로컬 도구: 설치한 에이전트 스킬, 개인 설정
+.claude/skills
+.claude/settings.local.json
+skills-lock.json
